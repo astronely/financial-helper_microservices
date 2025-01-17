@@ -1,0 +1,92 @@
+syntax = "proto3";
+
+package user_v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
+
+option go_package = "github.com/astronely/financial-helper_microservices/pkg/user_v1;user_v1";
+
+service UserV1 {
+  rpc Create(CreateRequest) returns (CreateResponse);
+  rpc Login(LoginRequest) returns (LoginResponse);
+
+  rpc Get(GetRequest) returns (GetResponse);
+  rpc List(ListRequest) returns (ListResponse);
+  rpc Update(UpdateRequest) returns (google.protobuf.Empty);
+  rpc Delete(DeleteRequest) returns (google.protobuf.Empty);
+
+  rpc IsAuth(IsAuthRequest) returns (IsAuthResponse);
+}
+
+message UserInfo {
+  string email = 1;
+  string name = 2;
+}
+
+message User {
+  int64 id = 1;
+  UserInfo info = 2;
+  google.protobuf.Timestamp created_at = 3;
+  google.protobuf.Timestamp updated_at = 4;
+}
+
+message UpdatedUserInfo {
+  google.protobuf.StringValue email = 1;
+  google.protobuf.StringValue name = 2;
+  google.protobuf.StringValue password = 3;
+}
+
+message CreateRequest {
+  UserInfo info = 1;
+  string password = 2;
+}
+
+message CreateResponse {
+  int64 id = 1;
+  string token = 2;
+}
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  string token = 1;
+}
+
+message GetRequest {
+  int64 id = 1;
+}
+
+message GetResponse {
+  User user = 1;
+}
+
+message ListRequest {
+  int64 limit = 1;
+  int64 offset = 2;
+}
+
+message ListResponse {
+  repeated User users = 1;
+}
+
+message UpdateRequest {
+  int64 id = 1;
+  UpdatedUserInfo info = 2;
+}
+
+message DeleteRequest {
+  int64 id = 1;
+}
+
+message IsAuthRequest {
+  string token = 1;
+}
+
+message IsAuthResponse {
+  bool isAuth = 1;
+}
