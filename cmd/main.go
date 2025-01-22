@@ -2,47 +2,62 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"flag"
+	_ "github.com/Masterminds/squirrel"
+	userAPI "github.com/astronely/financial-helper_microservices/internal/api/user"
+	"github.com/astronely/financial-helper_microservices/internal/config"
+	"github.com/astronely/financial-helper_microservices/internal/config/env"
+	userRepository "github.com/astronely/financial-helper_microservices/internal/repository/user"
+	userService "github.com/astronely/financial-helper_microservices/internal/service/user"
 	desc "github.com/astronely/financial-helper_microservices/pkg/user_v1"
-	"github.com/brianvoe/gofakeit/v7"
+	_ "github.com/brianvoe/gofakeit/v7"
+	_ "github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
-	"google.golang.org/protobuf/types/known/timestamppb"
 	"log"
 	"net"
 )
 
-const grpcPort = 50051
+var configPath string
 
-type server struct {
-	desc.UnimplementedUserV1Server
-}
-
-func (s *server) Get(ctx context.Context, req *desc.GetRequest) (*desc.GetResponse, error) {
-	log.Printf("User id: %d", req.GetId())
-
-	return &desc.GetResponse{
-		User: &desc.User{
-			Id: req.GetId(),
-			Info: &desc.UserInfo{
-				Email: gofakeit.Email(),
-				Name:  gofakeit.Name(),
-			},
-			CreatedAt: timestamppb.New(gofakeit.Date()),
-			UpdatedAt: timestamppb.New(gofakeit.Date()),
-		},
-	}, nil
+func init() {
+	flag.StringVar(&configPath, "config-path", "local.env", "path to config file")
 }
 
 func main() {
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", grpcPort))
+	ctx := context.Background()
+
+	flag.Parse()
+	err := config.Load(configPath)
+
+	grpcConfig, err := env.NewGRPCConfig()
+	if err != nil {
+		log.Fatalf("Failed to load grpc config: %v", err)
+	}
+
+	pgConfig, err := env.NewPGConfig()
+	if err != nil {
+		log.Fatalf("Failed to load pg config: %v", err)
+	}
+
+	lis, err := net.Listen("tcp", grpcConfig.Address())
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
+	pool, err := pgxpool.New(ctx, pgConfig.DSN())
+	if err != nil {
+		log.Fatalf("failed to connect: %v", err)
+	}
+	defer pool.Close()
+
+	userRepo := userRepository.NewRepository(pool)
+	userSrv := userService.NewService(userRepo)
+
 	s := grpc.NewServer()
 	reflection.Register(s)
-	desc.RegisterUserV1Server(s, &server{})
+	desc.RegisterUserV1Server(s, userAPI.NewImplementation(userSrv))
 
 	log.Printf("server listening at %v", lis.Addr())
 
