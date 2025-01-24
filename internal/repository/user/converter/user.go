@@ -2,15 +2,10 @@ package converter
 
 import (
 	"github.com/astronely/financial-helper_microservices/internal/model"
-	"github.com/astronely/financial-helper_microservices/internal/repository/user/modelRepo"
+	modelRepo "github.com/astronely/financial-helper_microservices/internal/repository/user/model"
 )
 
 func ToUserFromRepo(user *modelRepo.User) *model.User {
-	//var updatedAt *timestamppb.Timestamp
-	//if user.UpdatedAt.Valid {
-	//	updatedAt = timestamppb.New(user.UpdatedAt.Time)
-	//}
-
 	return &model.User{
 		ID:        user.ID,
 		Info:      ToUserInfoFromRepo(user.Info),

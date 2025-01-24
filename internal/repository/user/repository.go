@@ -3,12 +3,12 @@ package user
 import (
 	"context"
 	sq "github.com/Masterminds/squirrel"
+	"github.com/astronely/financial-helper_microservices/internal/client/db"
 	"github.com/astronely/financial-helper_microservices/internal/model"
 	"github.com/astronely/financial-helper_microservices/internal/repository"
 	"github.com/astronely/financial-helper_microservices/internal/repository/user/converter"
-	"github.com/astronely/financial-helper_microservices/internal/repository/user/modelRepo"
+	modelRepo "github.com/astronely/financial-helper_microservices/internal/repository/user/model"
 	_ "github.com/brianvoe/gofakeit/v7"
-	"github.com/jackc/pgx/v5/pgxpool"
 	_ "google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -24,10 +24,10 @@ const (
 )
 
 type repo struct {
-	db *pgxpool.Pool
+	db db.Client
 }
 
-func NewRepository(db *pgxpool.Pool) repository.UserRepository {
+func NewRepository(db db.Client) repository.UserRepository {
 	return &repo{db: db}
 }
 
@@ -43,16 +43,21 @@ func (r *repo) Create(ctx context.Context, info *model.UserInfo, password string
 		return 0, "", err
 	}
 
+	q := db.Query{
+		Name:     "user_repository.Create",
+		QueryRaw: query,
+	}
+
 	var id int64
-	err = r.db.QueryRow(ctx, query, args...).Scan(&id)
+	err = r.db.DB().QueryRawContext(ctx, q, args...).Scan(&id)
 	if err != nil {
 		return 0, "", err
 	}
+
 	return id, "token", nil
 }
 
 func (r *repo) Get(ctx context.Context, id int64) (*model.User, error) {
-	//log.Printf("TEST ID: %d", id)
 	builder := sq.Select(idColumn, emailColumn, nameColumn, createdAtColumn, updatedAtColumn).
 		PlaceholderFormat(sq.Dollar).
 		From(tableName).
@@ -60,15 +65,20 @@ func (r *repo) Get(ctx context.Context, id int64) (*model.User, error) {
 		Limit(1)
 
 	query, args, err := builder.ToSql()
-	//log.Printf("TEST QUERY: %s", query)
 	if err != nil {
 		return nil, err
 	}
 
+	q := db.Query{
+		Name:     "user_repository.Get",
+		QueryRaw: query,
+	}
+
 	var user modelRepo.User
-	err = r.db.QueryRow(ctx, query, args...).Scan(&user.ID, &user.Info.Name, &user.Info.Email, &user.CreatedAt, &user.UpdatedAt)
+	err = r.db.DB().ScanOneContext(ctx, &user, q, args...)
 	if err != nil {
 		return nil, err
 	}
+
 	return converter.ToUserFromRepo(&user), nil
 }
