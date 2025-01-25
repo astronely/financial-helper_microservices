@@ -1,8 +1,9 @@
-package user
+package tests
 
 import (
 	"context"
 	"fmt"
+	"github.com/astronely/financial-helper_microservices/internal/api/user"
 	"github.com/astronely/financial-helper_microservices/internal/model"
 	"github.com/stretchr/testify/require"
 
@@ -97,7 +98,7 @@ func TestImplementation_Create(t *testing.T) {
 				}
 			}()
 
-			api := NewImplementation(userServiceMock)
+			api := user.NewImplementation(userServiceMock)
 
 			res, err := api.Create(tt.args.ctx, tt.args.req)
 			require.Equal(t, tt.err, err)

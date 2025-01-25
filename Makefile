@@ -23,7 +23,7 @@ test:
 
 test-coverage:
 	go clean -testcache
-	go test ./... -coverprofile=coverage.tmp.out -covermode count -coverpkg=github.com/astronely/financial-helper_microservices/internal/api/...
+	go test ./... -coverprofile=coverage.tmp.out -covermode count -coverpkg=github.com/astronely/financial-helper_microservices/internal/api/...,github.com/astronely/financial-helper_microservices/internal/service/...
 	grep -v 'mocks\|config' coverage.tmp.out > coverage.out
 	rm coverage.tmp.out
 	go tool cover -html=coverage.out;

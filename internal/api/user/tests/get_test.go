@@ -1,9 +1,10 @@
-package user
+package tests
 
 import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/astronely/financial-helper_microservices/internal/api/user"
 	"github.com/astronely/financial-helper_microservices/internal/model"
 	"github.com/astronely/financial-helper_microservices/internal/service"
 	"github.com/astronely/financial-helper_microservices/internal/service/mocks"
@@ -109,7 +110,7 @@ func TestImplementation_Get(t *testing.T) {
 				}
 			}()
 
-			api := NewImplementation(userServiceMock)
+			api := user.NewImplementation(userServiceMock)
 
 			res, err := api.Get(tt.args.ctx, tt.args.req)
 			require.Equal(t, tt.err, err)
