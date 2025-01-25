@@ -17,6 +17,19 @@ local-migration-up:
 local-migration-down:
 	goose -dir ${MIGRATION_DIR} postgres ${MIGRATION_DSN} down -v
 
+test:
+	go clean -testcache
+	go test ./... -v -covermode count -coverpkg=github.com/astronely/financial-helper_microservices/internal/api/...
+
+test-coverage:
+	go clean -testcache
+	go test ./... -coverprofile=coverage.tmp.out -covermode count -coverpkg=github.com/astronely/financial-helper_microservices/internal/api/...
+	grep -v 'mocks\|config' coverage.tmp.out > coverage.out
+	rm coverage.tmp.out
+	go tool cover -html=coverage.out;
+	go tool cover -func=./coverage.out | grep "total";
+	grep -sqFx "/coverage.out" .gitignore || echo "/coverage.out" >> .gitignore
+
 generate:
 	make generate-user-api
 
