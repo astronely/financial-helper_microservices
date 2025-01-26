@@ -5,19 +5,50 @@ package user_v1;
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/wrappers.proto";
+import "google/api/annotations.proto";
 
 option go_package = "github.com/astronely/financial-helper_microservices/pkg/user_v1;user_v1";
 
 service UserV1 {
-  rpc Create(CreateRequest) returns (CreateResponse);
+  rpc Create(CreateRequest) returns (CreateResponse){
+    option (google.api.http) = {
+      post: "/user/v1/create"
+      body: "*"
+    };
+  };
+
   rpc Login(LoginRequest) returns (LoginResponse);
 
-  rpc Get(GetRequest) returns (GetResponse);
-  rpc List(ListRequest) returns (ListResponse);
-  rpc Update(UpdateRequest) returns (google.protobuf.Empty);
-  rpc Delete(DeleteRequest) returns (google.protobuf.Empty);
+  rpc Get(GetRequest) returns (GetResponse){
+    option (google.api.http) = {
+      get: "/user/v1/get"
+    };
+  };
 
-  rpc IsAuth(IsAuthRequest) returns (IsAuthResponse);
+  rpc List(ListRequest) returns (ListResponse){
+    option (google.api.http) = {
+      get: "/user/v1/list"
+    };
+  };
+
+  rpc Update(UpdateRequest) returns (google.protobuf.Empty){
+    option (google.api.http) = {
+      patch: "/user/v1/update"
+      body: "*"
+    };
+  };
+
+  rpc Delete(DeleteRequest) returns (google.protobuf.Empty){
+    option (google.api.http) = {
+      delete: "/user/v1/delete"
+    };
+  };
+
+  rpc IsAuth(IsAuthRequest) returns (IsAuthResponse){
+    option (google.api.http) = {
+      get: "/user/v1/isAuth"
+    };
+  };
 }
 
 message UserInfo {

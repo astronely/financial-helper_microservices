@@ -19,4 +19,6 @@
 .env
 *.local
 .DS_Store
+
+/vendor.protogen
 /coverage.out
