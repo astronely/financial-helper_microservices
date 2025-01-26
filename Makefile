@@ -4,7 +4,9 @@ install-deps:
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.36.3
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1
 	go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@v2.26.0
+	go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2
 	go install github.com/pressly/goose/v3/cmd/goose@latest
+	go install github.com/rakyll/statik@v0.1.7
 
 get-deps:
 	go get -u google.golang.org/protobuf/cmd/protoc-gen-go
@@ -34,6 +36,8 @@ test-coverage:
 
 generate:
 	make generate-user-api
+	mkdir -p pkg/swagger
+	statik -src=pkg/swagger/ -include='*.css,*.html,*.js,*.json,*.png'
 
 generate-user-api:
 	mkdir -p pkg/user_v1
@@ -41,6 +45,7 @@ generate-user-api:
 	--go_out=pkg/user_v1 --go_opt=paths=source_relative \
  	--go-grpc_out=pkg/user_v1 --go-grpc_opt=paths=source_relative \
  	--grpc-gateway_out=pkg/user_v1 --grpc-gateway_opt=paths=source_relative \
+ 	--openapiv2_out=allow_merge=true,merge_file_name=api:pkg/swagger \
  	 api/user_v1/user.proto
 
 vendor-proto:
@@ -49,4 +54,10 @@ vendor-proto:
 			mkdir -p  vendor.protogen/google/ &&\
 			mv vendor.protogen/googleapis/google/api vendor.protogen/google &&\
 			rm -rf vendor.protogen/googleapis ;\
+		fi
+		@if [ ! -d vendor.protogen/protoc-gen-openapiv2 ]; then \
+			mkdir -p vendor.protogen/protoc-gen-openapiv2/options &&\
+			git clone https://github.com/grpc-ecosystem/grpc-gateway vendor.protogen/openapiv2 &&\
+			mv vendor.protogen/openapiv2/protoc-gen-openapiv2/options/*.proto vendor.protogen/protoc-gen-openapiv2/options &&\
+			rm -rf vendor.protogen/openapiv2 ;\
 		fi
