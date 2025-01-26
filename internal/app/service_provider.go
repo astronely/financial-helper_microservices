@@ -13,6 +13,7 @@ import (
 	userRepository "github.com/astronely/financial-helper_microservices/internal/repository/user"
 	"github.com/astronely/financial-helper_microservices/internal/service"
 	userService "github.com/astronely/financial-helper_microservices/internal/service/user"
+	"log"
 )
 
 type serviceProvider struct {
@@ -97,7 +98,14 @@ func (s *serviceProvider) DBClient(ctx context.Context) db.Client {
 		if err != nil {
 			panic("Error initializing DB client/PING")
 		}
-		closer.Add(cl.Close)
+		closer.Add(func() error {
+			err := cl.Close()
+			if err != nil {
+				return err
+			}
+			log.Printf("Successfully closed DB client")
+			return nil
+		})
 
 		s.dbClient = cl
 	}

@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"github.com/astronely/financial-helper_microservices/internal/closer"
 	"github.com/astronely/financial-helper_microservices/internal/config"
@@ -17,7 +18,8 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"sync"
+	"os/signal"
+	"syscall"
 )
 
 var configPath string
@@ -46,16 +48,16 @@ func NewApp(ctx context.Context) (*App, error) {
 
 func (a *App) Run() error {
 	defer func() {
+		log.Printf("shutting down the server...")
+
 		closer.CloseAll()
 		closer.Wait()
 	}()
 
-	wg := sync.WaitGroup{}
-	wg.Add(2)
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
 
 	go func() {
-		defer wg.Done()
-
 		err := a.runGRPCServer()
 		if err != nil {
 			log.Fatalf("failed to start gRPC server: %v", err)
@@ -63,8 +65,6 @@ func (a *App) Run() error {
 	}()
 
 	go func() {
-		defer wg.Done()
-
 		err := a.runHTTPServer()
 		if err != nil {
 			log.Fatalf("failed to start HTTP server: %v", err)
@@ -72,15 +72,13 @@ func (a *App) Run() error {
 	}()
 
 	go func() {
-		defer wg.Done()
-
 		err := a.runSwaggerServer()
 		if err != nil {
 			log.Fatalf("failed to start Swagger server: %v", err)
 		}
 	}()
 
-	wg.Wait()
+	<-ctx.Done()
 
 	return nil
 }
@@ -141,7 +139,7 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 	}
 
 	corsMiddleware := cors.New(cors.Options{
-		AllowedOrigins:   []string{"localhost:8088"},
+		AllowedOrigins:   []string{"http://localhost:8088"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Authorization", "Content-Type", "Accept", "Content-Length"},
 		AllowCredentials: true,
@@ -181,8 +179,14 @@ func (a *App) runGRPCServer() error {
 		return err
 	}
 
+	closer.Add(func() error {
+		a.grpcServer.GracefulStop()
+		log.Printf("GRPC server shutdown gracefully")
+		return nil
+	})
+
 	err = a.grpcServer.Serve(list)
-	if err != nil {
+	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		return err
 	}
 
@@ -192,8 +196,15 @@ func (a *App) runGRPCServer() error {
 func (a *App) runHTTPServer() error {
 	log.Printf("HTTP server is running on %s", a.serviceProvider.HTTPConfig().Address())
 
+	closer.Add(func() error {
+		if err := a.httpServer.Shutdown(context.Background()); err == nil {
+			log.Printf("HTTP server shutdown gracefully")
+		}
+		return nil
+	})
+
 	err := a.httpServer.ListenAndServe()
-	if err != nil {
+	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		return err
 	}
 
@@ -203,8 +214,15 @@ func (a *App) runHTTPServer() error {
 func (a *App) runSwaggerServer() error {
 	log.Printf("Swagger server is running on %s", a.serviceProvider.SwaggerConfig().Address())
 
+	closer.Add(func() error {
+		if err := a.swaggerServer.Shutdown(context.Background()); err == nil {
+			log.Printf("Swagger server shutdown gracefully")
+		}
+		return nil
+	})
+
 	err := a.swaggerServer.ListenAndServe()
-	if err != nil {
+	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		return err
 	}
 

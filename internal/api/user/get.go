@@ -13,7 +13,7 @@ func (i *Implementation) Get(ctx context.Context, req *desc.GetRequest) (*desc.G
 		log.Printf("error getting user: %v", err)
 		return nil, err
 	}
-	log.Printf("Get User: %v", userObj.ID)
+	//log.Printf("Get User: %v", userObj.ID)
 	return &desc.GetResponse{
 		User: converter.ToUserFromService(userObj),
 	}, nil

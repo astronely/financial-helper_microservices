@@ -23,7 +23,7 @@ local-migration-down:
 
 test:
 	go clean -testcache
-	go test ./... -v -covermode count -coverpkg=github.com/astronely/financial-helper_microservices/internal/api/...
+	go test ./... -v -coverpkg=github.com/astronely/financial-helper_microservices/internal/api/...,github.com/astronely/financial-helper_microservices/internal/service/...
 
 test-coverage:
 	go clean -testcache
