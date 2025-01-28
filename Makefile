@@ -3,9 +3,10 @@ include local.env
 install-deps:
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.36.3
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1
+	go install github.com/envoyproxy/protoc-gen-validate@v1.2.1
 	go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@v2.26.0
 	go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2
-	go install github.com/pressly/goose/v3/cmd/goose@latest
+	go install github.com/pressly/goose/v3/cmd/goose@v3.24.1
 	go install github.com/rakyll/statik@v0.1.7
 
 get-deps:
@@ -44,11 +45,18 @@ generate-user-api:
 	protoc --proto_path api/user_v1 --proto_path vendor.protogen \
 	--go_out=pkg/user_v1 --go_opt=paths=source_relative \
  	--go-grpc_out=pkg/user_v1 --go-grpc_opt=paths=source_relative \
+ 	--validate_out lang=go:pkg/user_v1 --validate_opt=paths=source_relative \
  	--grpc-gateway_out=pkg/user_v1 --grpc-gateway_opt=paths=source_relative \
  	--openapiv2_out=allow_merge=true,merge_file_name=api:pkg/swagger \
  	 api/user_v1/user.proto
 
 vendor-proto:
+		@if [ ! -d vendor.protogen/validate ]; then \
+			mkdir -p vendor.protogen/validate &&\
+			git clone https://github.com/envoyproxy/protoc-gen-validate vendor.protogen/protoc-gen-validate &&\
+			mv vendor.protogen/protoc-gen-validate/validate/*.proto vendor.protogen/validate &&\
+			rm -rf vendor.protogen/protoc-gen-validate ;\
+		fi
 		@if [ ! -d vendor.protogen/google ]; then \
 			git clone https://github.com/googleapis/googleapis vendor.protogen/googleapis &&\
 			mkdir -p  vendor.protogen/google/ &&\

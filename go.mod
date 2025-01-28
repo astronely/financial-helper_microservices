@@ -5,6 +5,7 @@ go 1.23.1
 require (
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/brianvoe/gofakeit/v7 v7.1.2
+	github.com/envoyproxy/protoc-gen-validate v1.1.0
 	github.com/fatih/color v1.18.0
 	github.com/georgysavva/scany v1.2.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
