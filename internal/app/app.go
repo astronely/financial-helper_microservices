@@ -6,8 +6,11 @@ import (
 	"flag"
 	"github.com/astronely/financial-helper_microservices/internal/closer"
 	"github.com/astronely/financial-helper_microservices/internal/config"
+	"github.com/astronely/financial-helper_microservices/internal/interceptor"
+	"github.com/astronely/financial-helper_microservices/internal/logger"
 	desc "github.com/astronely/financial-helper_microservices/pkg/user_v1"
 	_ "github.com/astronely/financial-helper_microservices/statik"
+	grpcMiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/rakyll/statik/fs"
 	"github.com/rs/cors"
@@ -26,6 +29,7 @@ var configPath string
 
 func init() {
 	flag.StringVar(&configPath, "config-path", "local.env", "path to config file")
+	logger.Init(configPath)
 }
 
 type App struct {
@@ -48,7 +52,7 @@ func NewApp(ctx context.Context) (*App, error) {
 
 func (a *App) Run() error {
 	defer func() {
-		log.Printf("shutting down the server...")
+		logger.Info("shutting down the server...")
 
 		closer.CloseAll()
 		closer.Wait()
@@ -118,7 +122,14 @@ func (a *App) initServiceProvider(_ context.Context) error {
 }
 
 func (a *App) initGRPCServer(ctx context.Context) error {
-	a.grpcServer = grpc.NewServer(grpc.Creds(insecure.NewCredentials()))
+	a.grpcServer = grpc.NewServer(
+		grpc.Creds(insecure.NewCredentials()),
+		grpc.UnaryInterceptor(
+			grpcMiddleware.ChainUnaryServer(
+				interceptor.LogInterceptor,
+			),
+		),
+	)
 
 	reflection.Register(a.grpcServer)
 
@@ -172,7 +183,9 @@ func (a *App) initSwaggerServer(_ context.Context) error {
 }
 
 func (a *App) runGRPCServer() error {
-	log.Printf("GRPC server is running on %s", a.serviceProvider.GRPCConfig().Address())
+	logger.Info("GRPC server is running",
+		"address:", a.serviceProvider.GRPCConfig().Address(),
+	)
 
 	list, err := net.Listen("tcp", a.serviceProvider.GRPCConfig().Address())
 	if err != nil {
@@ -181,7 +194,7 @@ func (a *App) runGRPCServer() error {
 
 	closer.Add(func() error {
 		a.grpcServer.GracefulStop()
-		log.Printf("GRPC server shutdown gracefully")
+		logger.Info("GRPC server shutdown gracefully")
 		return nil
 	})
 
@@ -194,11 +207,13 @@ func (a *App) runGRPCServer() error {
 }
 
 func (a *App) runHTTPServer() error {
-	log.Printf("HTTP server is running on %s", a.serviceProvider.HTTPConfig().Address())
+	logger.Info("HTTP server is running",
+		"address", a.serviceProvider.HTTPConfig().Address(),
+	)
 
 	closer.Add(func() error {
 		if err := a.httpServer.Shutdown(context.Background()); err == nil {
-			log.Printf("HTTP server shutdown gracefully")
+			logger.Info("HTTP server shutdown gracefully")
 		}
 		return nil
 	})
@@ -212,11 +227,13 @@ func (a *App) runHTTPServer() error {
 }
 
 func (a *App) runSwaggerServer() error {
-	log.Printf("Swagger server is running on %s", a.serviceProvider.SwaggerConfig().Address())
+	logger.Info("Swagger server is running",
+		"address:", a.serviceProvider.SwaggerConfig().Address(),
+	)
 
 	closer.Add(func() error {
 		if err := a.swaggerServer.Shutdown(context.Background()); err == nil {
-			log.Printf("Swagger server shutdown gracefully")
+			logger.Info("Swagger server shutdown gracefully")
 		}
 		return nil
 	})
@@ -231,7 +248,8 @@ func (a *App) runSwaggerServer() error {
 
 func serveSwaggerFile(path string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("Serving swagger file: %s", path)
+		logger.Info("Serving swagger file",
+			"file", path)
 
 		statikFs, err := fs.New()
 		if err != nil {
