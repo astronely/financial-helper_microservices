@@ -2,7 +2,7 @@ package interceptor
 
 import (
 	"context"
-	"github.com/astronely/financial-helper_microservices/internal/logger"
+	"github.com/astronely/financial-helper_microservices/pkg/logger"
 	"google.golang.org/grpc"
 	"time"
 )

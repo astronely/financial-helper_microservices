@@ -58,7 +58,7 @@ func (r *repo) Create(ctx context.Context, info *model.UserInfo, password string
 }
 
 func (r *repo) Get(ctx context.Context, id int64) (*model.User, error) {
-	builder := sq.Select(idColumn, emailColumn, nameColumn, createdAtColumn, updatedAtColumn).
+	builder := sq.Select(idColumn, emailColumn, nameColumn, passwordColumn, createdAtColumn, updatedAtColumn).
 		PlaceholderFormat(sq.Dollar).
 		From(tableName).
 		Where(sq.Eq{idColumn: id}).

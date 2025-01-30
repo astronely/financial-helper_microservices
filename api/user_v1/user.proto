@@ -35,8 +35,6 @@ service UserV1 {
     };
   };
 
-  rpc Login(LoginRequest) returns (LoginResponse);
-
   rpc Get(GetRequest) returns (GetResponse){
     option (google.api.http) = {
       get: "/user/v1/get"
@@ -59,12 +57,6 @@ service UserV1 {
   rpc Delete(DeleteRequest) returns (google.protobuf.Empty){
     option (google.api.http) = {
       delete: "/user/v1/delete"
-    };
-  };
-
-  rpc IsAuth(IsAuthRequest) returns (IsAuthResponse){
-    option (google.api.http) = {
-      get: "/user/v1/isAuth"
     };
   };
 }
@@ -97,15 +89,6 @@ message CreateResponse {
   string token = 2;
 }
 
-message LoginRequest {
-  string email = 1 [(validate.rules).string.email = true];
-  string password = 2 [(validate.rules).string.min_len = 1];
-}
-
-message LoginResponse {
-  string token = 1;
-}
-
 message GetRequest {
   int64 id = 1 [(validate.rules).int64.gte = 0];
 }
@@ -113,7 +96,6 @@ message GetRequest {
 message GetResponse {
   User user = 1;
 }
-
 message ListRequest {
   int64 limit = 1 [(validate.rules).int64.gte = 0];
   int64 offset = 2 [(validate.rules).int64.gte = 0];
@@ -130,12 +112,4 @@ message UpdateRequest {
 
 message DeleteRequest {
   int64 id = 1 [(validate.rules).int64.gte = 0];
-}
-
-message IsAuthRequest {
-  string token = 1 [(validate.rules).string.min_len = 1];
-}
-
-message IsAuthResponse {
-  bool isAuth = 1;
 }

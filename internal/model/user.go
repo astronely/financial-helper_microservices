@@ -13,6 +13,7 @@ type User struct {
 }
 
 type UserInfo struct {
-	Email string
-	Name  string
+	Email    string
+	Name     string
+	Password string
 }

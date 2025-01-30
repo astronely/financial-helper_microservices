@@ -4,11 +4,12 @@ import (
 	"context"
 	"errors"
 	"flag"
-	"github.com/astronely/financial-helper_microservices/internal/closer"
 	"github.com/astronely/financial-helper_microservices/internal/config"
 	"github.com/astronely/financial-helper_microservices/internal/interceptor"
-	"github.com/astronely/financial-helper_microservices/internal/logger"
-	desc "github.com/astronely/financial-helper_microservices/pkg/user_v1"
+	descAuth "github.com/astronely/financial-helper_microservices/pkg/auth_v1"
+	"github.com/astronely/financial-helper_microservices/pkg/closer"
+	"github.com/astronely/financial-helper_microservices/pkg/logger"
+	descUser "github.com/astronely/financial-helper_microservices/pkg/user_v1"
 	_ "github.com/astronely/financial-helper_microservices/statik"
 	grpcMiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -134,7 +135,8 @@ func (a *App) initGRPCServer(ctx context.Context) error {
 
 	reflection.Register(a.grpcServer)
 
-	desc.RegisterUserV1Server(a.grpcServer, a.serviceProvider.UserImpl(ctx))
+	descUser.RegisterUserV1Server(a.grpcServer, a.serviceProvider.UserImpl(ctx))
+	descAuth.RegisterAuthV1Server(a.grpcServer, a.serviceProvider.AuthImpl(ctx))
 	return nil
 }
 
@@ -145,7 +147,12 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	}
 
-	err := desc.RegisterUserV1HandlerFromEndpoint(ctx, mux, a.serviceProvider.GRPCConfig().Address(), opts)
+	err := descUser.RegisterUserV1HandlerFromEndpoint(ctx, mux, a.serviceProvider.GRPCConfig().Address(), opts)
+	if err != nil {
+		return err
+	}
+
+	err = descAuth.RegisterAuthV1HandlerFromEndpoint(ctx, mux, a.serviceProvider.GRPCConfig().Address(), opts)
 	if err != nil {
 		return err
 	}

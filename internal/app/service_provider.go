@@ -2,18 +2,21 @@ package app
 
 import (
 	"context"
+	"github.com/astronely/financial-helper_microservices/internal/api/auth"
 	"github.com/astronely/financial-helper_microservices/internal/api/user"
 	"github.com/astronely/financial-helper_microservices/internal/client/db"
 	"github.com/astronely/financial-helper_microservices/internal/client/db/pg"
 	"github.com/astronely/financial-helper_microservices/internal/client/db/transaction"
-	"github.com/astronely/financial-helper_microservices/internal/closer"
 	"github.com/astronely/financial-helper_microservices/internal/config"
 	"github.com/astronely/financial-helper_microservices/internal/config/env"
-	"github.com/astronely/financial-helper_microservices/internal/logger"
 	"github.com/astronely/financial-helper_microservices/internal/repository"
+	authRepository "github.com/astronely/financial-helper_microservices/internal/repository/auth"
 	userRepository "github.com/astronely/financial-helper_microservices/internal/repository/user"
 	"github.com/astronely/financial-helper_microservices/internal/service"
+	authService "github.com/astronely/financial-helper_microservices/internal/service/auth"
 	userService "github.com/astronely/financial-helper_microservices/internal/service/user"
+	"github.com/astronely/financial-helper_microservices/pkg/closer"
+	"github.com/astronely/financial-helper_microservices/pkg/logger"
 )
 
 type serviceProvider struct {
@@ -22,13 +25,17 @@ type serviceProvider struct {
 	httpConfig    config.HTTPConfig
 	swaggerConfig config.SwaggerConfig
 
-	dbClient       db.Client
-	txManager      db.TxManager
+	dbClient  db.Client
+	txManager db.TxManager
+
 	userRepository repository.UserRepository
+	authRepository repository.AuthRepository
 
 	userService service.UserService
+	authService service.AuthService
 
 	userImpl *user.Implementation
+	authImpl *auth.Implementation
 }
 
 func newServiceProvider() *serviceProvider {
@@ -128,6 +135,14 @@ func (s *serviceProvider) UserRepository(ctx context.Context) repository.UserRep
 	return s.userRepository
 }
 
+func (s *serviceProvider) AuthRepository(ctx context.Context) repository.AuthRepository {
+	if s.authRepository == nil {
+		s.authRepository = authRepository.NewRepository(s.DBClient(ctx))
+	}
+
+	return s.authRepository
+}
+
 func (s *serviceProvider) UserService(ctx context.Context) service.UserService {
 	if s.userService == nil {
 		s.userService = userService.NewService(s.UserRepository(ctx), s.TxManager(ctx))
@@ -136,10 +151,26 @@ func (s *serviceProvider) UserService(ctx context.Context) service.UserService {
 	return s.userService
 }
 
+func (s *serviceProvider) AuthService(ctx context.Context) service.AuthService {
+	if s.authService == nil {
+		s.authService = authService.NewService(s.AuthRepository(ctx))
+	}
+
+	return s.authService
+}
+
 func (s *serviceProvider) UserImpl(ctx context.Context) *user.Implementation {
 	if s.userImpl == nil {
 		s.userImpl = user.NewImplementation(s.UserService(ctx))
 	}
 
 	return s.userImpl
+}
+
+func (s *serviceProvider) AuthImpl(ctx context.Context) *auth.Implementation {
+	if s.authImpl == nil {
+		s.authImpl = auth.NewImplementation(s.AuthService(ctx))
+	}
+
+	return s.authImpl
 }

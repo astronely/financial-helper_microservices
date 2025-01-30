@@ -3,7 +3,7 @@ package user
 import (
 	"context"
 	"github.com/astronely/financial-helper_microservices/internal/converter"
-	"github.com/astronely/financial-helper_microservices/internal/logger"
+	"github.com/astronely/financial-helper_microservices/pkg/logger"
 	desc "github.com/astronely/financial-helper_microservices/pkg/user_v1"
 )
 

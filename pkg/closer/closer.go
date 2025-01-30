@@ -1,7 +1,7 @@
 package closer
 
 import (
-	"github.com/astronely/financial-helper_microservices/internal/logger"
+	"github.com/astronely/financial-helper_microservices/pkg/logger"
 	"os"
 	"os/signal"
 	"sync"

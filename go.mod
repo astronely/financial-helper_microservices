@@ -5,6 +5,7 @@ go 1.23.1
 require (
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/brianvoe/gofakeit/v7 v7.1.2
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/envoyproxy/protoc-gen-validate v1.1.0
 	github.com/fatih/color v1.18.0
 	github.com/georgysavva/scany v1.2.2
