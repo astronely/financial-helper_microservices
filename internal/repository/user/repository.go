@@ -9,6 +9,7 @@ import (
 	"github.com/astronely/financial-helper_microservices/internal/repository/user/converter"
 	modelRepo "github.com/astronely/financial-helper_microservices/internal/repository/user/model"
 	_ "github.com/brianvoe/gofakeit/v7"
+	"golang.org/x/crypto/bcrypt"
 	_ "google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -31,16 +32,21 @@ func NewRepository(db db.Client) repository.UserRepository {
 	return &repo{db: db}
 }
 
-func (r *repo) Create(ctx context.Context, info *model.UserInfo, password string) (int64, string, error) {
+func (r *repo) Create(ctx context.Context, info *model.UserInfo, password string) (int64, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 10)
+	if err != nil {
+		return 0, err
+	}
+
 	builder := sq.Insert(tableName).
 		PlaceholderFormat(sq.Dollar).
 		Columns(emailColumn, nameColumn, passwordColumn).
-		Values(info.Email, info.Name, password).
+		Values(info.Email, info.Name, hashedPassword).
 		Suffix("RETURNING id")
 
 	query, args, err := builder.ToSql()
 	if err != nil {
-		return 0, "", err
+		return 0, err
 	}
 
 	q := db.Query{
@@ -51,14 +57,14 @@ func (r *repo) Create(ctx context.Context, info *model.UserInfo, password string
 	var id int64
 	err = r.db.DB().QueryRawContext(ctx, q, args...).Scan(&id)
 	if err != nil {
-		return 0, "", err
+		return 0, err
 	}
 
-	return id, "token", nil
+	return id, nil
 }
 
 func (r *repo) Get(ctx context.Context, id int64) (*model.User, error) {
-	builder := sq.Select(idColumn, emailColumn, nameColumn, passwordColumn, createdAtColumn, updatedAtColumn).
+	builder := sq.Select(idColumn, emailColumn, nameColumn, createdAtColumn, updatedAtColumn).
 		PlaceholderFormat(sq.Dollar).
 		From(tableName).
 		Where(sq.Eq{idColumn: id}).

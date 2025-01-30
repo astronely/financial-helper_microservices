@@ -2,6 +2,8 @@ package auth
 
 import (
 	"context"
+	"errors"
+	"github.com/astronely/financial-helper_microservices/internal/utils"
 	"github.com/astronely/financial-helper_microservices/pkg/logger"
 )
 
@@ -12,11 +14,11 @@ func (s *serv) Login(ctx context.Context, email string, password string) (string
 	}
 
 	logger.Debug("User in service layer, login",
-		"ID", user.ID,
+		"user", user,
 	)
-	//if !utils.VerifyPassword(user.Info.Password, password) {
-	//	return "", errors.New("invalid password")
-	//}
+	if !utils.VerifyPassword(user.Info.Password, password) {
+		return "", errors.New("invalid password")
+	}
 
 	return "test success", nil
 }

@@ -31,8 +31,8 @@ func NewRepository(db db.Client) repository.AuthRepository {
 	}
 }
 
-func (r *repo) GetUserByEmail(ctx context.Context, email string) (*model.User, error) {
-	builder := sq.Select(idColumn, emailColumn, nameColumn, passwordColumn, createdAtColumn, updatedAtColumn).
+func (r *repo) GetUserByEmail(ctx context.Context, email string) (*model.UserAuth, error) {
+	builder := sq.Select(idColumn, emailColumn, nameColumn, passwordColumn).
 		PlaceholderFormat(sq.Dollar).
 		From(tableName).
 		Where(sq.Eq{emailColumn: email}).
