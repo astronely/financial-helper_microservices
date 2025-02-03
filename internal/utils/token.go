@@ -7,11 +7,12 @@ import (
 	"time"
 )
 
-func GenerateToken(info model.UserInfo, secretKey []byte, duration time.Duration) (string, error) {
+func GenerateToken(id int64, info model.UserInfo, secretKey []byte, duration time.Duration) (string, error) {
 	claims := model.UserClaims{
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(duration).Unix(),
 		},
+		ID:       id,
 		Email:    info.Email,
 		Username: info.Name,
 	}

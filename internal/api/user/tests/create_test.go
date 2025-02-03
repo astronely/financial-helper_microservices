@@ -5,12 +5,11 @@ import (
 	"fmt"
 	"github.com/astronely/financial-helper_microservices/internal/api/user"
 	"github.com/astronely/financial-helper_microservices/internal/model"
-	"github.com/stretchr/testify/require"
-
 	"github.com/astronely/financial-helper_microservices/internal/service"
 	"github.com/astronely/financial-helper_microservices/internal/service/mocks"
 	desc "github.com/astronely/financial-helper_microservices/pkg/user_v1"
 	"github.com/brianvoe/gofakeit/v7"
+	"github.com/stretchr/testify/require"
 	"testing"
 )
 

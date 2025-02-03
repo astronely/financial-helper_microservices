@@ -21,12 +21,10 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	UserV1_Create_FullMethodName = "/user_v1.UserV1/Create"
-	UserV1_Login_FullMethodName  = "/user_v1.UserV1/Login"
 	UserV1_Get_FullMethodName    = "/user_v1.UserV1/Get"
 	UserV1_List_FullMethodName   = "/user_v1.UserV1/List"
 	UserV1_Update_FullMethodName = "/user_v1.UserV1/Update"
 	UserV1_Delete_FullMethodName = "/user_v1.UserV1/Delete"
-	UserV1_IsAuth_FullMethodName = "/user_v1.UserV1/IsAuth"
 )
 
 // UserV1Client is the client API for UserV1 service.
@@ -34,12 +32,10 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserV1Client interface {
 	Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*CreateResponse, error)
-	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
 	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error)
 	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error)
-	Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*UpdateResponse, error)
 	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	IsAuth(ctx context.Context, in *IsAuthRequest, opts ...grpc.CallOption) (*IsAuthResponse, error)
 }
 
 type userV1Client struct {
@@ -54,16 +50,6 @@ func (c *userV1Client) Create(ctx context.Context, in *CreateRequest, opts ...gr
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(CreateResponse)
 	err := c.cc.Invoke(ctx, UserV1_Create_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *userV1Client) Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(LoginResponse)
-	err := c.cc.Invoke(ctx, UserV1_Login_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -90,9 +76,9 @@ func (c *userV1Client) List(ctx context.Context, in *ListRequest, opts ...grpc.C
 	return out, nil
 }
 
-func (c *userV1Client) Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *userV1Client) Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*UpdateResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(emptypb.Empty)
+	out := new(UpdateResponse)
 	err := c.cc.Invoke(ctx, UserV1_Update_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -110,27 +96,15 @@ func (c *userV1Client) Delete(ctx context.Context, in *DeleteRequest, opts ...gr
 	return out, nil
 }
 
-func (c *userV1Client) IsAuth(ctx context.Context, in *IsAuthRequest, opts ...grpc.CallOption) (*IsAuthResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(IsAuthResponse)
-	err := c.cc.Invoke(ctx, UserV1_IsAuth_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // UserV1Server is the server API for UserV1 service.
 // All implementations must embed UnimplementedUserV1Server
 // for forward compatibility.
 type UserV1Server interface {
 	Create(context.Context, *CreateRequest) (*CreateResponse, error)
-	Login(context.Context, *LoginRequest) (*LoginResponse, error)
 	Get(context.Context, *GetRequest) (*GetResponse, error)
 	List(context.Context, *ListRequest) (*ListResponse, error)
-	Update(context.Context, *UpdateRequest) (*emptypb.Empty, error)
+	Update(context.Context, *UpdateRequest) (*UpdateResponse, error)
 	Delete(context.Context, *DeleteRequest) (*emptypb.Empty, error)
-	IsAuth(context.Context, *IsAuthRequest) (*IsAuthResponse, error)
 	mustEmbedUnimplementedUserV1Server()
 }
 
@@ -144,23 +118,17 @@ type UnimplementedUserV1Server struct{}
 func (UnimplementedUserV1Server) Create(context.Context, *CreateRequest) (*CreateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
 }
-func (UnimplementedUserV1Server) Login(context.Context, *LoginRequest) (*LoginResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
-}
 func (UnimplementedUserV1Server) Get(context.Context, *GetRequest) (*GetResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
 func (UnimplementedUserV1Server) List(context.Context, *ListRequest) (*ListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
 }
-func (UnimplementedUserV1Server) Update(context.Context, *UpdateRequest) (*emptypb.Empty, error) {
+func (UnimplementedUserV1Server) Update(context.Context, *UpdateRequest) (*UpdateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
 func (UnimplementedUserV1Server) Delete(context.Context, *DeleteRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
-}
-func (UnimplementedUserV1Server) IsAuth(context.Context, *IsAuthRequest) (*IsAuthResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method IsAuth not implemented")
 }
 func (UnimplementedUserV1Server) mustEmbedUnimplementedUserV1Server() {}
 func (UnimplementedUserV1Server) testEmbeddedByValue()                {}
@@ -197,24 +165,6 @@ func _UserV1_Create_Handler(srv interface{}, ctx context.Context, dec func(inter
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserV1Server).Create(ctx, req.(*CreateRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _UserV1_Login_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(LoginRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UserV1Server).Login(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: UserV1_Login_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserV1Server).Login(ctx, req.(*LoginRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -291,24 +241,6 @@ func _UserV1_Delete_Handler(srv interface{}, ctx context.Context, dec func(inter
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UserV1_IsAuth_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(IsAuthRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UserV1Server).IsAuth(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: UserV1_IsAuth_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserV1Server).IsAuth(ctx, req.(*IsAuthRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // UserV1_ServiceDesc is the grpc.ServiceDesc for UserV1 service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -319,10 +251,6 @@ var UserV1_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Create",
 			Handler:    _UserV1_Create_Handler,
-		},
-		{
-			MethodName: "Login",
-			Handler:    _UserV1_Login_Handler,
 		},
 		{
 			MethodName: "Get",
@@ -339,10 +267,6 @@ var UserV1_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Delete",
 			Handler:    _UserV1_Delete_Handler,
-		},
-		{
-			MethodName: "IsAuth",
-			Handler:    _UserV1_IsAuth_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -6,6 +6,7 @@ import (
 	"flag"
 	"github.com/astronely/financial-helper_microservices/internal/config"
 	"github.com/astronely/financial-helper_microservices/internal/interceptor"
+	_ "github.com/astronely/financial-helper_microservices/pkg/access_v1"
 	descAuth "github.com/astronely/financial-helper_microservices/pkg/auth_v1"
 	"github.com/astronely/financial-helper_microservices/pkg/closer"
 	"github.com/astronely/financial-helper_microservices/pkg/logger"
@@ -141,7 +142,9 @@ func (a *App) initGRPCServer(ctx context.Context) error {
 }
 
 func (a *App) initHTTPServer(ctx context.Context) error {
-	mux := runtime.NewServeMux()
+	mux := runtime.NewServeMux(
+		runtime.WithForwardResponseOption(interceptor.MetadataToCookieInterceptor),
+	)
 
 	opts := []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),

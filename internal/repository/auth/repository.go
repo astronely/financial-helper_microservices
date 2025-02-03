@@ -13,12 +13,10 @@ import (
 const (
 	tableName = "users"
 
-	idColumn        = "id"
-	emailColumn     = "email"
-	nameColumn      = "name"
-	passwordColumn  = "password"
-	createdAtColumn = "created_at"
-	updatedAtColumn = "updated_at"
+	idColumn       = "id"
+	emailColumn    = "email"
+	nameColumn     = "name"
+	passwordColumn = "password"
 )
 
 type repo struct {

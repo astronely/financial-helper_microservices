@@ -16,3 +16,10 @@ type UserInfo struct {
 	Email string
 	Name  string
 }
+
+type UpdateUserInfo struct {
+	ID       int64
+	Email    string
+	Name     string
+	Password string
+}

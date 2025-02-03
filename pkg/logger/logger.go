@@ -13,6 +13,10 @@ const (
 
 var globalLogger *slog.Logger
 
+func init() {
+	Init("local.env")
+}
+
 func Init(env string) {
 	var opts *slog.HandlerOptions
 
@@ -49,6 +53,6 @@ func Error(msg string, args ...any) {
 	globalLogger.Error(msg, args...)
 }
 
-func With(args ...any) {
-	globalLogger.With(args)
-}
+//func With(args ...any) {
+//	globalLogger.With(args)
+//}

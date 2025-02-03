@@ -14,6 +14,15 @@ func ToUserFromRepo(user *modelRepo.User) *model.User {
 	}
 }
 
+func ToUsersFromRepo(users []*modelRepo.User) []*model.User {
+	var usersFromRepo []*model.User
+	for _, user := range users {
+		usersFromRepo = append(usersFromRepo, ToUserFromRepo(user))
+	}
+
+	return usersFromRepo
+}
+
 func ToUserInfoFromRepo(info modelRepo.Info) model.UserInfo {
 	return model.UserInfo{
 		Name:  info.Name,

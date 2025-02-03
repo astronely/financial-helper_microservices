@@ -12,10 +12,15 @@ func (s *serv) Create(ctx context.Context, info *model.UserInfo, password string
 		return 0, "", err
 	}
 
-	token, err := utils.GenerateToken(model.UserInfo{
-		Name:  info.Name,
-		Email: info.Email,
-	}, []byte("testSecretKey"), 360)
+	token, err := utils.GenerateToken(
+		id,
+		model.UserInfo{
+			Name:  info.Name,
+			Email: info.Email,
+		},
+		[]byte("testSecretKey"), 360,
+	)
+
 	if err != nil {
 		return 0, "", err
 	}

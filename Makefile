@@ -38,6 +38,7 @@ test-coverage:
 generate:
 	make generate-user-api
 	make generate-auth-api
+	make generate-access-api
 	make generate-openapi
 	mkdir -p pkg/swagger
 	statik -src=pkg/swagger/ -include='*.css,*.html,*.js,*.json,*.png'

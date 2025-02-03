@@ -47,7 +47,7 @@ service UserV1 {
     };
   };
 
-  rpc Update(UpdateRequest) returns (google.protobuf.Empty){
+  rpc Update(UpdateRequest) returns (UpdateResponse){
     option (google.api.http) = {
       patch: "/user/v1/update"
       body: "*"
@@ -74,9 +74,9 @@ message User {
 }
 
 message UpdatedUserInfo {
-  google.protobuf.StringValue email = 1;
-  google.protobuf.StringValue name = 2;
-  google.protobuf.StringValue password = 3;
+  google.protobuf.StringValue email = 1 [(validate.rules).string.email = true];
+  google.protobuf.StringValue name = 2 [(validate.rules).string = {min_len:5, max_len: 100}];
+  google.protobuf.StringValue password = 3 [(validate.rules).string = {min_len:8}];
 }
 
 message CreateRequest {
@@ -107,7 +107,11 @@ message ListResponse {
 
 message UpdateRequest {
   int64 id = 1 [(validate.rules).int64.gte = 0];
-  UpdatedUserInfo info = 2;
+  UpdatedUserInfo info = 2 [(validate.rules).message.required = true];
+}
+
+message UpdateResponse {
+  int64 id = 1;
 }
 
 message DeleteRequest {

@@ -34,12 +34,14 @@ service AuthV1 {
 
   rpc GetRefreshToken (GetRefreshTokenRequest) returns (GetRefreshTokenResponse) {
     option (google.api.http) = {
-      get: "/user/v1/refresh_token"
+      post: "/user/v1/refresh_token"
+      body: "*"
     };
   };
   rpc GetAccessToken (GetAccessTokenRequest) returns (GetAccessTokenResponse) {
     option (google.api.http) = {
-      get: "/user/v1/access_token"
+      post: "/user/v1/access_token"
+      body: "*"
     };
   };
 }

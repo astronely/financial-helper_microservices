@@ -20,6 +20,14 @@ func ToUserFromService(user *model.User) *desc.User {
 	}
 }
 
+func ToUserListFromService(users []*model.User) []*desc.User {
+	var userList []*desc.User
+	for _, user := range users {
+		userList = append(userList, ToUserFromService(user))
+	}
+	return userList
+}
+
 func ToUserInfoFromService(info model.UserInfo) *desc.UserInfo {
 	return &desc.UserInfo{
 		Email: info.Email,
@@ -31,5 +39,14 @@ func ToUserInfoFromDesc(info *desc.UserInfo) *model.UserInfo {
 	return &model.UserInfo{
 		Email: info.Email,
 		Name:  info.Name,
+	}
+}
+
+func ToUpdateUserInfoFromDesc(info *desc.UpdateRequest) *model.UpdateUserInfo {
+	return &model.UpdateUserInfo{
+		ID:       info.Id,
+		Email:    info.GetInfo().GetEmail().GetValue(),
+		Name:     info.GetInfo().GetName().GetValue(),
+		Password: info.GetInfo().GetPassword().GetValue(),
 	}
 }

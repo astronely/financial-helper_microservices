@@ -15,7 +15,7 @@ type UserRepository struct {
 }
 
 // Create provides a mock function with given fields: ctx, info, password
-func (_m *UserRepository) Create(ctx context.Context, info *model.UserInfo, password string) (int64, string, error) {
+func (_m *UserRepository) Create(ctx context.Context, info *model.UserInfo, password string) (int64, error) {
 	ret := _m.Called(ctx, info, password)
 
 	if len(ret) == 0 {
@@ -23,9 +23,8 @@ func (_m *UserRepository) Create(ctx context.Context, info *model.UserInfo, pass
 	}
 
 	var r0 int64
-	var r1 string
-	var r2 error
-	if rf, ok := ret.Get(0).(func(context.Context, *model.UserInfo, string) (int64, string, error)); ok {
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *model.UserInfo, string) (int64, error)); ok {
 		return rf(ctx, info, password)
 	}
 	if rf, ok := ret.Get(0).(func(context.Context, *model.UserInfo, string) int64); ok {
@@ -34,19 +33,13 @@ func (_m *UserRepository) Create(ctx context.Context, info *model.UserInfo, pass
 		r0 = ret.Get(0).(int64)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, *model.UserInfo, string) string); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, *model.UserInfo, string) error); ok {
 		r1 = rf(ctx, info, password)
 	} else {
-		r1 = ret.Get(1).(string)
+		r1 = ret.Error(1)
 	}
 
-	if rf, ok := ret.Get(2).(func(context.Context, *model.UserInfo, string) error); ok {
-		r2 = rf(ctx, info, password)
-	} else {
-		r2 = ret.Error(2)
-	}
-
-	return r0, r1, r2
+	return r0, r1
 }
 
 // Get provides a mock function with given fields: ctx, id

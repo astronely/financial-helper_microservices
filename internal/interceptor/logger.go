@@ -2,6 +2,7 @@ package interceptor
 
 import (
 	"context"
+	"fmt"
 	"github.com/astronely/financial-helper_microservices/pkg/logger"
 	"google.golang.org/grpc"
 	"time"
@@ -23,7 +24,7 @@ func LogInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServer
 		"method", info.FullMethod,
 		"req", req,
 		"res", res,
-		"duration", time.Since(now),
+		"duration", fmt.Sprintf("%f seconds", time.Since(now).Seconds()),
 	)
 
 	return res, err

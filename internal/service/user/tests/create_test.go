@@ -7,6 +7,7 @@ import (
 	"github.com/astronely/financial-helper_microservices/internal/repository"
 	"github.com/astronely/financial-helper_microservices/internal/repository/mocks"
 	"github.com/astronely/financial-helper_microservices/internal/service/user"
+	"github.com/astronely/financial-helper_microservices/internal/utils"
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -26,7 +27,10 @@ func Test_serv_Create(t *testing.T) {
 
 		email    = gofakeit.Email()
 		name     = gofakeit.Name()
-		token    = "token"
+		token, _ = utils.GenerateToken(model.UserInfo{
+			Name:  name,
+			Email: email,
+		}, []byte("testSecretKey"), 360)
 		password = gofakeit.Password(true, true, true, true, false, 10)
 		info     = &model.UserInfo{
 			Email: email,
@@ -56,7 +60,7 @@ func Test_serv_Create(t *testing.T) {
 			want1: token,
 			userRepositoryMock: func() repository.UserRepository {
 				mock := mocks.NewUserRepository(t)
-				mock.On("Create", ctx, info, password).Return(int64(1), token, nil)
+				mock.On("Create", ctx, info, password).Return(int64(1), nil)
 				return mock
 			},
 		},
@@ -72,7 +76,7 @@ func Test_serv_Create(t *testing.T) {
 			want1: "",
 			userRepositoryMock: func() repository.UserRepository {
 				mock := mocks.NewUserRepository(t)
-				mock.On("Create", ctx, info, password).Return(int64(0), "", repoErr)
+				mock.On("Create", ctx, info, password).Return(int64(0), repoErr)
 				return mock
 			},
 		},
