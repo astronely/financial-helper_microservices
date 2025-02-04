@@ -2,8 +2,8 @@ package transaction
 
 import (
 	"context"
-	"github.com/astronely/financial-helper_microservices/internal/client/db"
-	"github.com/astronely/financial-helper_microservices/internal/client/db/pg"
+	"github.com/astronely/financial-helper_microservices/pkg/client/db"
+	"github.com/astronely/financial-helper_microservices/pkg/client/db/pg"
 	"github.com/jackc/pgx/v4"
 	"github.com/pkg/errors"
 )

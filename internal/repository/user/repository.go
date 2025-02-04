@@ -3,11 +3,11 @@ package user
 import (
 	"context"
 	sq "github.com/Masterminds/squirrel"
-	"github.com/astronely/financial-helper_microservices/internal/client/db"
 	"github.com/astronely/financial-helper_microservices/internal/model"
 	"github.com/astronely/financial-helper_microservices/internal/repository"
 	"github.com/astronely/financial-helper_microservices/internal/repository/user/converter"
 	modelRepo "github.com/astronely/financial-helper_microservices/internal/repository/user/model"
+	"github.com/astronely/financial-helper_microservices/pkg/client/db"
 	_ "github.com/brianvoe/gofakeit/v7"
 	"golang.org/x/crypto/bcrypt"
 	_ "google.golang.org/protobuf/types/known/timestamppb"

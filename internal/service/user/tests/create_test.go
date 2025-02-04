@@ -23,14 +23,15 @@ func Test_serv_Create(t *testing.T) {
 	}
 
 	var (
-		ctx = context.Background()
-
+		ctx      = context.Background()
+		id       = gofakeit.Int64()
 		email    = gofakeit.Email()
 		name     = gofakeit.Name()
-		token, _ = utils.GenerateToken(model.UserInfo{
-			Name:  name,
-			Email: email,
-		}, []byte("testSecretKey"), 360)
+		token, _ = utils.GenerateToken(id,
+			model.UserInfo{
+				Name:  name,
+				Email: email,
+			}, []byte("testSecretKey"), 360)
 		password = gofakeit.Password(true, true, true, true, false, 10)
 		info     = &model.UserInfo{
 			Email: email,
@@ -56,11 +57,11 @@ func Test_serv_Create(t *testing.T) {
 				password: password,
 			},
 			err:   nil,
-			want:  1,
+			want:  id,
 			want1: token,
 			userRepositoryMock: func() repository.UserRepository {
 				mock := mocks.NewUserRepository(t)
-				mock.On("Create", ctx, info, password).Return(int64(1), nil)
+				mock.On("Create", ctx, info, password).Return(id, nil)
 				return mock
 			},
 		},

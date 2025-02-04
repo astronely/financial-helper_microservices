@@ -3,8 +3,8 @@ package pg
 import (
 	"context"
 	"fmt"
-	"github.com/astronely/financial-helper_microservices/internal/client/db"
-	"github.com/astronely/financial-helper_microservices/internal/client/db/prettier"
+	"github.com/astronely/financial-helper_microservices/pkg/client/db"
+	"github.com/astronely/financial-helper_microservices/pkg/client/db/prettier"
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"

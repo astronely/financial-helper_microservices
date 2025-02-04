@@ -1,9 +1,9 @@
 package user
 
 import (
-	"github.com/astronely/financial-helper_microservices/internal/client/db"
 	"github.com/astronely/financial-helper_microservices/internal/repository"
 	def "github.com/astronely/financial-helper_microservices/internal/service"
+	"github.com/astronely/financial-helper_microservices/pkg/client/db"
 )
 
 var _ def.UserService = (*serv)(nil)

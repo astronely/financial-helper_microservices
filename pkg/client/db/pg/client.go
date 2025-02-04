@@ -2,7 +2,7 @@ package pg
 
 import (
 	"context"
-	"github.com/astronely/financial-helper_microservices/internal/client/db"
+	"github.com/astronely/financial-helper_microservices/pkg/client/db"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/pkg/errors"
 )

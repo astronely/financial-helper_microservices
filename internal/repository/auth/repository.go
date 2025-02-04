@@ -3,11 +3,11 @@ package auth
 import (
 	"context"
 	sq "github.com/Masterminds/squirrel"
-	"github.com/astronely/financial-helper_microservices/internal/client/db"
 	"github.com/astronely/financial-helper_microservices/internal/model"
 	"github.com/astronely/financial-helper_microservices/internal/repository"
 	"github.com/astronely/financial-helper_microservices/internal/repository/auth/converter"
 	modelRepo "github.com/astronely/financial-helper_microservices/internal/repository/auth/model"
+	"github.com/astronely/financial-helper_microservices/pkg/client/db"
 )
 
 const (

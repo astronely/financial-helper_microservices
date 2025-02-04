@@ -49,6 +49,24 @@ func (_m *UserService) Create(ctx context.Context, info *model.UserInfo, passwor
 	return r0, r1, r2
 }
 
+// Delete provides a mock function with given fields: ctx, id
+func (_m *UserService) Delete(ctx context.Context, id int64) error {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Delete")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, int64) error); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // Get provides a mock function with given fields: ctx, id
 func (_m *UserService) Get(ctx context.Context, id int64) (*model.User, error) {
 	ret := _m.Called(ctx, id)
@@ -72,6 +90,64 @@ func (_m *UserService) Get(ctx context.Context, id int64) (*model.User, error) {
 
 	if rf, ok := ret.Get(1).(func(context.Context, int64) error); ok {
 		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// List provides a mock function with given fields: ctx, limit, offset
+func (_m *UserService) List(ctx context.Context, limit uint64, offset uint64) ([]*model.User, error) {
+	ret := _m.Called(ctx, limit, offset)
+
+	if len(ret) == 0 {
+		panic("no return value specified for List")
+	}
+
+	var r0 []*model.User
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint64, uint64) ([]*model.User, error)); ok {
+		return rf(ctx, limit, offset)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint64, uint64) []*model.User); ok {
+		r0 = rf(ctx, limit, offset)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.User)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint64, uint64) error); ok {
+		r1 = rf(ctx, limit, offset)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// Update provides a mock function with given fields: ctx, info
+func (_m *UserService) Update(ctx context.Context, info *model.UpdateUserInfo) (int64, error) {
+	ret := _m.Called(ctx, info)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Update")
+	}
+
+	var r0 int64
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *model.UpdateUserInfo) (int64, error)); ok {
+		return rf(ctx, info)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *model.UpdateUserInfo) int64); ok {
+		r0 = rf(ctx, info)
+	} else {
+		r0 = ret.Get(0).(int64)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *model.UpdateUserInfo) error); ok {
+		r1 = rf(ctx, info)
 	} else {
 		r1 = ret.Error(1)
 	}
