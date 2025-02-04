@@ -20,5 +20,5 @@ type AuthService interface {
 }
 
 type AccessService interface {
-	Check(ctx context.Context, accessToken string) (bool, error)
+	Check(ctx context.Context, endpointAddress string) (bool, error)
 }

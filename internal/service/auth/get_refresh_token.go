@@ -16,7 +16,9 @@ func (s *serv) GetRefreshToken(ctx context.Context, refreshToken string) (string
 	if err != nil {
 		return "", err
 	}
-	logger.Debug("after verifying token")
+
+	//logger.Debug("after verifying token")
+
 	token, err := utils.GenerateToken(
 		claims.ID,
 		model.UserInfo{
@@ -26,12 +28,15 @@ func (s *serv) GetRefreshToken(ctx context.Context, refreshToken string) (string
 		[]byte(refreshTokenKey), refreshTokenExpiration)
 
 	if err != nil {
+		logger.Error("Error in GetRefreshToken",
+			"err: ", err.Error(),
+		)
 		return "", status.Errorf(codes.Aborted, "invalid refresh token")
 	}
 
 	md := metadata.Pairs("set-cookie", "token="+token+"; HttpOnly; Path=/; Secure; SameSite=Strict")
 
-	err = grpc.SendHeader(ctx, md)
+	err = grpc.SetHeader(ctx, md)
 	if err != nil {
 		return "", err
 	}

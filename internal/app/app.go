@@ -7,6 +7,7 @@ import (
 	"github.com/astronely/financial-helper_microservices/internal/config"
 	"github.com/astronely/financial-helper_microservices/internal/interceptor"
 	_ "github.com/astronely/financial-helper_microservices/pkg/access_v1"
+	descAccess "github.com/astronely/financial-helper_microservices/pkg/access_v1"
 	descAuth "github.com/astronely/financial-helper_microservices/pkg/auth_v1"
 	"github.com/astronely/financial-helper_microservices/pkg/closer"
 	"github.com/astronely/financial-helper_microservices/pkg/logger"
@@ -124,12 +125,15 @@ func (a *App) initServiceProvider(_ context.Context) error {
 }
 
 func (a *App) initGRPCServer(ctx context.Context) error {
+	authInterceptor := interceptor.NewAuthInterceptor(a.serviceProvider.AccessService(ctx))
+
 	a.grpcServer = grpc.NewServer(
 		grpc.Creds(insecure.NewCredentials()),
 		grpc.UnaryInterceptor(
 			grpcMiddleware.ChainUnaryServer(
 				interceptor.LogInterceptor,
 				interceptor.ValidateInterceptor,
+				authInterceptor.AuthInterceptor,
 			),
 		),
 	)
@@ -138,6 +142,7 @@ func (a *App) initGRPCServer(ctx context.Context) error {
 
 	descUser.RegisterUserV1Server(a.grpcServer, a.serviceProvider.UserImpl(ctx))
 	descAuth.RegisterAuthV1Server(a.grpcServer, a.serviceProvider.AuthImpl(ctx))
+	descAccess.RegisterAccessV1Server(a.grpcServer, a.serviceProvider.AccessImpl(ctx))
 	return nil
 }
 
@@ -156,6 +161,11 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 	}
 
 	err = descAuth.RegisterAuthV1HandlerFromEndpoint(ctx, mux, a.serviceProvider.GRPCConfig().Address(), opts)
+	if err != nil {
+		return err
+	}
+
+	err = descAccess.RegisterAccessV1HandlerFromEndpoint(ctx, mux, a.serviceProvider.GRPCConfig().Address(), opts)
 	if err != nil {
 		return err
 	}

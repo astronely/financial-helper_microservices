@@ -5,7 +5,6 @@ import (
 	"errors"
 	"github.com/astronely/financial-helper_microservices/internal/model"
 	"github.com/astronely/financial-helper_microservices/internal/utils"
-	"github.com/astronely/financial-helper_microservices/pkg/logger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )
@@ -16,9 +15,9 @@ func (s *serv) Login(ctx context.Context, email string, password string) (string
 		return "", err
 	}
 
-	logger.Debug("User in service layer, login",
-		"user", user,
-	)
+	//logger.Debug("User in service layer, login",
+	//	"user", user,
+	//)
 
 	if !utils.VerifyPassword(user.Info.Password, password) {
 		return "", errors.New("invalid password")
