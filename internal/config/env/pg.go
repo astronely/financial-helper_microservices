@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-var _ config.PGConfig
+var _ config.PGConfig = (*pgConfig)(nil)
 
 const (
 	dsnEnvName = "PG_DSN"
@@ -16,7 +16,7 @@ type pgConfig struct {
 	dsn string
 }
 
-func NewPGConfig() (*pgConfig, error) {
+func NewPGConfig() (config.PGConfig, error) {
 	dsn := os.Getenv(dsnEnvName)
 	if len(dsn) == 0 {
 		return nil, errors.New("pg dsn not found")

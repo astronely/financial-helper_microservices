@@ -29,7 +29,7 @@ func (s *serv) Login(ctx context.Context, email string, password string) (string
 			Name:  user.Info.Name,
 			Email: user.Info.Email,
 		},
-		[]byte(refreshTokenKey), refreshTokenExpiration,
+		[]byte(s.tokenConfig.RefreshTokenKey()), s.tokenConfig.RefreshTokenExpirationTime(),
 	)
 
 	accessToken, err := utils.GenerateToken(
@@ -38,7 +38,7 @@ func (s *serv) Login(ctx context.Context, email string, password string) (string
 			Name:  user.Info.Name,
 			Email: user.Info.Email,
 		},
-		[]byte(accessTokenKey), accessTimeExpiration,
+		[]byte(s.tokenConfig.AccessTokenKey()), s.tokenConfig.AccessTokenExpirationTime(),
 	)
 
 	err = grpc.SetHeader(ctx, metadata.Pairs("Authorization", "Bearer "+accessToken))

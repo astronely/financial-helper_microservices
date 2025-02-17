@@ -26,6 +26,7 @@ type serviceProvider struct {
 	grpcConfig    config.GRPCConfig
 	httpConfig    config.HTTPConfig
 	swaggerConfig config.SwaggerConfig
+	tokenConfig   config.TokenConfig
 
 	dbClient  db.Client
 	txManager db.TxManager
@@ -98,6 +99,18 @@ func (s *serviceProvider) SwaggerConfig() config.SwaggerConfig {
 	return s.swaggerConfig
 }
 
+func (s *serviceProvider) TokenConfig() config.TokenConfig {
+	if s.tokenConfig == nil {
+		cfg, err := env.NewTokenConfig()
+		if err != nil {
+			panic("Error loading Token config")
+		}
+		s.tokenConfig = cfg
+	}
+
+	return s.tokenConfig
+}
+
 func (s *serviceProvider) DBClient(ctx context.Context) db.Client {
 	if s.dbClient == nil {
 		cl, err := pg.New(ctx, s.PGConfig().DSN())
@@ -149,7 +162,7 @@ func (s *serviceProvider) AuthRepository(ctx context.Context) repository.AuthRep
 
 func (s *serviceProvider) UserService(ctx context.Context) service.UserService {
 	if s.userService == nil {
-		s.userService = userService.NewService(s.UserRepository(ctx), s.TxManager(ctx))
+		s.userService = userService.NewService(s.UserRepository(ctx), s.TxManager(ctx), s.TokenConfig())
 	}
 
 	return s.userService
@@ -157,7 +170,7 @@ func (s *serviceProvider) UserService(ctx context.Context) service.UserService {
 
 func (s *serviceProvider) AuthService(ctx context.Context) service.AuthService {
 	if s.authService == nil {
-		s.authService = authService.NewService(s.AuthRepository(ctx))
+		s.authService = authService.NewService(s.AuthRepository(ctx), s.TokenConfig())
 	}
 
 	return s.authService
@@ -165,7 +178,7 @@ func (s *serviceProvider) AuthService(ctx context.Context) service.AuthService {
 
 func (s *serviceProvider) AccessService(ctx context.Context) service.AccessService {
 	if s.accessService == nil {
-		s.accessService = accessService.NewService(s.AuthService(ctx))
+		s.accessService = accessService.NewService(s.AuthService(ctx), s.TokenConfig())
 	}
 
 	return s.accessService

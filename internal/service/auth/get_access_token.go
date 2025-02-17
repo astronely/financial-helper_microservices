@@ -12,7 +12,7 @@ import (
 )
 
 func (s *serv) GetAccessToken(ctx context.Context, refreshToken string) (string, error) {
-	claims, err := utils.VerifyToken(refreshToken, []byte(refreshTokenKey))
+	claims, err := utils.VerifyToken(refreshToken, []byte(s.tokenConfig.RefreshTokenKey()))
 	if err != nil {
 		return "", err
 	}
@@ -23,9 +23,9 @@ func (s *serv) GetAccessToken(ctx context.Context, refreshToken string) (string,
 			Name:  claims.Username,
 			Email: claims.Email,
 		},
-		[]byte(accessTokenKey), accessTimeExpiration)
+		[]byte(s.tokenConfig.AccessTokenKey()), s.tokenConfig.AccessTokenExpirationTime())
 	if err != nil {
-		logger.Error("Error in GetAccesstoken",
+		logger.Error("Error in GetAccessToken",
 			"err", err.Error(),
 		)
 		return "", status.Errorf(codes.Aborted, "invalid refresh token")

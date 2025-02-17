@@ -12,7 +12,8 @@ import (
 )
 
 const authPrefix = "Bearer "
-const accessTokenKey = "access_token_key"
+
+//const accessTokenKey = "access_token_key"
 
 func (s *serv) Check(ctx context.Context, endpointAddress string) (bool, error) {
 	if !strings.HasSuffix(endpointAddress, "/Check") {
@@ -35,7 +36,7 @@ func (s *serv) Check(ctx context.Context, endpointAddress string) (bool, error) 
 
 	accessToken := strings.TrimPrefix(authHeader[0], authPrefix)
 
-	_, err := utils.VerifyToken(accessToken, []byte(accessTokenKey))
+	_, err := utils.VerifyToken(accessToken, []byte(s.tokenConfig.AccessTokenKey()))
 	if err != nil {
 		logger.Error("Verify access token error",
 			"token", accessToken,
@@ -61,7 +62,7 @@ func (s *serv) Check(ctx context.Context, endpointAddress string) (bool, error) 
 			return false, status.Errorf(codes.Unauthenticated, "access tokens is invalid")
 		}
 
-		_, err = utils.VerifyToken(newAccessToken, []byte(accessTokenKey))
+		_, err = utils.VerifyToken(newAccessToken, []byte(s.tokenConfig.AccessTokenKey()))
 		if err != nil {
 			return false, status.Errorf(codes.Unauthenticated, "access tokens is invalid")
 		}

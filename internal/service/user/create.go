@@ -18,7 +18,7 @@ func (s *serv) Create(ctx context.Context, info *model.UserInfo, password string
 			Name:  info.Name,
 			Email: info.Email,
 		},
-		[]byte("testSecretKey"), 360,
+		[]byte(s.tokenConfig.RefreshTokenKey()), s.tokenConfig.RefreshTokenExpirationTime(),
 	)
 
 	if err != nil {

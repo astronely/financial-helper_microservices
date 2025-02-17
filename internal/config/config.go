@@ -1,6 +1,9 @@
 package config
 
-import "github.com/joho/godotenv"
+import (
+	"github.com/joho/godotenv"
+	"time"
+)
 
 func Load(path string) error {
 	err := godotenv.Load(path)
@@ -25,4 +28,11 @@ type SwaggerConfig interface {
 
 type PGConfig interface {
 	DSN() string
+}
+
+type TokenConfig interface {
+	AccessTokenKey() string
+	RefreshTokenKey() string
+	AccessTokenExpirationTime() time.Duration
+	RefreshTokenExpirationTime() time.Duration
 }

@@ -2,6 +2,7 @@ package env
 
 import (
 	"errors"
+	"github.com/astronely/financial-helper_microservices/internal/config"
 	"net"
 	"os"
 )
@@ -11,16 +12,12 @@ const (
 	swaggerPortEnv = "SWAGGER_PORT"
 )
 
-type SwaggerConfig interface {
-	Address() string
-}
-
 type swaggerConfig struct {
 	host string
 	port string
 }
 
-func NewSwaggerConfig() (SwaggerConfig, error) {
+func NewSwaggerConfig() (config.SwaggerConfig, error) {
 	host := os.Getenv(swaggerHostEnv)
 	if len(host) == 0 {
 		return nil, errors.New("http host not found in environment")

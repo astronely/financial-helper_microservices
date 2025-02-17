@@ -19,7 +19,7 @@ type grpcConfig struct {
 	port string
 }
 
-func NewGRPCConfig() (*grpcConfig, error) {
+func NewGRPCConfig() (config.GRPCConfig, error) {
 	host := os.Getenv(grpcHostEnvName)
 	if len(host) == 0 {
 		return nil, errors.New("grpc host not found")

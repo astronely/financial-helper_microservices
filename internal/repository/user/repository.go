@@ -11,6 +11,7 @@ import (
 	_ "github.com/brianvoe/gofakeit/v7"
 	"golang.org/x/crypto/bcrypt"
 	_ "google.golang.org/protobuf/types/known/timestamppb"
+	"time"
 )
 
 const (
@@ -149,6 +150,8 @@ func (r *repo) Update(ctx context.Context, info *model.UpdateUserInfo) (int64, e
 	if info.Password != "" {
 		updateMap[passwordColumn] = info.Password
 	}
+
+	updateMap["updated_at"] = time.Now()
 
 	builder := sq.Update(tableName).
 		PlaceholderFormat(sq.Dollar).

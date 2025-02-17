@@ -1,6 +1,6 @@
 -- +goose Up
 create table users (
-    id serial primary key,
+    id bigserial primary key,
     email text not null,
     name text not null,
     password text not null,
@@ -9,4 +9,4 @@ create table users (
 );
 
 -- +goose Down
-drop table user;
+drop table users;
