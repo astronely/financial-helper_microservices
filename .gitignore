@@ -12,7 +12,7 @@
 *.out
 
 # IDE files
-.idea/
+../.idea/
 *.iml
 
 # Local settings
@@ -20,5 +20,5 @@
 *.local
 .DS_Store
 
-/vendor.protogen
+/userService/vendor.protogen
 /coverage.out
