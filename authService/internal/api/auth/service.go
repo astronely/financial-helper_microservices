@@ -1,8 +1,8 @@
 package auth
 
 import (
-	"github.com/astronely/financial-helper_microservices/userService/internal/service"
-	desc "github.com/astronely/financial-helper_microservices/userService/pkg/auth_v1"
+	"github.com/astronely/financial-helper_microservices/authService/internal/service"
+	desc "github.com/astronely/financial-helper_microservices/authService/pkg/auth_v1"
 )
 
 type Implementation struct {

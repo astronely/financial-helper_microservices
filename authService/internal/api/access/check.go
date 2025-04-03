@@ -2,7 +2,7 @@ package access
 
 import (
 	"context"
-	desc "github.com/astronely/financial-helper_microservices/userService/pkg/access_v1"
+	desc "github.com/astronely/financial-helper_microservices/authService/pkg/access_v1"
 )
 
 func (i *Implementation) Check(ctx context.Context, req *desc.CheckRequest) (*desc.CheckResponse, error) {

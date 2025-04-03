@@ -2,7 +2,7 @@ package auth
 
 import (
 	"context"
-	desc "github.com/astronely/financial-helper_microservices/userService/pkg/auth_v1"
+	desc "github.com/astronely/financial-helper_microservices/authService/pkg/auth_v1"
 )
 
 func (i *Implementation) GetAccessToken(ctx context.Context, req *desc.GetAccessTokenRequest) (*desc.GetAccessTokenResponse, error) {
