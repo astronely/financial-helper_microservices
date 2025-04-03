@@ -41,6 +41,7 @@ generate:
 	mkdir -p pkg/swagger
 	statik -src=pkg/swagger/ -include='*.css,*.html,*.js,*.json,*.png'
 
+
 generate-user-api:
 	mkdir -p pkg/user_v1
 	protoc --proto_path api/user_v1 --proto_path vendor.protogen \

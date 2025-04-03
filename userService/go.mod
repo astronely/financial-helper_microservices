@@ -5,7 +5,6 @@ go 1.23.1
 require (
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/brianvoe/gofakeit/v7 v7.1.2
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/envoyproxy/protoc-gen-validate v1.1.0
 	github.com/fatih/color v1.18.0
 	github.com/georgysavva/scany v1.2.2
@@ -19,10 +18,10 @@ require (
 	github.com/rakyll/statik v0.1.7
 	github.com/rs/cors v1.11.1
 	github.com/stretchr/testify v1.10.0
-	golang.org/x/crypto v0.32.0
-	google.golang.org/genproto/googleapis/api v0.0.0-20250115164207-1a7da9e5054f
+	golang.org/x/crypto v0.36.0
+	google.golang.org/genproto/googleapis/api v0.0.0-20250227231956-55c901821b1e
 	google.golang.org/grpc v1.70.0
-	google.golang.org/protobuf v1.36.4
+	google.golang.org/protobuf v1.36.5
 )
 
 require (
@@ -41,9 +40,10 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.13.1 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
-	golang.org/x/net v0.34.0 // indirect
-	golang.org/x/sys v0.29.0 // indirect
-	golang.org/x/text v0.21.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250115164207-1a7da9e5054f // indirect
+	golang.org/x/net v0.37.0 // indirect
+	golang.org/x/sys v0.31.0 // indirect
+	golang.org/x/text v0.23.0 // indirect
+	google.golang.org/genproto v0.0.0-20250324211829-b45e905df463 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250227231956-55c901821b1e // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

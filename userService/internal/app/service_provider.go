@@ -2,17 +2,12 @@ package app
 
 import (
 	"context"
-	"github.com/astronely/financial-helper_microservices/userService/internal/api/access"
-	"github.com/astronely/financial-helper_microservices/userService/internal/api/auth"
 	"github.com/astronely/financial-helper_microservices/userService/internal/api/user"
 	"github.com/astronely/financial-helper_microservices/userService/internal/config"
 	"github.com/astronely/financial-helper_microservices/userService/internal/config/env"
 	"github.com/astronely/financial-helper_microservices/userService/internal/repository"
-	authRepository "github.com/astronely/financial-helper_microservices/userService/internal/repository/auth"
 	userRepository "github.com/astronely/financial-helper_microservices/userService/internal/repository/user"
 	"github.com/astronely/financial-helper_microservices/userService/internal/service"
-	accessService "github.com/astronely/financial-helper_microservices/userService/internal/service/access"
-	authService "github.com/astronely/financial-helper_microservices/userService/internal/service/auth"
 	userService "github.com/astronely/financial-helper_microservices/userService/internal/service/user"
 	"github.com/astronely/financial-helper_microservices/userService/pkg/client/db"
 	"github.com/astronely/financial-helper_microservices/userService/pkg/client/db/pg"
@@ -32,15 +27,15 @@ type serviceProvider struct {
 	txManager db.TxManager
 
 	userRepository repository.UserRepository
-	authRepository repository.AuthRepository
+	//authRepository repository.AuthRepository
 
-	userService   service.UserService
-	authService   service.AuthService
-	accessService service.AccessService
+	userService service.UserService
+	//authService   service.AuthService
+	//accessService service.AccessService
 
-	userImpl   *user.Implementation
-	authImpl   *auth.Implementation
-	accessImpl *access.Implementation
+	userImpl *user.Implementation
+	//authImpl   *auth.Implementation
+	//accessImpl *access.Implementation
 }
 
 func newServiceProvider() *serviceProvider {
@@ -152,13 +147,13 @@ func (s *serviceProvider) UserRepository(ctx context.Context) repository.UserRep
 	return s.userRepository
 }
 
-func (s *serviceProvider) AuthRepository(ctx context.Context) repository.AuthRepository {
-	if s.authRepository == nil {
-		s.authRepository = authRepository.NewRepository(s.DBClient(ctx))
-	}
-
-	return s.authRepository
-}
+//func (s *serviceProvider) AuthRepository(ctx context.Context) repository.AuthRepository {
+//	if s.authRepository == nil {
+//		s.authRepository = authRepository.NewRepository(s.DBClient(ctx))
+//	}
+//
+//	return s.authRepository
+//}
 
 func (s *serviceProvider) UserService(ctx context.Context) service.UserService {
 	if s.userService == nil {
@@ -168,21 +163,21 @@ func (s *serviceProvider) UserService(ctx context.Context) service.UserService {
 	return s.userService
 }
 
-func (s *serviceProvider) AuthService(ctx context.Context) service.AuthService {
-	if s.authService == nil {
-		s.authService = authService.NewService(s.AuthRepository(ctx), s.TokenConfig())
-	}
+//func (s *serviceProvider) AuthService(ctx context.Context) service.AuthService {
+//	if s.authService == nil {
+//		s.authService = authService.NewService(s.AuthRepository(ctx), s.TokenConfig())
+//	}
+//
+//	return s.authService
+//}
 
-	return s.authService
-}
-
-func (s *serviceProvider) AccessService(ctx context.Context) service.AccessService {
-	if s.accessService == nil {
-		s.accessService = accessService.NewService(s.AuthService(ctx), s.TokenConfig())
-	}
-
-	return s.accessService
-}
+//func (s *serviceProvider) AccessService(ctx context.Context) service.AccessService {
+//	if s.accessService == nil {
+//		s.accessService = accessService.NewService(s.AuthService(ctx), s.TokenConfig())
+//	}
+//
+//	return s.accessService
+//}
 
 func (s *serviceProvider) UserImpl(ctx context.Context) *user.Implementation {
 	if s.userImpl == nil {
@@ -192,18 +187,18 @@ func (s *serviceProvider) UserImpl(ctx context.Context) *user.Implementation {
 	return s.userImpl
 }
 
-func (s *serviceProvider) AuthImpl(ctx context.Context) *auth.Implementation {
-	if s.authImpl == nil {
-		s.authImpl = auth.NewImplementation(s.AuthService(ctx))
-	}
-
-	return s.authImpl
-}
-
-func (s *serviceProvider) AccessImpl(ctx context.Context) *access.Implementation {
-	if s.accessImpl == nil {
-		s.accessImpl = access.NewImplementation(s.AccessService(ctx))
-	}
-
-	return s.accessImpl
-}
+//func (s *serviceProvider) AuthImpl(ctx context.Context) *auth.Implementation {
+//	if s.authImpl == nil {
+//		s.authImpl = auth.NewImplementation(s.AuthService(ctx))
+//	}
+//
+//	return s.authImpl
+//}
+//
+//func (s *serviceProvider) AccessImpl(ctx context.Context) *access.Implementation {
+//	if s.accessImpl == nil {
+//		s.accessImpl = access.NewImplementation(s.AccessService(ctx))
+//	}
+//
+//	return s.accessImpl
+//}

@@ -125,7 +125,7 @@ func (a *App) initServiceProvider(_ context.Context) error {
 }
 
 func (a *App) initGRPCServer(ctx context.Context) error {
-	authInterceptor := interceptor.NewAuthInterceptor(a.serviceProvider.AccessService(ctx))
+	//authInterceptor := interceptor.NewAuthInterceptor(a.serviceProvider.AccessService(ctx))
 
 	a.grpcServer = grpc.NewServer(
 		grpc.Creds(insecure.NewCredentials()),
@@ -133,7 +133,7 @@ func (a *App) initGRPCServer(ctx context.Context) error {
 			grpcMiddleware.ChainUnaryServer(
 				interceptor.LogInterceptor,
 				interceptor.ValidateInterceptor,
-				authInterceptor.AuthInterceptor,
+				//authInterceptor.AuthInterceptor,
 			),
 		),
 	)
@@ -141,8 +141,8 @@ func (a *App) initGRPCServer(ctx context.Context) error {
 	reflection.Register(a.grpcServer)
 
 	descUser.RegisterUserV1Server(a.grpcServer, a.serviceProvider.UserImpl(ctx))
-	descAuth.RegisterAuthV1Server(a.grpcServer, a.serviceProvider.AuthImpl(ctx))
-	descAccess.RegisterAccessV1Server(a.grpcServer, a.serviceProvider.AccessImpl(ctx))
+	//descAuth.RegisterAuthV1Server(a.grpcServer, a.serviceProvider.AuthImpl(ctx))
+	//descAccess.RegisterAccessV1Server(a.grpcServer, a.serviceProvider.AccessImpl(ctx))
 	return nil
 }
 
@@ -171,7 +171,7 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 	}
 
 	corsMiddleware := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:8088"},
+		AllowedOrigins:   []string{"http://localhost:8088", "http://localhost:8089"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Authorization", "Content-Type", "Accept", "Content-Length"},
 		AllowCredentials: true,
@@ -193,11 +193,18 @@ func (a *App) initSwaggerServer(_ context.Context) error {
 
 	mux := http.NewServeMux()
 	mux.Handle("/", http.StripPrefix("/", http.FileServer(statikFs)))
-	mux.HandleFunc("/api.swagger.json", serveSwaggerFile("/api.swagger.json"))
+	mux.HandleFunc("/userApi.swagger.json", serveSwaggerFile("/api.swagger.json"))
+
+	corsMiddleware := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:8089"},
+		AllowedMethods:   []string{"GET", "OPTIONS"},
+		AllowedHeaders:   []string{"Authorization", "Content-Type", "Accept", "Content-Length"},
+		AllowCredentials: true,
+	})
 
 	a.swaggerServer = &http.Server{
 		Addr:    a.serviceProvider.SwaggerConfig().Address(),
-		Handler: mux,
+		Handler: corsMiddleware.Handler(mux),
 	}
 
 	return nil
