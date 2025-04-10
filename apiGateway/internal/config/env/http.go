@@ -2,7 +2,7 @@ package env
 
 import (
 	"errors"
-	"github.com/astronely/financial-helper_microservices/userService/internal/config"
+	"github.com/astronely/financial-helper_microservices/apiGateway/internal/config"
 	"net"
 	"os"
 )
@@ -17,15 +17,14 @@ type httpConfig struct {
 	port string
 }
 
-func NewHTTPConfig() (config.HTTPConfig, error) {
+func NewHttpConfig() (config.HTTPConfig, error) {
 	host := os.Getenv(httpHostEnvName)
 	if len(host) == 0 {
-		return nil, errors.New("http host not found in environment")
+		return nil, errors.New("http host not found in env")
 	}
-
 	port := os.Getenv(httpPortEnvName)
 	if len(port) == 0 {
-		return nil, errors.New("http port not found in environment")
+		return nil, errors.New("http port not found in env")
 	}
 
 	return &httpConfig{

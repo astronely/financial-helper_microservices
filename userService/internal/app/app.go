@@ -6,21 +6,13 @@ import (
 	"flag"
 	"github.com/astronely/financial-helper_microservices/userService/internal/config"
 	"github.com/astronely/financial-helper_microservices/userService/internal/interceptor"
-	_ "github.com/astronely/financial-helper_microservices/userService/pkg/access_v1"
-	descAccess "github.com/astronely/financial-helper_microservices/userService/pkg/access_v1"
-	descAuth "github.com/astronely/financial-helper_microservices/userService/pkg/auth_v1"
 	"github.com/astronely/financial-helper_microservices/userService/pkg/closer"
 	"github.com/astronely/financial-helper_microservices/userService/pkg/logger"
 	descUser "github.com/astronely/financial-helper_microservices/userService/pkg/user_v1"
-	_ "github.com/astronely/financial-helper_microservices/userService/statik"
 	grpcMiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	"github.com/rakyll/statik/fs"
-	"github.com/rs/cors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
-	"io"
 	"log"
 	"net"
 	"net/http"
@@ -71,20 +63,6 @@ func (a *App) Run() error {
 		}
 	}()
 
-	go func() {
-		err := a.runHTTPServer()
-		if err != nil {
-			log.Fatalf("failed to start HTTP server: %v", err)
-		}
-	}()
-
-	go func() {
-		err := a.runSwaggerServer()
-		if err != nil {
-			log.Fatalf("failed to start Swagger server: %v", err)
-		}
-	}()
-
 	<-ctx.Done()
 
 	return nil
@@ -95,8 +73,6 @@ func (a *App) initDeps(ctx context.Context) error {
 		a.initConfig,
 		a.initServiceProvider,
 		a.initGRPCServer,
-		a.initHTTPServer,
-		a.initSwaggerServer,
 	}
 
 	for _, f := range inits {
@@ -125,15 +101,12 @@ func (a *App) initServiceProvider(_ context.Context) error {
 }
 
 func (a *App) initGRPCServer(ctx context.Context) error {
-	//authInterceptor := interceptor.NewAuthInterceptor(a.serviceProvider.AccessService(ctx))
-
 	a.grpcServer = grpc.NewServer(
 		grpc.Creds(insecure.NewCredentials()),
 		grpc.UnaryInterceptor(
 			grpcMiddleware.ChainUnaryServer(
 				interceptor.LogInterceptor,
 				interceptor.ValidateInterceptor,
-				//authInterceptor.AuthInterceptor,
 			),
 		),
 	)
@@ -141,72 +114,6 @@ func (a *App) initGRPCServer(ctx context.Context) error {
 	reflection.Register(a.grpcServer)
 
 	descUser.RegisterUserV1Server(a.grpcServer, a.serviceProvider.UserImpl(ctx))
-	//descAuth.RegisterAuthV1Server(a.grpcServer, a.serviceProvider.AuthImpl(ctx))
-	//descAccess.RegisterAccessV1Server(a.grpcServer, a.serviceProvider.AccessImpl(ctx))
-	return nil
-}
-
-func (a *App) initHTTPServer(ctx context.Context) error {
-	mux := runtime.NewServeMux(
-		runtime.WithForwardResponseOption(interceptor.MetadataToCookieInterceptor),
-	)
-
-	opts := []grpc.DialOption{
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	}
-
-	err := descUser.RegisterUserV1HandlerFromEndpoint(ctx, mux, a.serviceProvider.GRPCConfig().Address(), opts)
-	if err != nil {
-		return err
-	}
-
-	err = descAuth.RegisterAuthV1HandlerFromEndpoint(ctx, mux, a.serviceProvider.GRPCConfig().Address(), opts)
-	if err != nil {
-		return err
-	}
-
-	err = descAccess.RegisterAccessV1HandlerFromEndpoint(ctx, mux, a.serviceProvider.GRPCConfig().Address(), opts)
-	if err != nil {
-		return err
-	}
-
-	corsMiddleware := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:8088", "http://localhost:8089"},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Authorization", "Content-Type", "Accept", "Content-Length"},
-		AllowCredentials: true,
-	})
-
-	a.httpServer = &http.Server{
-		Addr:    a.serviceProvider.HTTPConfig().Address(),
-		Handler: corsMiddleware.Handler(mux),
-	}
-
-	return nil
-}
-
-func (a *App) initSwaggerServer(_ context.Context) error {
-	statikFs, err := fs.New()
-	if err != nil {
-		return err
-	}
-
-	mux := http.NewServeMux()
-	mux.Handle("/", http.StripPrefix("/", http.FileServer(statikFs)))
-	mux.HandleFunc("/userApi.swagger.json", serveSwaggerFile("/api.swagger.json"))
-
-	corsMiddleware := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:8089"},
-		AllowedMethods:   []string{"GET", "OPTIONS"},
-		AllowedHeaders:   []string{"Authorization", "Content-Type", "Accept", "Content-Length"},
-		AllowCredentials: true,
-	})
-
-	a.swaggerServer = &http.Server{
-		Addr:    a.serviceProvider.SwaggerConfig().Address(),
-		Handler: corsMiddleware.Handler(mux),
-	}
-
 	return nil
 }
 
@@ -232,85 +139,4 @@ func (a *App) runGRPCServer() error {
 	}
 
 	return nil
-}
-
-func (a *App) runHTTPServer() error {
-	logger.Info("HTTP server is running",
-		"address", a.serviceProvider.HTTPConfig().Address(),
-	)
-
-	closer.Add(func() error {
-		if err := a.httpServer.Shutdown(context.Background()); err == nil {
-			logger.Info("HTTP server shutdown gracefully")
-		}
-		return nil
-	})
-
-	err := a.httpServer.ListenAndServe()
-	if err != nil && !errors.Is(err, http.ErrServerClosed) {
-		return err
-	}
-
-	return nil
-}
-
-func (a *App) runSwaggerServer() error {
-	logger.Info("Swagger server is running",
-		"address:", a.serviceProvider.SwaggerConfig().Address(),
-	)
-
-	closer.Add(func() error {
-		if err := a.swaggerServer.Shutdown(context.Background()); err == nil {
-			logger.Info("Swagger server shutdown gracefully")
-		}
-		return nil
-	})
-
-	err := a.swaggerServer.ListenAndServe()
-	if err != nil && !errors.Is(err, http.ErrServerClosed) {
-		return err
-	}
-
-	return nil
-}
-
-func serveSwaggerFile(path string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		logger.Debug("Serving swagger file",
-			"file", path)
-
-		statikFs, err := fs.New()
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		//log.Printf("Open swagger file: %s", path)
-
-		file, err := statikFs.Open(path)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		defer file.Close()
-
-		//log.Printf("Read swagger file: %s", path)
-
-		content, err := io.ReadAll(file)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		//log.Printf("Write swagger file: %s", path)
-
-		w.Header().Set("Content-Type", "application/json")
-		_, err = w.Write(content)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		//log.Printf("Served swagger file: %s", path)
-	}
 }

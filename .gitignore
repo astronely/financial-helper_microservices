@@ -21,4 +21,6 @@
 .DS_Store
 
 /userService/vendor.protogen
+/authService/vendor.protogen
+/apiGateway/vendor.protogen
 /coverage.out
