@@ -1,6 +1,7 @@
 package model
 
 import (
+	"database/sql"
 	"github.com/shopspring/decimal"
 	"time"
 )
@@ -10,7 +11,7 @@ type Transaction struct {
 	Info      TransactionInfo
 	DetailsID int64
 	CreatedAt time.Time
-	//UpdatedAt sql.NullTime
+	UpdatedAt sql.NullTime
 
 	TransactionDetails TransactionDetails
 }
