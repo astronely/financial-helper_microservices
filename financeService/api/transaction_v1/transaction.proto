@@ -1,0 +1,131 @@
+syntax = "proto3";
+
+package transaction_v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "validate/validate.proto";
+
+option go_package = "github.com/astronely/financial-helper_microservices/financeService/pkg/transaction_v1;transaction_v1";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  info: {
+    title: "Transaction API"
+    version: "1.0.0"
+    contact: {
+      name: "astronely"
+    };
+  };
+
+  host: "localhost:8080",
+  schemes: HTTP,
+  schemes: HTTPS,
+  consumes: "application/json",
+  produces: "application/json",
+};
+
+service TransactionV1 {
+  rpc Create(CreateRequest) returns (CreateResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/transaction/create",
+      body: "*"
+    };
+  };
+
+  rpc Get(GetRequest) returns (GetResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/transaction/get",
+      body: "*"
+    };
+  };
+
+  rpc List(ListRequest) returns (ListResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/transaction/list",
+      body: "*"
+    };
+  };
+
+  rpc Delete(DeleteRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/api/v1/transaction/delete",
+      body: "*"
+    };
+  };
+
+  rpc Update(UpdateRequest) returns (UpdateResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/transaction/update",
+      body: "*"
+    };
+  };
+}
+
+// -------------------------------------------------------------------------
+
+message TransactionInfo {
+  int64 owner_id = 1 [(validate.rules).int64.gte = 0];
+  int64 wallet_id = 2 [(validate.rules).int64.gte = 0];
+  int64 board_id = 3 [(validate.rules).int64.gte = 0];
+  string sum = 4 [(validate.rules).string = {min_len:1}];
+  int64 details_id = 5 [(validate.rules).int64.gte = 0];
+}
+
+message TransactionDetails {
+  int64 transaction_id = 1 [(validate.rules).int64.gte = 0]; // Возможно эта информация не нужна в коде (только в бд)
+  string name = 2 [(validate.rules).string = {min_len:1}];
+  string category = 3 [(validate.rules).string = {min_len:1}];
+  google.protobuf.Timestamp created_at = 4;
+}
+
+message Transaction {
+  int64 id = 1 [(validate.rules).int64.gte = 0];
+  TransactionInfo info = 2 [(validate.rules).message.required = true];
+  google.protobuf.Timestamp created_at = 3;
+}
+
+message UpdatedTransactionInfo {
+  google.protobuf.Int64Value wallet_id = 1 [(validate.rules).int64.gte = 0];
+  google.protobuf.StringValue sum = 2 [(validate.rules).string = {min_len:1}];
+}
+
+message CreateRequest {
+  TransactionInfo info = 1 [(validate.rules).message.required = true];
+}
+
+message CreateResponse {
+  int64 id = 1;
+}
+
+message GetRequest {
+  int64 id = 1 [(validate.rules).int64.gte = 0];
+}
+
+message GetResponse {
+  Transaction transaction = 1;
+}
+
+message ListRequest {
+  int64 limit = 1 [(validate.rules).int64.gte = 0];
+  int64 offset = 2 [(validate.rules).int64.gte = 0];
+}
+
+message ListResponse {
+  repeated Transaction transactions = 1;
+}
+
+message UpdateRequest {
+  int64 id = 1 [(validate.rules).int64.gte = 0];
+  UpdatedTransactionInfo info = 2 [(validate.rules).message.required = true];
+}
+
+message UpdateResponse {
+  int64 id = 1;
+}
+
+message DeleteRequest {
+  int64 id = 1 [(validate.rules).int64.gte = 0];
+}

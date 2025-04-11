@@ -17,6 +17,7 @@ generate:
 	make generate-user-api
 	make generate-auth-api
 	make generate-access-api
+	make generate-wallet-api
 	# TODO: other APIs
 	make generate-openapi
 	mkdir -p pkg/swagger
@@ -48,14 +49,27 @@ generate-access-api:
  	--grpc-gateway_out=pkg/access_v1 --grpc-gateway_opt=paths=source_relative \
  	api/access_v1/access.proto
 
+generate-wallet-api:
+	mkdir -p pkg/wallet_v1
+	protoc --proto_path api/wallet_v1 --proto_path vendor.protogen \
+	--go_out=pkg/wallet_v1 --go_opt=paths=source_relative \
+ 	--go-grpc_out=pkg/wallet_v1 --go-grpc_opt=paths=source_relative \
+ 	--grpc-gateway_out=pkg/wallet_v1 --grpc-gateway_opt=paths=source_relative \
+ 	api/wallet_v1/wallet.proto
+
 generate-openapi:
 	mkdir -p pkg/swagger
 	protoc --proto_path=api --proto_path=vendor.protogen \
 		--openapiv2_out=allow_merge=true,merge_file_name=userApi:pkg/swagger \
 		api/user_v1/user.proto
+
 	protoc --proto_path=api --proto_path=vendor.protogen \
 		--openapiv2_out=allow_merge=true,merge_file_name=authApi:pkg/swagger \
 		api/auth_v1/auth.proto api/access_v1/access.proto
+
+	protoc --proto_path=api --proto_path=vendor.protogen \
+		--openapiv2_out=allow_merge=true,merge_file_name=financeApi:pkg/swagger \
+		api/wallet_v1/wallet.proto api/transaction_v1/transaction.proto
 
 vendor-proto:
 		@if [ ! -d vendor.protogen/validate ]; then \

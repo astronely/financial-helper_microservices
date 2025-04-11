@@ -2,8 +2,8 @@ package auth
 
 import (
 	"context"
+	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/logger"
 	desc "github.com/astronely/financial-helper_microservices/authService/pkg/auth_v1"
-	"github.com/astronely/financial-helper_microservices/userService/pkg/logger"
 )
 
 func (i *Implementation) Login(ctx context.Context, req *desc.LoginRequest) (*desc.LoginResponse, error) {

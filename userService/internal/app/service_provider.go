@@ -2,6 +2,8 @@ package app
 
 import (
 	"context"
+	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/closer"
+	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/logger"
 	"github.com/astronely/financial-helper_microservices/userService/internal/api/user"
 	"github.com/astronely/financial-helper_microservices/userService/internal/config"
 	"github.com/astronely/financial-helper_microservices/userService/internal/config/env"
@@ -12,30 +14,20 @@ import (
 	"github.com/astronely/financial-helper_microservices/userService/pkg/client/db"
 	"github.com/astronely/financial-helper_microservices/userService/pkg/client/db/pg"
 	"github.com/astronely/financial-helper_microservices/userService/pkg/client/db/transaction"
-	"github.com/astronely/financial-helper_microservices/userService/pkg/closer"
-	"github.com/astronely/financial-helper_microservices/userService/pkg/logger"
 )
 
 type serviceProvider struct {
-	pgConfig      config.PGConfig
-	grpcConfig    config.GRPCConfig
-	httpConfig    config.HTTPConfig
-	swaggerConfig config.SwaggerConfig
-	tokenConfig   config.TokenConfig
+	pgConfig    config.PGConfig
+	grpcConfig  config.GRPCConfig
+	tokenConfig config.TokenConfig
 
 	dbClient  db.Client
 	txManager db.TxManager
 
 	userRepository repository.UserRepository
-	//authRepository repository.AuthRepository
-
-	userService service.UserService
-	//authService   service.AuthService
-	//accessService service.AccessService
+	userService    service.UserService
 
 	userImpl *user.Implementation
-	//authImpl   *auth.Implementation
-	//accessImpl *access.Implementation
 }
 
 func newServiceProvider() *serviceProvider {
@@ -66,32 +58,6 @@ func (s *serviceProvider) GRPCConfig() config.GRPCConfig {
 	}
 
 	return s.grpcConfig
-}
-
-func (s *serviceProvider) HTTPConfig() config.HTTPConfig {
-	if s.httpConfig == nil {
-		cfg, err := env.NewHTTPConfig()
-		if err != nil {
-			panic("Error loading HTTP config")
-		}
-
-		s.httpConfig = cfg
-	}
-
-	return s.httpConfig
-}
-
-func (s *serviceProvider) SwaggerConfig() config.SwaggerConfig {
-	if s.swaggerConfig == nil {
-		cfg, err := env.NewSwaggerConfig()
-		if err != nil {
-			panic("Error loading Swagger config")
-		}
-
-		s.swaggerConfig = cfg
-	}
-
-	return s.swaggerConfig
 }
 
 func (s *serviceProvider) TokenConfig() config.TokenConfig {
@@ -147,14 +113,6 @@ func (s *serviceProvider) UserRepository(ctx context.Context) repository.UserRep
 	return s.userRepository
 }
 
-//func (s *serviceProvider) AuthRepository(ctx context.Context) repository.AuthRepository {
-//	if s.authRepository == nil {
-//		s.authRepository = authRepository.NewRepository(s.DBClient(ctx))
-//	}
-//
-//	return s.authRepository
-//}
-
 func (s *serviceProvider) UserService(ctx context.Context) service.UserService {
 	if s.userService == nil {
 		s.userService = userService.NewService(s.UserRepository(ctx), s.TxManager(ctx), s.TokenConfig())
@@ -163,22 +121,6 @@ func (s *serviceProvider) UserService(ctx context.Context) service.UserService {
 	return s.userService
 }
 
-//func (s *serviceProvider) AuthService(ctx context.Context) service.AuthService {
-//	if s.authService == nil {
-//		s.authService = authService.NewService(s.AuthRepository(ctx), s.TokenConfig())
-//	}
-//
-//	return s.authService
-//}
-
-//func (s *serviceProvider) AccessService(ctx context.Context) service.AccessService {
-//	if s.accessService == nil {
-//		s.accessService = accessService.NewService(s.AuthService(ctx), s.TokenConfig())
-//	}
-//
-//	return s.accessService
-//}
-
 func (s *serviceProvider) UserImpl(ctx context.Context) *user.Implementation {
 	if s.userImpl == nil {
 		s.userImpl = user.NewImplementation(s.UserService(ctx))
@@ -186,19 +128,3 @@ func (s *serviceProvider) UserImpl(ctx context.Context) *user.Implementation {
 
 	return s.userImpl
 }
-
-//func (s *serviceProvider) AuthImpl(ctx context.Context) *auth.Implementation {
-//	if s.authImpl == nil {
-//		s.authImpl = auth.NewImplementation(s.AuthService(ctx))
-//	}
-//
-//	return s.authImpl
-//}
-//
-//func (s *serviceProvider) AccessImpl(ctx context.Context) *access.Implementation {
-//	if s.accessImpl == nil {
-//		s.accessImpl = access.NewImplementation(s.AccessService(ctx))
-//	}
-//
-//	return s.accessImpl
-//}

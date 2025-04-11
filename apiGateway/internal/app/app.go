@@ -5,12 +5,14 @@ import (
 	"errors"
 	"flag"
 	"github.com/astronely/financial-helper_microservices/apiGateway/internal/config"
+	descAccess "github.com/astronely/financial-helper_microservices/apiGateway/pkg/access_v1"
+	descAuth "github.com/astronely/financial-helper_microservices/apiGateway/pkg/auth_v1"
+	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/closer"
+	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/logger"
+	descUser "github.com/astronely/financial-helper_microservices/apiGateway/pkg/user_v1"
+	descWallet "github.com/astronely/financial-helper_microservices/apiGateway/pkg/wallet_v1"
 	_ "github.com/astronely/financial-helper_microservices/apiGateway/statik"
-	descAccess "github.com/astronely/financial-helper_microservices/authService/pkg/access_v1"
-	descAuth "github.com/astronely/financial-helper_microservices/authService/pkg/auth_v1"
-	"github.com/astronely/financial-helper_microservices/userService/pkg/closer"
-	"github.com/astronely/financial-helper_microservices/userService/pkg/logger"
-	descUser "github.com/astronely/financial-helper_microservices/userService/pkg/user_v1"
+	//descWallet "github.com/astronely/financial-helper_microservices/financeService/pkg/transaction_v1"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/rakyll/statik/fs"
 	"github.com/rs/cors"
@@ -122,6 +124,7 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 	if err != nil {
 		return nil
 	}
+	err = descWallet.RegisterWalletV1HandlerFromEndpoint(ctx, mux, a.serviceProvider.GrpcConfig().FinanceAddress(), opts)
 
 	corsMiddleware := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:9090"}, // TODO: Дописать IP клиента
@@ -188,6 +191,7 @@ func (a *App) initSwaggerServer(_ context.Context) error {
 	mux.Handle("/", http.StripPrefix("/", http.FileServer(statikFs)))
 	mux.HandleFunc("/userApi.swagger.json", serveSwaggerFile("/userApi.swagger.json"))
 	mux.HandleFunc("/authApi.swagger.json", serveSwaggerFile("/authApi.swagger.json"))
+	mux.HandleFunc("/financeApi.swagger.json", serveSwaggerFile("/financeApi.swagger.json"))
 
 	a.swaggerServer = &http.Server{
 		Addr:    a.serviceProvider.SwaggerConfig().Address(),

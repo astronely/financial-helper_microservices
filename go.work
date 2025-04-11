@@ -4,4 +4,5 @@ use (
 	./authService
 	./userService
 	./apiGateway
+	./financeService
 )

@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"flag"
+	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/closer"
+	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/logger"
 	"github.com/astronely/financial-helper_microservices/userService/internal/config"
 	"github.com/astronely/financial-helper_microservices/userService/internal/interceptor"
-	"github.com/astronely/financial-helper_microservices/userService/pkg/closer"
-	"github.com/astronely/financial-helper_microservices/userService/pkg/logger"
 	descUser "github.com/astronely/financial-helper_microservices/userService/pkg/user_v1"
 	grpcMiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"google.golang.org/grpc"
@@ -30,8 +30,6 @@ func init() {
 type App struct {
 	serviceProvider *serviceProvider
 	grpcServer      *grpc.Server
-	httpServer      *http.Server
-	swaggerServer   *http.Server
 }
 
 func NewApp(ctx context.Context) (*App, error) {

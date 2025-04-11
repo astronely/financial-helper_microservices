@@ -2,6 +2,8 @@ package app
 
 import (
 	"context"
+	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/closer"
+	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/logger"
 	"github.com/astronely/financial-helper_microservices/authService/internal/api/access"
 	"github.com/astronely/financial-helper_microservices/authService/internal/api/auth"
 	"github.com/astronely/financial-helper_microservices/authService/internal/config"
@@ -13,16 +15,12 @@ import (
 	authService "github.com/astronely/financial-helper_microservices/authService/internal/service/auth"
 	"github.com/astronely/financial-helper_microservices/userService/pkg/client/db"
 	"github.com/astronely/financial-helper_microservices/userService/pkg/client/db/pg"
-	"github.com/astronely/financial-helper_microservices/userService/pkg/closer"
-	"github.com/astronely/financial-helper_microservices/userService/pkg/logger"
 )
 
 type serviceProvider struct {
-	pgConfig      config.PGConfig
-	grpcConfig    config.GRPCConfig
-	httpConfig    config.HTTPConfig
-	swaggerConfig config.SwaggerConfig
-	tokenConfig   config.TokenConfig
+	pgConfig    config.PGConfig
+	grpcConfig  config.GRPCConfig
+	tokenConfig config.TokenConfig
 
 	dbClient db.Client
 
@@ -63,32 +61,6 @@ func (s *serviceProvider) GRPCConfig() config.GRPCConfig {
 	}
 
 	return s.grpcConfig
-}
-
-func (s *serviceProvider) HTTPConfig() config.HTTPConfig {
-	if s.httpConfig == nil {
-		cfg, err := env.NewHTTPConfig()
-		if err != nil {
-			panic("Error loading HTTP config")
-		}
-
-		s.httpConfig = cfg
-	}
-
-	return s.httpConfig
-}
-
-func (s *serviceProvider) SwaggerConfig() config.SwaggerConfig {
-	if s.swaggerConfig == nil {
-		cfg, err := env.NewSwaggerConfig()
-		if err != nil {
-			panic("Error loading Swagger config")
-		}
-
-		s.swaggerConfig = cfg
-	}
-
-	return s.swaggerConfig
 }
 
 func (s *serviceProvider) TokenConfig() config.TokenConfig {

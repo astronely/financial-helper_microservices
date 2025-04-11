@@ -2,9 +2,9 @@ package auth
 
 import (
 	"context"
+	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/logger"
 	"github.com/astronely/financial-helper_microservices/authService/internal/model"
 	"github.com/astronely/financial-helper_microservices/authService/internal/utils"
-	"github.com/astronely/financial-helper_microservices/userService/pkg/logger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"

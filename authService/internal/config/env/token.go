@@ -2,8 +2,8 @@ package env
 
 import (
 	"errors"
+	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/logger"
 	"github.com/astronely/financial-helper_microservices/authService/internal/config"
-	"github.com/astronely/financial-helper_microservices/userService/pkg/logger"
 	"os"
 	"time"
 )

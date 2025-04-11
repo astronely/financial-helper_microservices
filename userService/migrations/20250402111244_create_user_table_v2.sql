@@ -9,6 +9,10 @@ ALTER TABLE users
     ALTER COLUMN created_at TYPE TIMESTAMPTZ,
     ALTER COLUMN updated_at SET DEFAULT NOW();
 
+CREATE INDEX ON "users" ("email");
+
+CREATE INDEX ON "users" ("email", "password");
+
 -- +goose Down
 ALTER TABLE users
     DROP COLUMN password_changed_at,
