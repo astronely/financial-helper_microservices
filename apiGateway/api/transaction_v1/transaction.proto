@@ -68,20 +68,25 @@ message TransactionInfo {
   int64 wallet_id = 2 [(validate.rules).int64.gte = 0];
   int64 board_id = 3 [(validate.rules).int64.gte = 0];
   string sum = 4 [(validate.rules).string = {min_len:1}];
-  int64 details_id = 5 [(validate.rules).int64.gte = 0];
 }
 
 message TransactionDetails {
   int64 transaction_id = 1 [(validate.rules).int64.gte = 0]; // Возможно эта информация не нужна в коде (только в бд)
-  string name = 2 [(validate.rules).string = {min_len:1}];
-  string category = 3 [(validate.rules).string = {min_len:1}];
-  google.protobuf.Timestamp created_at = 4;
+  TransactionDetailsInfo info = 2 [(validate.rules).message.required = true];
+  google.protobuf.Timestamp created_at = 3;
+}
+
+message TransactionDetailsInfo {
+  string name = 1 [(validate.rules).string = {min_len:1}];
+  int64 category = 2 [(validate.rules).int64.gte = 0]; // TODO: Сделать валидацию > чем 0 и < чем максимальный id категории
+  google.protobuf.Timestamp transaction_date = 3;
 }
 
 message Transaction {
   int64 id = 1 [(validate.rules).int64.gte = 0];
   TransactionInfo info = 2 [(validate.rules).message.required = true];
-  google.protobuf.Timestamp created_at = 3;
+  int64 details_id = 3 [(validate.rules).int64.gte = 0];
+  google.protobuf.Timestamp created_at = 4;
 }
 
 message UpdatedTransactionInfo {
@@ -91,6 +96,7 @@ message UpdatedTransactionInfo {
 
 message CreateRequest {
   TransactionInfo info = 1 [(validate.rules).message.required = true];
+  TransactionDetailsInfo detailsInfo = 2 [(validate.rules).message.required = true];
 }
 
 message CreateResponse {

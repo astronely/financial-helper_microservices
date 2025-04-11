@@ -9,8 +9,10 @@ import (
 	"github.com/astronely/financial-helper_microservices/financeService/internal/config"
 	"github.com/astronely/financial-helper_microservices/financeService/internal/config/env"
 	"github.com/astronely/financial-helper_microservices/financeService/internal/repository"
+	transactionRepository "github.com/astronely/financial-helper_microservices/financeService/internal/repository/transaction"
 	walletRepository "github.com/astronely/financial-helper_microservices/financeService/internal/repository/wallet"
 	"github.com/astronely/financial-helper_microservices/financeService/internal/service"
+	transactionService "github.com/astronely/financial-helper_microservices/financeService/internal/service/transaction"
 	walletService "github.com/astronely/financial-helper_microservices/financeService/internal/service/wallet"
 	"github.com/astronely/financial-helper_microservices/userService/pkg/client/db"
 	"github.com/astronely/financial-helper_microservices/userService/pkg/client/db/pg"
@@ -25,9 +27,11 @@ type serviceProvider struct {
 	txManager db.TxManager
 
 	// TODO: Services, Repositories and Implementations
-	walletService service.WalletService
+	walletService      service.WalletService
+	transactionService service.TransactionService
 
-	walletRepository repository.WalletRepository
+	walletRepository      repository.WalletRepository
+	transactionRepository repository.TransactionRepository
 
 	walletImpl      *wallet.Implementation
 	transactionImpl *apiTransaction.Implementation
@@ -94,9 +98,16 @@ func (s *serviceProvider) TxManager(ctx context.Context) db.TxManager {
 
 func (s *serviceProvider) WalletService(ctx context.Context) service.WalletService {
 	if s.walletService == nil {
-		s.walletService = walletService.NewService(s.WalletRepository(ctx), s.TxManager(ctx))
+		s.walletService = walletService.NewService(s.WalletRepository(ctx))
 	}
 	return s.walletService
+}
+
+func (s *serviceProvider) TransactionService(ctx context.Context) service.TransactionService {
+	if s.transactionService == nil {
+		s.transactionService = transactionService.NewService(s.TransactionRepository(ctx), s.TxManager(ctx))
+	}
+	return s.transactionService
 }
 
 func (s *serviceProvider) WalletRepository(ctx context.Context) repository.WalletRepository {
@@ -104,6 +115,13 @@ func (s *serviceProvider) WalletRepository(ctx context.Context) repository.Walle
 		s.walletRepository = walletRepository.NewRepository(s.DBClient(ctx))
 	}
 	return s.walletRepository
+}
+
+func (s *serviceProvider) TransactionRepository(ctx context.Context) repository.TransactionRepository {
+	if s.transactionRepository == nil {
+		s.transactionRepository = transactionRepository.NewRepository(s.DBClient(ctx))
+	}
+	return s.transactionRepository
 }
 
 func (s *serviceProvider) WalletImpl(ctx context.Context) *wallet.Implementation {
@@ -115,7 +133,7 @@ func (s *serviceProvider) WalletImpl(ctx context.Context) *wallet.Implementation
 
 func (s *serviceProvider) TransactionImpl(ctx context.Context) *apiTransaction.Implementation {
 	if s.transactionImpl == nil {
-		s.transactionImpl = apiTransaction.NewImplementation()
+		s.transactionImpl = apiTransaction.NewImplementation(s.TransactionService(ctx))
 	}
 	return s.transactionImpl
 }

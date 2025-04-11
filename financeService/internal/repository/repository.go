@@ -14,4 +14,6 @@ type WalletRepository interface {
 }
 
 type TransactionRepository interface {
+	CreateTransactionDetails(ctx context.Context, transactionDetails *model.TransactionDetailsInfo) (int64, error)
+	CreateTransaction(ctx context.Context, transactionInfo *model.TransactionInfo, transactionDetailsId int64) (int64, error)
 }

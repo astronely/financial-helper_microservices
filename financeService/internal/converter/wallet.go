@@ -42,7 +42,7 @@ func ToWalletInfoFromService(walletInfo model.WalletInfo) *desc.WalletInfo {
 func ToUpdateWalletInfoFromDesc(wallet *desc.UpdateRequest) *model.UpdateWalletInfo {
 	balance, err := decimal.NewFromString(wallet.GetInfo().GetBalance().GetValue())
 	if err != nil {
-		logger.Info("Error converting from balance to decimal",
+		logger.Error("Error converting from balance to decimal",
 			"error", err,
 			"balance", wallet.GetInfo().GetBalance().GetValue(),
 		)
@@ -59,7 +59,7 @@ func ToUpdateWalletInfoFromDesc(wallet *desc.UpdateRequest) *model.UpdateWalletI
 func ToWalletInfoFromDesc(walletInfo *desc.WalletInfo) *model.WalletInfo {
 	balance, err := decimal.NewFromString(walletInfo.GetBalance())
 	if err != nil {
-		logger.Info("Error converting from balance to decimal",
+		logger.Error("Error converting from balance to decimal",
 			"error", err,
 			"balance", walletInfo.GetBalance(),
 		)

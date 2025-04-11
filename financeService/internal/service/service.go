@@ -13,4 +13,6 @@ type WalletService interface {
 	Delete(ctx context.Context, id int64) error
 }
 
-type TransactionService interface{}
+type TransactionService interface {
+	Create(ctx context.Context, transactionInfo *model.TransactionInfo, transactionDetailsInfo *model.TransactionDetailsInfo) (int64, error)
+}
