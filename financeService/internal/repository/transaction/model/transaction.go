@@ -12,7 +12,7 @@ type Transaction struct {
 	CreatedAt time.Time       `db:"created_at"`
 	UpdatedAt sql.NullTime    `db:"updated_at"`
 
-	TransactionDetails *TransactionDetails `db:"-"`
+	TransactionDetails TransactionDetails `db:""`
 }
 
 type TransactionInfo struct {
@@ -25,15 +25,15 @@ type TransactionInfo struct {
 
 type TransactionDetails struct {
 	ID              int64     `db:"id"`
-	Name            string    `db:"name"`
+	Name            string    `db:"detail_name"`
 	Category        int64     `db:"category"`
 	TransactionDate time.Time `db:"transaction_date"`
 
-	TransactionCategory *TransactionCategory `db:"-"`
+	TransactionCategory TransactionCategory `db:""`
 }
 
 type TransactionCategory struct {
 	ID          int64  `db:"id"`
-	Name        string `db:"name"`
+	Name        string `db:"category_name"`
 	Description string `db:"description"`
 }

@@ -71,9 +71,8 @@ message TransactionInfo {
 }
 
 message TransactionDetails {
-  int64 transaction_id = 1 [(validate.rules).int64.gte = 0]; // Возможно эта информация не нужна в коде (только в бд)
+  int64 id = 1 [(validate.rules).int64.gte = 0]; // Возможно эта информация не нужна в коде (только в бд)
   TransactionDetailsInfo info = 2 [(validate.rules).message.required = true];
-  google.protobuf.Timestamp created_at = 3;
 }
 
 message TransactionDetailsInfo {
@@ -82,11 +81,17 @@ message TransactionDetailsInfo {
   google.protobuf.Timestamp transaction_date = 3;
 }
 
+message TransactionCategory {
+  string name = 1;
+  string description = 2;
+}
+
 message Transaction {
   int64 id = 1 [(validate.rules).int64.gte = 0];
   TransactionInfo info = 2 [(validate.rules).message.required = true];
   int64 details_id = 3 [(validate.rules).int64.gte = 0];
-  google.protobuf.Timestamp created_at = 4;
+  google.protobuf.Timestamp updated_at = 4;
+  google.protobuf.Timestamp created_at = 5;
 }
 
 message UpdatedTransactionInfo {
@@ -109,6 +114,8 @@ message GetRequest {
 
 message GetResponse {
   Transaction transaction = 1;
+  TransactionDetails details = 2;
+  TransactionCategory category = 3;
 }
 
 message ListRequest {
@@ -117,7 +124,7 @@ message ListRequest {
 }
 
 message ListResponse {
-  repeated Transaction transactions = 1;
+  repeated GetResponse transactions = 1;
 }
 
 message UpdateRequest {

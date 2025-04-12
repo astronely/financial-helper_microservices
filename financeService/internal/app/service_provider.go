@@ -105,7 +105,11 @@ func (s *serviceProvider) WalletService(ctx context.Context) service.WalletServi
 
 func (s *serviceProvider) TransactionService(ctx context.Context) service.TransactionService {
 	if s.transactionService == nil {
-		s.transactionService = transactionService.NewService(s.TransactionRepository(ctx), s.TxManager(ctx))
+		s.transactionService = transactionService.NewService(
+			s.TransactionRepository(ctx),
+			s.WalletRepository(ctx),
+			s.TxManager(ctx),
+		)
 	}
 	return s.transactionService
 }

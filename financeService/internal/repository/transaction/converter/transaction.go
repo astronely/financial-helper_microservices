@@ -24,7 +24,7 @@ func ToTransactionInfoFromRepo(transactionInfo modelRepo.TransactionInfo) model.
 	}
 }
 
-func ToTransactionDetailsFromRepo(transactionDetails *modelRepo.TransactionDetails) model.TransactionDetails {
+func ToTransactionDetailsFromRepo(transactionDetails modelRepo.TransactionDetails) model.TransactionDetails {
 	return model.TransactionDetails{
 		ID:                  transactionDetails.ID,
 		Info:                ToTransactionDetailsInfoFromRepo(transactionDetails),
@@ -32,17 +32,25 @@ func ToTransactionDetailsFromRepo(transactionDetails *modelRepo.TransactionDetai
 	}
 }
 
-func ToTransactionDetailsInfoFromRepo(transactionDetails *modelRepo.TransactionDetails) model.TransactionDetailsInfo {
+func ToTransactionDetailsInfoFromRepo(transactionDetails modelRepo.TransactionDetails) model.TransactionDetailsInfo {
 	return model.TransactionDetailsInfo{
 		Name:            transactionDetails.Name,
 		TransactionDate: transactionDetails.TransactionDate,
 	}
 }
 
-func ToTransactionCategoryFromRepo(transactionCategory *modelRepo.TransactionCategory) model.TransactionCategory {
+func ToTransactionCategoryFromRepo(transactionCategory modelRepo.TransactionCategory) model.TransactionCategory {
 	return model.TransactionCategory{
 		ID:          transactionCategory.ID,
 		Name:        transactionCategory.Name,
 		Description: transactionCategory.Description,
 	}
+}
+
+func ToTransactionListFromRepo(transactions []*modelRepo.Transaction) []*model.Transaction {
+	var transactionList []*model.Transaction
+	for _, transaction := range transactions {
+		transactionList = append(transactionList, ToTransactionFromRepo(transaction))
+	}
+	return transactionList
 }

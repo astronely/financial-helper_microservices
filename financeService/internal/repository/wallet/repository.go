@@ -2,6 +2,7 @@ package wallet
 
 import (
 	"context"
+	"errors"
 	sq "github.com/Masterminds/squirrel"
 	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/logger"
 	"github.com/astronely/financial-helper_microservices/financeService/internal/model"
@@ -153,6 +154,64 @@ func (r *repo) Update(ctx context.Context, walletInfo *model.UpdateWalletInfo) (
 	return id, nil
 }
 
+func (r *repo) UpdateBalance(ctx context.Context, id int64, value decimal.Decimal) error {
+	//logger.Debug("Debug balance",
+	//	"id", id,
+	//	"Value to add", value,
+	//)
+	builder := sq.Select(balanceColumn).
+		From(tableName).
+		PlaceholderFormat(sq.Dollar).
+		Where(sq.Eq{idColumn: id}).
+		Limit(1)
+
+	query, args, err := builder.ToSql()
+	if err != nil {
+		return err
+	}
+
+	q := db.Query{
+		Name:     "finance_repository.Wallet.UpdateBalance.GetBalance",
+		QueryRaw: query,
+	}
+	var balance decimal.Decimal
+
+	err = r.db.DB().ScanOneContext(ctx, &balance, q, args...)
+	if err != nil {
+		return err
+	}
+
+	balance = balance.Add(value)
+
+	if balance.IsNegative() {
+		return errors.New("negative balance")
+	}
+
+	builder2 := sq.Update(tableName).
+		PlaceholderFormat(sq.Dollar).
+		Set(balanceColumn, balance).
+		Set(updatedAtColumn, time.Now()).
+		Where(sq.Eq{idColumn: id})
+
+	query, args, err = builder2.ToSql()
+	if err != nil {
+		return err
+	}
+
+	q = db.Query{
+		Name:     "finance_repository.Wallet.UpdateBalance",
+		QueryRaw: query,
+	}
+
+	//logger.Debug("Debug balance",
+	//	"query", q,
+	//	"balance", balance,
+	//)
+
+	_, err = r.db.DB().ExecContext(ctx, q, args...)
+	return err
+}
+
 func (r *repo) Delete(ctx context.Context, id int64) error {
 	builder := sq.Delete(tableName).
 		PlaceholderFormat(sq.Dollar).
@@ -168,6 +227,10 @@ func (r *repo) Delete(ctx context.Context, id int64) error {
 		QueryRaw: query,
 	}
 
-	_, err = r.db.DB().ExecContext(ctx, q, args...)
+	res, err := r.db.DB().ExecContext(ctx, q, args...)
+	if res.RowsAffected() == 0 {
+		return errors.New("wallet with this id doesnt exist")
+	}
+
 	return err
 }

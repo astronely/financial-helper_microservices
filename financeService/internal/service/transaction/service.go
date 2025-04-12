@@ -10,12 +10,15 @@ var _ def.TransactionService = (*serv)(nil)
 
 type serv struct {
 	transactionRepository repository.TransactionRepository
+	walletRepository      repository.WalletRepository
 	txManager             db.TxManager
 }
 
-func NewService(transactionRepository repository.TransactionRepository, txManager db.TxManager) def.TransactionService {
+func NewService(transactionRepository repository.TransactionRepository,
+	walletRepository repository.WalletRepository, txManager db.TxManager) def.TransactionService {
 	return &serv{
 		transactionRepository: transactionRepository,
+		walletRepository:      walletRepository,
 		txManager:             txManager,
 	}
 }

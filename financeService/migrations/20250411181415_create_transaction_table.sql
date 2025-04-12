@@ -56,8 +56,7 @@ ALTER TABLE "transactions"
     ON DELETE CASCADE;
 
 ALTER TABLE "transaction_details"
-    ADD FOREIGN KEY ("category") REFERENCES "transaction_categories" ("id")
-    ON DELETE CASCADE;
+    ADD FOREIGN KEY ("category") REFERENCES "transaction_categories" ("id");
 -- +goose StatementEnd
 
 -- +goose Down
