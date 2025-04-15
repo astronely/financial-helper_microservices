@@ -6,8 +6,8 @@ import (
 	"github.com/astronely/financial-helper_microservices/financeService/internal/model"
 )
 
-func (s *serv) List(ctx context.Context, limit, offset uint64) ([]*model.Transaction, error) {
-	transactions, err := s.transactionRepository.List(ctx, limit, offset)
+func (s *serv) List(ctx context.Context, limit, offset uint64, filters map[string]interface{}) ([]*model.Transaction, error) {
+	transactions, err := s.transactionRepository.List(ctx, limit, offset, filters)
 	if err != nil {
 		logger.Error("Error List transactions",
 			"Error", err.Error())

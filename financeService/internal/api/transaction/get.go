@@ -7,7 +7,7 @@ import (
 )
 
 func (i *Implementation) Get(ctx context.Context, req *desc.GetRequest) (*desc.GetResponse, error) {
-	transaction, err := i.service.Get(ctx, req.GetId())
+	transaction, err := i.service.Get(ctx, req.GetId(), converter.Filters(req.GetFilterInfo()))
 	if err != nil {
 		return nil, err
 	}

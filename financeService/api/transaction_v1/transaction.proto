@@ -86,6 +86,13 @@ message TransactionCategory {
   string description = 2;
 }
 
+message FilterInfo {
+  google.protobuf.Int64Value category = 1 [(validate.rules).int64.gte=0];
+  google.protobuf.Timestamp transaction_date = 2;
+  google.protobuf.Int64Value owner_id = 3 [(validate.rules).int64.gte=0];
+  google.protobuf.Int64Value wallet_id = 4 [(validate.rules).int64.gte=0];
+}
+
 message Transaction {
   int64 id = 1 [(validate.rules).int64.gte = 0];
   TransactionInfo info = 2 [(validate.rules).message.required = true];
@@ -94,9 +101,11 @@ message Transaction {
   google.protobuf.Timestamp created_at = 5;
 }
 
-message UpdatedTransactionInfo {
+message UpdateTransactionInfo {
   google.protobuf.Int64Value wallet_id = 1 [(validate.rules).int64.gte = 0];
   google.protobuf.StringValue sum = 2 [(validate.rules).string = {min_len:1}];
+  google.protobuf.StringValue name = 3 [(validate.rules).string = {min_len:1}];
+  google.protobuf.Int64Value category = 4 [(validate.rules).int64.gte = 0];
 }
 
 message CreateRequest {
@@ -110,6 +119,7 @@ message CreateResponse {
 
 message GetRequest {
   int64 id = 1 [(validate.rules).int64.gte = 0];
+  FilterInfo filterInfo = 2;
 }
 
 message GetResponse {
@@ -121,6 +131,7 @@ message GetResponse {
 message ListRequest {
   int64 limit = 1 [(validate.rules).int64.gte = 0];
   int64 offset = 2 [(validate.rules).int64.gte = 0];
+  FilterInfo filterInfo = 3;
 }
 
 message ListResponse {
@@ -129,7 +140,7 @@ message ListResponse {
 
 message UpdateRequest {
   int64 id = 1 [(validate.rules).int64.gte = 0];
-  UpdatedTransactionInfo info = 2 [(validate.rules).message.required = true];
+  UpdateTransactionInfo info = 2 [(validate.rules).message.required = true];
 }
 
 message UpdateResponse {

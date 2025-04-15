@@ -8,6 +8,14 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+const (
+	categoryColumn        = "category"
+	transactionDateColumn = "transaction_date"
+
+	ownerIdColumn  = "owner_id"
+	walletIdColumn = "wallet_id"
+)
+
 func ToTransactionInfoFromDesc(req *desc.TransactionInfo) *model.TransactionInfo {
 	sum, err := decimal.NewFromString(req.GetSum())
 	if err != nil {
@@ -43,7 +51,7 @@ func ToTransactionFromService(transaction *model.Transaction) *desc.Transaction 
 	return &desc.Transaction{
 		Id:        transaction.ID,
 		Info:      ToTransactionInfoFromService(transaction.Info),
-		DetailsId: transaction.DetailsID,
+		DetailsId: transaction.DetailsId,
 		UpdatedAt: updatedAt,
 		CreatedAt: timestamppb.New(transaction.CreatedAt),
 	}
@@ -86,4 +94,46 @@ func ToTransactionListFromService(transactions []*model.Transaction) []*desc.Tra
 		transactionList = append(transactionList, ToTransactionFromService(transaction))
 	}
 	return transactionList
+}
+
+func ToTransactionInfoUpdateFromDesc(req *desc.UpdateRequest) *model.TransactionInfoUpdate {
+	sum, err := decimal.NewFromString(req.GetInfo().GetSum().GetValue())
+	if err != nil {
+		logger.Error("Error converting from balance to decimal",
+			"error", err,
+			"balance", req.GetInfo().GetSum().GetValue(),
+		)
+		sum = decimal.NewFromInt(-1) // TODO: Возможно нужно как-то по другому обрабатывать данный случай
+	}
+	return &model.TransactionInfoUpdate{
+		ID:       req.GetId(),
+		WalletID: req.GetInfo().GetWalletId().GetValue(),
+		Sum:      sum,
+	}
+}
+
+func ToTransactionDetailsUpdateFromDesc(req *desc.UpdateRequest) *model.TransactionDetailsUpdate {
+	return &model.TransactionDetailsUpdate{
+		ID:       req.GetId(),
+		Name:     req.GetInfo().GetName().GetValue(),
+		Category: req.GetInfo().GetCategory().GetValue(),
+	}
+}
+
+func Filters(req *desc.FilterInfo) map[string]interface{} {
+	filters := map[string]interface{}{}
+	if req.GetCategory().GetValue() != 0 {
+		filters[categoryColumn] = req.GetCategory().GetValue()
+	}
+	if req.GetTransactionDate().IsValid() {
+		filters[transactionDateColumn] = req.GetTransactionDate().AsTime()
+	}
+	if req.GetOwnerId().GetValue() != 0 {
+		filters[ownerIdColumn] = req.GetOwnerId().GetValue()
+	}
+	if req.GetWalletId().GetValue() != 0 {
+		filters[walletIdColumn] = req.GetWalletId().GetValue()
+	}
+
+	return filters
 }

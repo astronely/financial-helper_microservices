@@ -9,7 +9,7 @@ import (
 type Transaction struct {
 	ID        int64
 	Info      TransactionInfo
-	DetailsID int64
+	DetailsId int64
 	CreatedAt time.Time
 	UpdatedAt sql.NullTime
 
@@ -40,4 +40,16 @@ type TransactionCategory struct {
 	ID          int64
 	Name        string
 	Description string
+}
+
+type TransactionInfoUpdate struct {
+	ID       int64
+	WalletID int64
+	Sum      decimal.Decimal
+}
+
+type TransactionDetailsUpdate struct {
+	ID       int64
+	Name     string
+	Category int64
 }

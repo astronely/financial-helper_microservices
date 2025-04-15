@@ -39,7 +39,7 @@ func ToWalletInfoFromService(walletInfo model.WalletInfo) *desc.WalletInfo {
 	}
 }
 
-func ToUpdateWalletInfoFromDesc(wallet *desc.UpdateRequest) *model.UpdateWalletInfo {
+func ToUpdateWalletInfoFromDesc(wallet *desc.UpdateRequest) *model.WalletUpdateInfo {
 	balance, err := decimal.NewFromString(wallet.GetInfo().GetBalance().GetValue())
 	if err != nil {
 		logger.Error("Error converting from balance to decimal",
@@ -49,7 +49,7 @@ func ToUpdateWalletInfoFromDesc(wallet *desc.UpdateRequest) *model.UpdateWalletI
 		balance = decimal.NewFromInt(-1) // TODO: Возможно нужно как-то по другому обрабатывать данный случай
 	}
 
-	return &model.UpdateWalletInfo{
+	return &model.WalletUpdateInfo{
 		ID:      wallet.GetId(),
 		Name:    wallet.GetInfo().GetName().GetValue(),
 		Balance: balance,

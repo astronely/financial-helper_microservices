@@ -9,6 +9,7 @@ func ToTransactionFromRepo(transaction *modelRepo.Transaction) *model.Transactio
 	return &model.Transaction{
 		ID:                 transaction.ID,
 		Info:               ToTransactionInfoFromRepo(transaction.Info),
+		DetailsId:          transaction.DetailsID,
 		CreatedAt:          transaction.CreatedAt,
 		UpdatedAt:          transaction.UpdatedAt,
 		TransactionDetails: ToTransactionDetailsFromRepo(transaction.TransactionDetails),
@@ -35,6 +36,7 @@ func ToTransactionDetailsFromRepo(transactionDetails modelRepo.TransactionDetail
 func ToTransactionDetailsInfoFromRepo(transactionDetails modelRepo.TransactionDetails) model.TransactionDetailsInfo {
 	return model.TransactionDetailsInfo{
 		Name:            transactionDetails.Name,
+		Category:        transactionDetails.Category,
 		TransactionDate: transactionDetails.TransactionDate,
 	}
 }

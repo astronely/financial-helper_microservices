@@ -18,6 +18,7 @@ generate:
 	make generate-auth-api
 	make generate-access-api
 	make generate-wallet-api
+	make generate-transaction-api
 	# TODO: other APIs
 	make generate-openapi
 	mkdir -p pkg/swagger
@@ -56,6 +57,14 @@ generate-wallet-api:
  	--go-grpc_out=pkg/wallet_v1 --go-grpc_opt=paths=source_relative \
  	--grpc-gateway_out=pkg/wallet_v1 --grpc-gateway_opt=paths=source_relative \
  	api/wallet_v1/wallet.proto
+
+generate-transaction-api:
+	mkdir -p pkg/transaction_v1
+	protoc --proto_path api/transaction_v1 --proto_path vendor.protogen \
+	--go_out=pkg/transaction_v1 --go_opt=paths=source_relative \
+ 	--go-grpc_out=pkg/transaction_v1 --go-grpc_opt=paths=source_relative \
+ 	--grpc-gateway_out=pkg/transaction_v1 --grpc-gateway_opt=paths=source_relative \
+ 	api/transaction_v1/transaction.proto
 
 generate-openapi:
 	mkdir -p pkg/swagger

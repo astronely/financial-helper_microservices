@@ -9,9 +9,11 @@ import (
 	descAuth "github.com/astronely/financial-helper_microservices/apiGateway/pkg/auth_v1"
 	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/closer"
 	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/logger"
+	descTransaction "github.com/astronely/financial-helper_microservices/apiGateway/pkg/transaction_v1"
 	descUser "github.com/astronely/financial-helper_microservices/apiGateway/pkg/user_v1"
 	descWallet "github.com/astronely/financial-helper_microservices/apiGateway/pkg/wallet_v1"
 	_ "github.com/astronely/financial-helper_microservices/apiGateway/statik"
+
 	//descWallet "github.com/astronely/financial-helper_microservices/financeService/pkg/transaction_v1"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/rakyll/statik/fs"
@@ -122,9 +124,16 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 	}
 	err = descAccess.RegisterAccessV1HandlerFromEndpoint(ctx, mux, a.serviceProvider.GrpcConfig().AuthAddress(), opts)
 	if err != nil {
-		return nil
+		return err
 	}
 	err = descWallet.RegisterWalletV1HandlerFromEndpoint(ctx, mux, a.serviceProvider.GrpcConfig().FinanceAddress(), opts)
+	if err != nil {
+		return err
+	}
+	err = descTransaction.RegisterTransactionV1HandlerFromEndpoint(ctx, mux, a.serviceProvider.GrpcConfig().FinanceAddress(), opts)
+	if err != nil {
+		return err
+	}
 
 	corsMiddleware := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:9090"}, // TODO: Дописать IP клиента

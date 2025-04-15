@@ -111,7 +111,7 @@ func (r *repo) List(ctx context.Context, limit, offset uint64) ([]*model.Wallet,
 	return converter.ToWalletsFromRepo(wallets), nil
 }
 
-func (r *repo) Update(ctx context.Context, walletInfo *model.UpdateWalletInfo) (int64, error) {
+func (r *repo) Update(ctx context.Context, walletInfo *model.WalletUpdateInfo) (int64, error) {
 	updateMap := map[string]interface{}{}
 
 	if walletInfo.Name != "" {
@@ -139,6 +139,10 @@ func (r *repo) Update(ctx context.Context, walletInfo *model.UpdateWalletInfo) (
 	if err != nil {
 		return 0, err
 	}
+
+	logger.Debug("Wallet args",
+		"args", args,
+	)
 
 	q := db.Query{
 		Name:     "finance_repository.Wallet.Update",

@@ -20,7 +20,7 @@ type WalletInfo struct {
 	Balance decimal.Decimal
 }
 
-type UpdateWalletInfo struct {
+type WalletUpdateInfo struct {
 	ID      int64
 	Name    string
 	Balance decimal.Decimal

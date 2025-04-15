@@ -100,6 +100,7 @@ func (a *App) initGRPCServer(ctx context.Context) error {
 		grpc.UnaryInterceptor(
 			grpcMiddleware.ChainUnaryServer(
 				interceptor.LogInterceptor,
+				interceptor.ValidateInterceptor,
 			),
 		),
 	)

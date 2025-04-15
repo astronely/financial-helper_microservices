@@ -2,6 +2,7 @@ package transaction
 
 import (
 	"context"
+	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/logger"
 	"github.com/astronely/financial-helper_microservices/userService/pkg/client/db"
 	"github.com/astronely/financial-helper_microservices/userService/pkg/client/db/pg"
 	"github.com/jackc/pgx/v4"
@@ -23,6 +24,7 @@ func (m *manager) transaction(ctx context.Context, opts pgx.TxOptions, fn db.Han
 	// Если это вложенная транзакция, то пропускаем инициацию новой и просто выполним обработчик
 	tx, ok := ctx.Value(pg.TxKey).(pgx.Tx)
 	if ok {
+		logger.Debug("Вложенная транзакция")
 		return fn(ctx)
 	}
 

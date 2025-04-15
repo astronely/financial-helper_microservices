@@ -25,7 +25,7 @@ func (s *serv) Create(ctx context.Context, transactionInfo *model.TransactionInf
 			return errTx
 		}
 
-		errTx = s.walletRepository.UpdateBalance(ctx, transactionInfo.WalletID, transactionInfo.Sum.Neg())
+		errTx = s.walletRepository.UpdateBalance(ctx, transactionInfo.WalletID, transactionInfo.Sum)
 		if errTx != nil {
 			logger.Error("Failed to update balance",
 				"error", errTx.Error(),

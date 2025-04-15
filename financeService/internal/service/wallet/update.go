@@ -6,7 +6,7 @@ import (
 	"github.com/astronely/financial-helper_microservices/financeService/internal/model"
 )
 
-func (s *serv) Update(ctx context.Context, walletInfo *model.UpdateWalletInfo) (int64, error) {
+func (s *serv) Update(ctx context.Context, walletInfo *model.WalletUpdateInfo) (int64, error) {
 	id, err := s.walletRepository.Update(ctx, walletInfo)
 	if err != nil {
 		logger.Error("Failed to update wallet",
