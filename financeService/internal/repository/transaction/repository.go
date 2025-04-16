@@ -389,3 +389,33 @@ func (r *repo) UpdateDetails(ctx context.Context, updateInfo *model.TransactionD
 	}
 	return id, nil
 }
+
+func (r *repo) Categories(ctx context.Context) ([]*model.TransactionCategory, error) {
+	builder := sq.Select(idColumn, categoryNameColumn, descriptionColumn).
+		PlaceholderFormat(sq.Dollar).
+		From(transactionCategoriesTable)
+
+	query, args, err := builder.ToSql()
+	if err != nil {
+		logger.Error("SQL Error message from categories",
+			"Error", err.Error(),
+		)
+		return nil, err
+	}
+
+	q := db.Query{
+		Name:     "finance_repository.Transaction.Categories",
+		QueryRaw: query,
+	}
+
+	var categories []*model.TransactionCategory
+	err = r.db.DB().ScanAllContext(ctx, &categories, q, args...)
+	if err != nil {
+		logger.Error("SQL Error message from categories",
+			"Error", err.Error(),
+		)
+		return nil, err
+	}
+
+	return categories, nil
+}

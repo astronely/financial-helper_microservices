@@ -20,4 +20,5 @@ type TransactionService interface {
 	Update(ctx context.Context,
 		updateInfo *model.TransactionInfoUpdate,
 		updateDetails *model.TransactionDetailsUpdate) (int64, error)
+	Categories(ctx context.Context) ([]*model.TransactionCategory, error)
 }

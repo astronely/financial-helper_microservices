@@ -22,4 +22,5 @@ type TransactionRepository interface {
 	List(ctx context.Context, limit, offset uint64, filters map[string]interface{}) ([]*model.Transaction, error)
 	UpdateInfo(ctx context.Context, updateInfo *model.TransactionInfoUpdate) (int64, decimal.Decimal, error)
 	UpdateDetails(ctx context.Context, updateInfo *model.TransactionDetailsUpdate) (int64, error)
+	Categories(ctx context.Context) ([]*model.TransactionCategory, error)
 }

@@ -59,6 +59,12 @@ service TransactionV1 {
       body: "*"
     };
   };
+
+  rpc Categories(google.protobuf.Empty) returns (CategoriesResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/transaction/categories"
+    };
+  };
 }
 
 // -------------------------------------------------------------------------
@@ -82,8 +88,9 @@ message TransactionDetailsInfo {
 }
 
 message TransactionCategory {
-  string name = 1;
-  string description = 2;
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
 }
 
 message FilterInfo {
@@ -149,4 +156,8 @@ message UpdateResponse {
 
 message DeleteRequest {
   int64 id = 1 [(validate.rules).int64.gte = 0];
+}
+
+message CategoriesResponse {
+  repeated TransactionCategory categories = 1;
 }

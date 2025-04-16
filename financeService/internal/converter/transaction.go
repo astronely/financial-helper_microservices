@@ -83,6 +83,7 @@ func ToTransactionDetailsInfoFromService(info model.TransactionDetailsInfo) *des
 
 func ToTransactionCategoryFromService(info model.TransactionCategory) *desc.TransactionCategory {
 	return &desc.TransactionCategory{
+		Id:          info.ID,
 		Name:        info.Name,
 		Description: info.Description,
 	}
@@ -136,4 +137,12 @@ func Filters(req *desc.FilterInfo) map[string]interface{} {
 	}
 
 	return filters
+}
+
+func ToCategoriesFromService(categories []*model.TransactionCategory) []*desc.TransactionCategory {
+	var descCategories []*desc.TransactionCategory
+	for _, category := range categories {
+		descCategories = append(descCategories, ToTransactionCategoryFromService(*category))
+	}
+	return descCategories
 }
