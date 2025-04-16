@@ -33,7 +33,7 @@ type TransactionDetails struct {
 }
 
 type TransactionCategory struct {
-	ID          int64  `db:"id"`
+	ID          int64  `db:"category_id"`
 	Name        string `db:"category_name"`
 	Description string `db:"description"`
 }

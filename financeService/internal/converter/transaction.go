@@ -89,10 +89,14 @@ func ToTransactionCategoryFromService(info model.TransactionCategory) *desc.Tran
 	}
 }
 
-func ToTransactionListFromService(transactions []*model.Transaction) []*desc.Transaction {
-	var transactionList []*desc.Transaction
+func ToTransactionListFromService(transactions []*model.Transaction) []*desc.GetResponse {
+	var transactionList []*desc.GetResponse
 	for _, transaction := range transactions {
-		transactionList = append(transactionList, ToTransactionFromService(transaction))
+		transactionList = append(transactionList, &desc.GetResponse{
+			Transaction: ToTransactionFromService(transaction),
+			Details:     ToTransactionDetailsFromService(transaction.TransactionDetails),
+			Category:    ToTransactionCategoryFromService(transaction.TransactionDetails.TransactionCategory),
+		})
 	}
 	return transactionList
 }

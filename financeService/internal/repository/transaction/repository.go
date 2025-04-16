@@ -67,6 +67,7 @@ const (
 	transactionDateColumnWithAlias = transactionDetailsPrefix + transactionDateColumn
 
 	// Основные колонки для таблицы "transaction_categories"
+	categoryIdColumnWithAlias   = transactionCategoriesPrefix + idColumn + " AS category_id"
 	categoryNameColumnWithAlias = transactionCategoriesPrefix + categoryNameColumn + " AS category_name"
 	descriptionColumnWithAlias  = transactionCategoriesPrefix + descriptionColumn
 )
@@ -136,7 +137,7 @@ func (r *repo) Get(ctx context.Context, id int64, filters map[string]interface{}
 		idColumnWithAlias, ownerIdColumnWithAlias, walletIdColumnWithAlias, boardIdColumnWithAlias,
 		sumColumnWithAlias, detailsIdColumnWithAlias, updatedAtColumnWithAlias, createdAtColumnWithAlias,
 		transactionDetailsIdWithAlias, detailsNameColumnWithAlias, categoryColumnWithAlias, transactionDateColumnWithAlias,
-		categoryNameColumnWithAlias, descriptionColumnWithAlias,
+		categoryIdColumnWithAlias, categoryNameColumnWithAlias, descriptionColumnWithAlias,
 	).
 		PlaceholderFormat(sq.Dollar).
 		From(transactionTableNameWithAlias).
@@ -192,8 +193,8 @@ func (r *repo) List(ctx context.Context, limit, offset uint64, filters map[strin
 	builder := sq.Select(
 		idColumnWithAlias, ownerIdColumnWithAlias, walletIdColumnWithAlias, boardIdColumnWithAlias,
 		sumColumnWithAlias, detailsIdColumnWithAlias, createdAtColumnWithAlias, updatedAtColumnWithAlias,
-		detailsNameColumnWithAlias, categoryColumnWithAlias, transactionDateColumnWithAlias,
-		categoryNameColumnWithAlias, descriptionColumnWithAlias,
+		transactionDetailsIdWithAlias, detailsNameColumnWithAlias, categoryColumnWithAlias, transactionDateColumnWithAlias,
+		categoryIdColumnWithAlias, categoryNameColumnWithAlias, descriptionColumnWithAlias,
 	).
 		PlaceholderFormat(sq.Dollar).
 		From(transactionTableNameWithAlias).
@@ -241,7 +242,9 @@ func (r *repo) List(ctx context.Context, limit, offset uint64, filters map[strin
 			"Error", err.Error())
 		return nil, err
 	}
-
+	logger.Debug("List transactions",
+		"transactions", transactions,
+	)
 	return converter.ToTransactionListFromRepo(transactions), nil
 }
 

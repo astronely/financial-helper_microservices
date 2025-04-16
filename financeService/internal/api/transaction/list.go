@@ -13,15 +13,8 @@ func (i *Implementation) List(ctx context.Context, req *desc.ListRequest) (*desc
 	if err != nil {
 		return nil, err
 	}
-	var convertedTransactions []*desc.GetResponse
-	for _, transaction := range transactions {
-		convertedTransactions = append(convertedTransactions, &desc.GetResponse{
-			Transaction: converter.ToTransactionFromService(transaction),
-			Details:     converter.ToTransactionDetailsFromService(transaction.TransactionDetails),
-			Category:    converter.ToTransactionCategoryFromService(transaction.TransactionDetails.TransactionCategory),
-		})
-	}
+
 	return &desc.ListResponse{
-		Transactions: convertedTransactions,
+		Transactions: converter.ToTransactionListFromService(transactions),
 	}, nil
 }
