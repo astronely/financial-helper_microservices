@@ -2,6 +2,7 @@ package transaction
 
 import (
 	"context"
+	"errors"
 	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/logger"
 	"github.com/astronely/financial-helper_microservices/financeService/internal/model"
 	"github.com/shopspring/decimal"
@@ -10,38 +11,113 @@ import (
 func (s *serv) Update(ctx context.Context,
 	updateInfo *model.TransactionInfoUpdate,
 	updateDetails *model.TransactionDetailsUpdate) (int64, error) {
-	var id int64
 	err := s.txManager.ReadCommitted(ctx, func(ctx context.Context) error {
-		var walletId int64
-		var diff decimal.Decimal
+		if updateInfo.ToWalletID != 0 && updateInfo.Type != "transfer" {
+			return errors.New("to wallet id must be with type transfer")
+		}
+		if updateInfo.Type == "transfer" && updateInfo.ToWalletID == 0 {
+			return errors.New("type transfer must be with wallet id")
+		}
+
+		var oldTxInfo *model.TransactionInfo
 		var errTx error
 
-		if updateInfo.WalletID != 0 || !updateInfo.Sum.Equal(decimal.NewFromInt(-1)) {
-			walletId, diff, errTx = s.transactionRepository.UpdateInfo(ctx, updateInfo)
+		// Update info if new info exists
+		if updateInfo.FromWalletID != 0 || !updateInfo.Amount.Equal(decimal.NewFromInt(-1)) ||
+			updateInfo.ToWalletID != 0 || updateInfo.Type != "" {
+
+			oldTxInfo, errTx = s.transactionRepository.UpdateInfo(ctx, updateInfo)
 			if errTx != nil {
 				logger.Error("error updating transaction info",
-					"Error", errTx,
+					"Error", errTx.Error(),
 				)
 				return errTx
 			}
 
-			if !updateInfo.Sum.Equal(decimal.NewFromInt(-1)) {
-				errTx = s.walletRepository.UpdateBalance(ctx, walletId, diff)
+			// Merge New and Old info
+			var amount = oldTxInfo.Amount
+			var txType = oldTxInfo.Type
+			var fromWalletId = oldTxInfo.FromWalletID
+			var toWalletId = oldTxInfo.ToWalletID.Int64
+
+			if !updateInfo.Amount.Equal(decimal.NewFromInt(-1)) {
+				amount = updateInfo.Amount
+			}
+			if updateInfo.Type != "" {
+				txType = updateInfo.Type
+			}
+			if updateInfo.FromWalletID != 0 {
+				fromWalletId = updateInfo.FromWalletID
+			}
+			if updateInfo.ToWalletID != 0 {
+				toWalletId = updateInfo.ToWalletID
+			}
+
+			// If new info exists, do rollback and add operations
+			if !updateInfo.Amount.Equal(decimal.NewFromInt(-1)) || updateInfo.FromWalletID != 0 ||
+				updateInfo.ToWalletID != 0 || updateInfo.Type != "" {
+
+				// Rollback FromWalletId (old info)
+				amountToAdd := oldTxInfo.Amount.Neg()
+				if oldTxInfo.Type == "transfer" {
+					amountToAdd = amountToAdd.Neg()
+				}
+
+				errTx = s.walletRepository.UpdateBalance(ctx, oldTxInfo.FromWalletID, amountToAdd, oldTxInfo.Type)
 				if errTx != nil {
-					logger.Error("error updating wallet balance after changing transaction info",
-						"Error", errTx,
+					logger.Error("error updating transaction balance, rollback from wallet id balance",
+						"Error", errTx.Error(),
 					)
 					return errTx
+				}
+
+				// Add amount to FromWalletID (new info)
+				amountToAdd = amount
+				if updateInfo.Type == "transfer" {
+					amountToAdd = amountToAdd.Neg()
+				}
+
+				errTx = s.walletRepository.UpdateBalance(ctx, fromWalletId, amountToAdd, txType)
+				if errTx != nil {
+					logger.Error("error updating wallet balance, FromWalletId",
+						"Error", errTx.Error(),
+					)
+					return errTx
+				}
+
+				// Rollback ToWalletId
+				if oldTxInfo.ToWalletID.Valid {
+					// If ToWalletID exists, then type = transfer
+					errTx = s.walletRepository.UpdateBalance(ctx, oldTxInfo.ToWalletID.Int64, oldTxInfo.Amount.Neg(), oldTxInfo.Type)
+					if errTx != nil {
+						logger.Error("error updating wallet balance, rollback to wallet id balance",
+							"Error", errTx.Error(),
+						)
+						return errTx
+					}
+				}
+
+				// Add amount to ToWalletID (new info)
+				if updateInfo.ToWalletID != 0 {
+					errTx = s.walletRepository.UpdateBalance(ctx, toWalletId, amount, txType)
+					if errTx != nil {
+						logger.Error("error updating wallet balance, add ToWalletId",
+							"Error", errTx.Error(),
+						)
+					}
 				}
 			}
 		}
 
-		id, errTx = s.transactionRepository.UpdateDetails(ctx, updateDetails)
-		if errTx != nil {
-			logger.Error("error updating details",
-				"Error", errTx,
-			)
-			return errTx
+		// Update details if new details exists
+		if updateDetails.Name != "" || updateDetails.Category != 0 {
+			_, errTx = s.transactionRepository.UpdateDetails(ctx, updateDetails)
+			if errTx != nil {
+				logger.Error("error updating details",
+					"Error", errTx,
+				)
+				return errTx
+			}
 		}
 		return nil
 	})
@@ -52,5 +128,5 @@ func (s *serv) Update(ctx context.Context,
 		)
 		return 0, err
 	}
-	return id, nil
+	return updateInfo.ID, nil
 }

@@ -1,11 +1,13 @@
 package converter
 
 import (
+	"database/sql"
 	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/logger"
 	"github.com/astronely/financial-helper_microservices/financeService/internal/model"
 	desc "github.com/astronely/financial-helper_microservices/financeService/pkg/transaction_v1"
 	"github.com/shopspring/decimal"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 const (
@@ -17,20 +19,30 @@ const (
 )
 
 func ToTransactionInfoFromDesc(req *desc.TransactionInfo) *model.TransactionInfo {
-	sum, err := decimal.NewFromString(req.GetSum())
+	amount, err := decimal.NewFromString(req.GetAmount())
 	if err != nil {
 		logger.Error("Error converting from balance to decimal",
 			"error", err,
-			"balance", req.GetSum(),
+			"balance", req.GetAmount(),
 		)
-		sum = decimal.NewFromInt(-1) // TODO: Возможно нужно как-то по другому обрабатывать данный случай
+		amount = decimal.NewFromInt(-1) // TODO: Возможно нужно как-то по другому обрабатывать данный случай
+	}
+	var isValidToWalletId = false
+
+	if req.GetToWalletId().GetValue() > 0 {
+		isValidToWalletId = true
 	}
 
 	return &model.TransactionInfo{
-		OwnerID:  req.GetOwnerId(),
-		WalletID: req.GetWalletId(),
-		BoardID:  req.GetBoardId(),
-		Sum:      sum,
+		OwnerID:      req.GetOwnerId(),
+		FromWalletID: req.GetFromWalletId(),
+		ToWalletID: sql.NullInt64{
+			Valid: isValidToWalletId,
+			Int64: req.GetToWalletId().GetValue(),
+		},
+		BoardID: req.GetBoardId(),
+		Amount:  amount,
+		Type:    req.GetType(),
 	}
 }
 
@@ -58,12 +70,19 @@ func ToTransactionFromService(transaction *model.Transaction) *desc.Transaction 
 }
 
 func ToTransactionInfoFromService(info model.TransactionInfo) *desc.TransactionInfo {
-	return &desc.TransactionInfo{
-		OwnerId:  info.OwnerID,
-		WalletId: info.WalletID,
-		BoardId:  info.BoardID,
-		Sum:      info.Sum.String(),
+	returningDesc := &desc.TransactionInfo{
+		OwnerId:      info.OwnerID,
+		FromWalletId: info.FromWalletID,
+		BoardId:      info.BoardID,
+		Amount:       info.Amount.String(),
+		Type:         info.Type,
 	}
+
+	if info.ToWalletID.Valid {
+		returningDesc.ToWalletId = &wrapperspb.Int64Value{Value: info.ToWalletID.Int64}
+	}
+
+	return returningDesc
 }
 
 func ToTransactionDetailsFromService(details model.TransactionDetails) *desc.TransactionDetails {
@@ -102,18 +121,20 @@ func ToTransactionListFromService(transactions []*model.Transaction) []*desc.Get
 }
 
 func ToTransactionInfoUpdateFromDesc(req *desc.UpdateRequest) *model.TransactionInfoUpdate {
-	sum, err := decimal.NewFromString(req.GetInfo().GetSum().GetValue())
+	amount, err := decimal.NewFromString(req.GetInfo().GetAmount().GetValue())
 	if err != nil {
 		logger.Error("Error converting from balance to decimal",
 			"error", err,
-			"balance", req.GetInfo().GetSum().GetValue(),
+			"balance", req.GetInfo().GetAmount().GetValue(),
 		)
-		sum = decimal.NewFromInt(-1) // TODO: Возможно нужно как-то по другому обрабатывать данный случай
+		amount = decimal.NewFromInt(-1) // TODO: Возможно нужно как-то по другому обрабатывать данный случай
 	}
 	return &model.TransactionInfoUpdate{
-		ID:       req.GetId(),
-		WalletID: req.GetInfo().GetWalletId().GetValue(),
-		Sum:      sum,
+		ID:           req.GetId(),
+		FromWalletID: req.GetInfo().GetFromWalletId().GetValue(),
+		ToWalletID:   req.GetInfo().GetToWalletId().GetValue(),
+		Amount:       amount,
+		Type:         req.GetInfo().GetType().GetValue(),
 	}
 }
 

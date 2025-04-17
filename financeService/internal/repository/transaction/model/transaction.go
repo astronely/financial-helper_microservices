@@ -17,10 +17,12 @@ type Transaction struct {
 }
 
 type TransactionInfo struct {
-	OwnerID  int64           `db:"owner_id"`
-	WalletID int64           `db:"wallet_id"`
-	BoardID  int64           `db:"board_id"`
-	Sum      decimal.Decimal `db:"sum"`
+	OwnerID      int64           `db:"owner_id"`
+	FromWalletID int64           `db:"from_wallet_id"`
+	ToWalletID   sql.NullInt64   `db:"to_wallet_id"`
+	BoardID      int64           `db:"board_id"`
+	Amount       decimal.Decimal `db:"amount"`
+	Type         string          `db:"type"`
 }
 
 type TransactionDetails struct {

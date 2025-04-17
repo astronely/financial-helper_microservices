@@ -17,10 +17,12 @@ type Transaction struct {
 }
 
 type TransactionInfo struct {
-	OwnerID  int64
-	WalletID int64
-	BoardID  int64
-	Sum      decimal.Decimal
+	OwnerID      int64
+	FromWalletID int64
+	ToWalletID   sql.NullInt64
+	BoardID      int64
+	Amount       decimal.Decimal
+	Type         string
 }
 
 type TransactionDetails struct {
@@ -43,9 +45,11 @@ type TransactionCategory struct {
 }
 
 type TransactionInfoUpdate struct {
-	ID       int64
-	WalletID int64
-	Sum      decimal.Decimal
+	ID           int64
+	FromWalletID int64
+	ToWalletID   int64
+	Amount       decimal.Decimal
+	Type         string
 }
 
 type TransactionDetailsUpdate struct {

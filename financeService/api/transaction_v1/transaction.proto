@@ -71,9 +71,11 @@ service TransactionV1 {
 
 message TransactionInfo {
   int64 owner_id = 1 [(validate.rules).int64.gte = 0];
-  int64 wallet_id = 2 [(validate.rules).int64.gte = 0];
-  int64 board_id = 3 [(validate.rules).int64.gte = 0];
-  string sum = 4 [(validate.rules).string = {min_len:1}];
+  int64 from_wallet_id = 2 [(validate.rules).int64.gte = 0];
+  google.protobuf.Int64Value to_wallet_id = 3 [(validate.rules).int64.gte = 0];
+  int64 board_id = 4 [(validate.rules).int64.gte = 0];
+  string amount = 5 [(validate.rules).string = {min_len:1}];
+  string type = 6 [(validate.rules).string = {min_len:1}];
 }
 
 message TransactionDetails {
@@ -109,10 +111,12 @@ message Transaction {
 }
 
 message UpdateTransactionInfo {
-  google.protobuf.Int64Value wallet_id = 1 [(validate.rules).int64.gte = 0];
-  google.protobuf.StringValue sum = 2 [(validate.rules).string = {min_len:1}];
-  google.protobuf.StringValue name = 3 [(validate.rules).string = {min_len:1}];
-  google.protobuf.Int64Value category = 4 [(validate.rules).int64.gte = 0];
+  google.protobuf.Int64Value from_wallet_id = 1 [(validate.rules).int64.gte = 0];
+  google.protobuf.Int64Value to_wallet_id = 2 [(validate.rules).int64.gte = 0];
+  google.protobuf.StringValue amount = 3 [(validate.rules).string = {min_len:1}];
+  google.protobuf.StringValue type = 4 [(validate.rules).string = {min_len:1}];
+  google.protobuf.StringValue name = 5 [(validate.rules).string = {min_len:1}];
+  google.protobuf.Int64Value category = 6 [(validate.rules).int64.gte = 0];
 }
 
 message CreateRequest {

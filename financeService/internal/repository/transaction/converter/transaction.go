@@ -18,10 +18,12 @@ func ToTransactionFromRepo(transaction *modelRepo.Transaction) *model.Transactio
 
 func ToTransactionInfoFromRepo(transactionInfo modelRepo.TransactionInfo) model.TransactionInfo {
 	return model.TransactionInfo{
-		OwnerID:  transactionInfo.OwnerID,
-		BoardID:  transactionInfo.BoardID,
-		WalletID: transactionInfo.WalletID,
-		Sum:      transactionInfo.Sum,
+		OwnerID:      transactionInfo.OwnerID,
+		BoardID:      transactionInfo.BoardID,
+		FromWalletID: transactionInfo.FromWalletID,
+		ToWalletID:   transactionInfo.ToWalletID,
+		Amount:       transactionInfo.Amount,
+		Type:         transactionInfo.Type,
 	}
 }
 

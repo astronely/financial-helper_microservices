@@ -2,6 +2,7 @@ package transaction
 
 import (
 	"context"
+	"errors"
 	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/logger"
 	"github.com/astronely/financial-helper_microservices/financeService/internal/model"
 )
@@ -17,6 +18,7 @@ func (s *serv) Create(ctx context.Context, transactionInfo *model.TransactionInf
 			return errTx
 		}
 
+		// Create transaction in database
 		id, errTx = s.transactionRepository.CreateTransaction(ctx, transactionInfo, detailsId)
 		if errTx != nil {
 			logger.Error("Failed to create transaction",
@@ -25,12 +27,36 @@ func (s *serv) Create(ctx context.Context, transactionInfo *model.TransactionInf
 			return errTx
 		}
 
-		errTx = s.walletRepository.UpdateBalance(ctx, transactionInfo.WalletID, transactionInfo.Sum)
-		if errTx != nil {
-			logger.Error("Failed to update balance",
-				"error", errTx.Error(),
-			)
-			return errTx
+		// Update wallet balance
+		if transactionInfo.Type == "transfer" {
+			errTx = s.walletRepository.UpdateBalance(ctx, transactionInfo.FromWalletID, transactionInfo.Amount.Neg(), "transfer")
+			if errTx != nil {
+				logger.Error("Failed to update balance",
+					"info", "transfer, FromWalletID",
+					"error", errTx.Error(),
+				)
+				return errTx
+			}
+
+			if !transactionInfo.ToWalletID.Valid {
+				return errors.New("ToWalletID not valid")
+			}
+			errTx = s.walletRepository.UpdateBalance(ctx, transactionInfo.ToWalletID.Int64, transactionInfo.Amount, "transfer")
+			if errTx != nil {
+				logger.Error("Failed to update balance",
+					"info", "transfer, ToWalletID",
+					"error", errTx.Error(),
+				)
+				return errTx
+			}
+		} else {
+			errTx = s.walletRepository.UpdateBalance(ctx, transactionInfo.FromWalletID, transactionInfo.Amount, "expense")
+			if errTx != nil {
+				logger.Error("Failed to update balance",
+					"error", errTx.Error(),
+				)
+				return errTx
+			}
 		}
 
 		return nil

@@ -2,6 +2,7 @@ package transaction
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	sq "github.com/Masterminds/squirrel"
@@ -32,14 +33,16 @@ const (
 
 	// transactions
 	// Основные колонки для таблицы "transactions"
-	idColumn        = "id"
-	ownerIdColumn   = "owner_id"
-	walletIdColumn  = "wallet_id"
-	boardIdColumn   = "board_id"
-	sumColumn       = "sum"
-	detailsIdColumn = "details_id"
-	updatedAtColumn = "updated_at"
-	createdAtColumn = "created_at"
+	idColumn           = "id"
+	ownerIdColumn      = "owner_id"
+	fromWalletIdColumn = "from_wallet_id"
+	toWalletIdColumn   = "to_wallet_id"
+	boardIdColumn      = "board_id"
+	amountColumn       = "amount"
+	typeColumn         = "type"
+	detailsIdColumn    = "details_id"
+	updatedAtColumn    = "updated_at"
+	createdAtColumn    = "created_at"
 
 	// Основные колонки для таблицы "transaction_details"
 	detailsNameColumn     = "name"
@@ -51,14 +54,16 @@ const (
 	descriptionColumn  = "description"
 
 	// Основные колонки для таблицы "transactions"
-	idColumnWithAlias        = transactionPrefix + idColumn
-	ownerIdColumnWithAlias   = transactionPrefix + ownerIdColumn
-	walletIdColumnWithAlias  = transactionPrefix + walletIdColumn
-	boardIdColumnWithAlias   = transactionPrefix + boardIdColumn
-	sumColumnWithAlias       = transactionPrefix + sumColumn
-	detailsIdColumnWithAlias = transactionPrefix + detailsIdColumn
-	updatedAtColumnWithAlias = transactionPrefix + updatedAtColumn
-	createdAtColumnWithAlias = transactionPrefix + createdAtColumn
+	idColumnWithAlias           = transactionPrefix + idColumn
+	ownerIdColumnWithAlias      = transactionPrefix + ownerIdColumn
+	fromWalletIdColumnWithAlias = transactionPrefix + fromWalletIdColumn
+	toWalletIdColumnWithAlias   = transactionPrefix + toWalletIdColumn
+	boardIdColumnWithAlias      = transactionPrefix + boardIdColumn
+	amountColumnWithAlias       = transactionPrefix + amountColumn
+	typeColumnWithAlias         = transactionPrefix + typeColumn
+	detailsIdColumnWithAlias    = transactionPrefix + detailsIdColumn
+	updatedAtColumnWithAlias    = transactionPrefix + updatedAtColumn
+	createdAtColumnWithAlias    = transactionPrefix + createdAtColumn
 
 	// Основные колонки для таблицы "transaction_details"
 	transactionDetailsIdWithAlias  = transactionDetailsPrefix + idColumn + " AS detail_id"
@@ -109,8 +114,8 @@ func (r *repo) CreateTransactionDetails(ctx context.Context, transactionDetails 
 func (r *repo) CreateTransaction(ctx context.Context, transactionInfo *model.TransactionInfo, transactionDetailsId int64) (int64, error) {
 	builder := sq.Insert(transactionTableName).
 		PlaceholderFormat(sq.Dollar).
-		Columns(ownerIdColumn, walletIdColumn, boardIdColumn, sumColumn, detailsIdColumn).
-		Values(transactionInfo.OwnerID, transactionInfo.WalletID, transactionInfo.BoardID, transactionInfo.Sum, transactionDetailsId).
+		Columns(ownerIdColumn, fromWalletIdColumn, toWalletIdColumn, boardIdColumn, amountColumn, typeColumn, detailsIdColumn).
+		Values(transactionInfo.OwnerID, transactionInfo.FromWalletID, transactionInfo.ToWalletID, transactionInfo.BoardID, transactionInfo.Amount, transactionInfo.Type, transactionDetailsId).
 		Suffix("RETURNING id")
 
 	query, args, err := builder.ToSql()
@@ -134,8 +139,9 @@ func (r *repo) CreateTransaction(ctx context.Context, transactionInfo *model.Tra
 
 func (r *repo) Get(ctx context.Context, id int64, filters map[string]interface{}) (*model.Transaction, error) {
 	builder := sq.Select(
-		idColumnWithAlias, ownerIdColumnWithAlias, walletIdColumnWithAlias, boardIdColumnWithAlias,
-		sumColumnWithAlias, detailsIdColumnWithAlias, updatedAtColumnWithAlias, createdAtColumnWithAlias,
+		idColumnWithAlias, ownerIdColumnWithAlias, fromWalletIdColumnWithAlias,
+		toWalletIdColumnWithAlias, boardIdColumnWithAlias, amountColumnWithAlias, typeColumnWithAlias,
+		detailsIdColumnWithAlias, updatedAtColumnWithAlias, createdAtColumnWithAlias,
 		transactionDetailsIdWithAlias, detailsNameColumnWithAlias, categoryColumnWithAlias, transactionDateColumnWithAlias,
 		categoryIdColumnWithAlias, categoryNameColumnWithAlias, descriptionColumnWithAlias,
 	).
@@ -159,8 +165,8 @@ func (r *repo) Get(ctx context.Context, id int64, filters map[string]interface{}
 		builder = builder.Where(sq.Eq{transactionPrefix + ownerIdColumn: val})
 	}
 
-	if val, ok := filters[walletIdColumn]; ok {
-		builder = builder.Where(sq.Eq{transactionPrefix + walletIdColumn: val})
+	if val, ok := filters[fromWalletIdColumn]; ok {
+		builder = builder.Where(sq.Eq{transactionPrefix + fromWalletIdColumn: val})
 	}
 
 	query, args, err := builder.ToSql()
@@ -191,8 +197,9 @@ func (r *repo) Get(ctx context.Context, id int64, filters map[string]interface{}
 
 func (r *repo) List(ctx context.Context, limit, offset uint64, filters map[string]interface{}) ([]*model.Transaction, error) {
 	builder := sq.Select(
-		idColumnWithAlias, ownerIdColumnWithAlias, walletIdColumnWithAlias, boardIdColumnWithAlias,
-		sumColumnWithAlias, detailsIdColumnWithAlias, createdAtColumnWithAlias, updatedAtColumnWithAlias,
+		idColumnWithAlias, ownerIdColumnWithAlias, fromWalletIdColumnWithAlias,
+		toWalletIdColumnWithAlias, boardIdColumnWithAlias, amountColumnWithAlias, typeColumnWithAlias,
+		detailsIdColumnWithAlias, updatedAtColumnWithAlias, createdAtColumnWithAlias,
 		transactionDetailsIdWithAlias, detailsNameColumnWithAlias, categoryColumnWithAlias, transactionDateColumnWithAlias,
 		categoryIdColumnWithAlias, categoryNameColumnWithAlias, descriptionColumnWithAlias,
 	).
@@ -215,8 +222,8 @@ func (r *repo) List(ctx context.Context, limit, offset uint64, filters map[strin
 		builder = builder.Where(sq.Eq{transactionPrefix + ownerIdColumn: val})
 	}
 
-	if val, ok := filters[walletIdColumn]; ok {
-		builder = builder.Where(sq.Eq{transactionPrefix + walletIdColumn: val})
+	if val, ok := filters[fromWalletIdColumn]; ok {
+		builder = builder.Where(sq.Eq{transactionPrefix + fromWalletIdColumn: val})
 	}
 
 	query, args, err := builder.ToSql()
@@ -248,18 +255,8 @@ func (r *repo) List(ctx context.Context, limit, offset uint64, filters map[strin
 	return converter.ToTransactionListFromRepo(transactions), nil
 }
 
-func (r *repo) UpdateInfo(ctx context.Context, updateInfo *model.TransactionInfoUpdate) (int64, decimal.Decimal, error) {
-	updateTransactionInfoMap := make(map[string]interface{})
-
-	if updateInfo.WalletID != 0 {
-		updateTransactionInfoMap[walletIdColumn] = updateInfo.WalletID
-	}
-	if updateInfo.Sum.GreaterThanOrEqual(decimal.NewFromFloat(0)) {
-		updateTransactionInfoMap[sumColumn] = updateInfo.Sum
-	}
-	updateTransactionInfoMap[updatedAtColumn] = time.Now()
-
-	selectBuilder := sq.Select(sumColumn).
+func (r *repo) UpdateInfo(ctx context.Context, updateInfo *model.TransactionInfoUpdate) (*model.TransactionInfo, error) {
+	selectBuilder := sq.Select(fromWalletIdColumn, toWalletIdColumn, amountColumn, typeColumn).
 		From(transactionTableName).
 		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{idColumn: updateInfo.ID}).
@@ -270,7 +267,7 @@ func (r *repo) UpdateInfo(ctx context.Context, updateInfo *model.TransactionInfo
 		logger.Error("SQL Error message from updateInfo",
 			"Error", err.Error(),
 		)
-		return -1, decimal.Zero, err
+		return nil, err
 	}
 
 	q := db.Query{
@@ -278,28 +275,51 @@ func (r *repo) UpdateInfo(ctx context.Context, updateInfo *model.TransactionInfo
 		QueryRaw: query,
 	}
 
-	var oldSum decimal.Decimal
+	var oldTxInfo modelRepo.TransactionInfo
 
-	err = r.db.DB().QueryRawContext(ctx, q, args...).Scan(&oldSum)
+	err = r.db.DB().ScanOneContext(ctx, &oldTxInfo, q, args...)
 	if err != nil {
 		logger.Error("SQL Error message from updateInfo from select",
 			"Error", err.Error(),
 		)
-		return -1, decimal.Zero, err
+		return nil, err
 	}
 
+	updateTransactionInfoMap := make(map[string]interface{})
+
+	if updateInfo.FromWalletID != 0 {
+		updateTransactionInfoMap[fromWalletIdColumn] = updateInfo.FromWalletID
+	}
+	if updateInfo.ToWalletID != 0 {
+		updateTransactionInfoMap[toWalletIdColumn] = updateInfo.ToWalletID
+	}
+	if updateInfo.Amount.GreaterThanOrEqual(decimal.NewFromFloat(0)) {
+		updateTransactionInfoMap[amountColumn] = updateInfo.Amount
+	}
+	if updateInfo.Type != "" {
+		updateTransactionInfoMap[typeColumn] = updateInfo.Type
+		if oldTxInfo.ToWalletID.Valid && updateInfo.Type != "transfer" {
+			updateTransactionInfoMap[toWalletIdColumn] = sql.NullInt64{Valid: false}
+		}
+	}
+
+	updateTransactionInfoMap[updatedAtColumn] = time.Now()
+
+	logger.Debug("UpdateInfoMap",
+		"map", updateTransactionInfoMap,
+	)
 	updateBuilder := sq.Update(transactionTableName).
 		PlaceholderFormat(sq.Dollar).
 		SetMap(updateTransactionInfoMap).
 		Where(sq.Eq{idColumn: updateInfo.ID}).
-		Suffix(fmt.Sprintf("RETURNING %s", walletIdColumn))
+		Suffix(fmt.Sprintf("RETURNING %s", fromWalletIdColumn))
 
 	query, args, err = updateBuilder.ToSql()
 	if err != nil {
 		logger.Error("SQL Error message from updateInfo",
 			"Error", err.Error(),
 		)
-		return -1, decimal.Zero, err
+		return nil, err
 	}
 
 	q = db.Query{
@@ -307,18 +327,18 @@ func (r *repo) UpdateInfo(ctx context.Context, updateInfo *model.TransactionInfo
 		QueryRaw: query,
 	}
 
-	var walletId int64
-	err = r.db.DB().QueryRawContext(ctx, q, args...).Scan(&walletId)
+	var fromWalletId int64
+	err = r.db.DB().QueryRawContext(ctx, q, args...).Scan(&fromWalletId)
 	if err != nil {
 		logger.Error("SQL Error message from updateInfo",
 			"Error", err.Error(),
 		)
-		return -1, decimal.Zero, err
+		return nil, err
 	}
 
-	diff := updateInfo.Sum.Sub(oldSum)
+	result := converter.ToTransactionInfoFromRepo(oldTxInfo)
 
-	return walletId, diff, nil
+	return &result, nil
 }
 
 func (r *repo) UpdateDetails(ctx context.Context, updateInfo *model.TransactionDetailsUpdate) (int64, error) {

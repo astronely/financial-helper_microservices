@@ -158,7 +158,7 @@ func (r *repo) Update(ctx context.Context, walletInfo *model.WalletUpdateInfo) (
 	return id, nil
 }
 
-func (r *repo) UpdateBalance(ctx context.Context, id int64, value decimal.Decimal) error {
+func (r *repo) UpdateBalance(ctx context.Context, id int64, value decimal.Decimal, txType string) error {
 	//logger.Debug("Debug balance",
 	//	"id", id,
 	//	"Value to add", value,
@@ -185,10 +185,12 @@ func (r *repo) UpdateBalance(ctx context.Context, id int64, value decimal.Decima
 		return err
 	}
 
-	balance = balance.Add(value)
-
-	if balance.IsNegative() {
-		return errors.New("negative balance")
+	if txType == "expense" {
+		balance = balance.Sub(value)
+	} else if txType == "income" || txType == "transfer" {
+		balance = balance.Add(value)
+	} else {
+		return errors.New("invalid txType")
 	}
 
 	builder2 := sq.Update(tableName).
