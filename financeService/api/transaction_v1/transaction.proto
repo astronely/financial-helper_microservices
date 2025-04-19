@@ -99,7 +99,8 @@ message FilterInfo {
   google.protobuf.Int64Value category = 1 [(validate.rules).int64.gte=0];
   google.protobuf.Timestamp transaction_date = 2;
   google.protobuf.Int64Value owner_id = 3 [(validate.rules).int64.gte=0];
-  google.protobuf.Int64Value wallet_id = 4 [(validate.rules).int64.gte=0];
+  google.protobuf.Int64Value from_wallet_id = 4 [(validate.rules).int64.gte=0];
+  google.protobuf.Int64Value to_wallet_id = 5 [(validate.rules).int64.gte=0];
 }
 
 message Transaction {

@@ -14,8 +14,9 @@ const (
 	categoryColumn        = "category"
 	transactionDateColumn = "transaction_date"
 
-	ownerIdColumn  = "owner_id"
-	walletIdColumn = "wallet_id"
+	ownerIdColumn      = "owner_id"
+	fromWalletIdColumn = "from_wallet_id"
+	toWalletIdColumn   = "to_wallet_id"
 )
 
 func ToTransactionInfoFromDesc(req *desc.TransactionInfo) *model.TransactionInfo {
@@ -157,8 +158,11 @@ func Filters(req *desc.FilterInfo) map[string]interface{} {
 	if req.GetOwnerId().GetValue() != 0 {
 		filters[ownerIdColumn] = req.GetOwnerId().GetValue()
 	}
-	if req.GetWalletId().GetValue() != 0 {
-		filters[walletIdColumn] = req.GetWalletId().GetValue()
+	if req.GetFromWalletId().GetValue() != 0 {
+		filters[fromWalletIdColumn] = req.GetFromWalletId().GetValue()
+	}
+	if req.GetToWalletId().GetValue() != 0 {
+		filters[toWalletIdColumn] = req.GetToWalletId().GetValue()
 	}
 
 	return filters

@@ -23,4 +23,5 @@ type TransactionRepository interface {
 	UpdateInfo(ctx context.Context, updateInfo *model.TransactionInfoUpdate) (*model.TransactionInfo, error)
 	UpdateDetails(ctx context.Context, updateInfo *model.TransactionDetailsUpdate) (int64, error)
 	Categories(ctx context.Context) ([]*model.TransactionCategory, error)
+	Delete(ctx context.Context, id int64) error
 }

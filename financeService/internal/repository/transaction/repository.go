@@ -169,6 +169,10 @@ func (r *repo) Get(ctx context.Context, id int64, filters map[string]interface{}
 		builder = builder.Where(sq.Eq{transactionPrefix + fromWalletIdColumn: val})
 	}
 
+	if val, ok := filters[toWalletIdColumn]; ok {
+		builder = builder.Where(sq.Eq{transactionPrefix + toWalletIdColumn: val})
+	}
+
 	query, args, err := builder.ToSql()
 	if err != nil {
 		return nil, err
@@ -224,6 +228,10 @@ func (r *repo) List(ctx context.Context, limit, offset uint64, filters map[strin
 
 	if val, ok := filters[fromWalletIdColumn]; ok {
 		builder = builder.Where(sq.Eq{transactionPrefix + fromWalletIdColumn: val})
+	}
+
+	if val, ok := filters[toWalletIdColumn]; ok {
+		builder = builder.Where(sq.Eq{transactionPrefix + toWalletIdColumn: val})
 	}
 
 	query, args, err := builder.ToSql()
@@ -441,4 +449,32 @@ func (r *repo) Categories(ctx context.Context) ([]*model.TransactionCategory, er
 	}
 
 	return categories, nil
+}
+
+func (r *repo) Delete(ctx context.Context, id int64) error {
+	builder := sq.Delete(transactionTableName).
+		PlaceholderFormat(sq.Dollar).
+		Where(sq.Eq{idColumn: id})
+
+	query, args, err := builder.ToSql()
+	if err != nil {
+		logger.Error("SQL Error message from delete",
+			"Error", err.Error(),
+		)
+		return err
+	}
+
+	q := db.Query{
+		Name:     "finance_repository.Transaction.Delete",
+		QueryRaw: query,
+	}
+
+	_, err = r.db.DB().ExecContext(ctx, q, args...)
+	if err != nil {
+		logger.Error("SQL Error message from delete",
+			"Error", err.Error(),
+		)
+		return err
+	}
+	return nil
 }
