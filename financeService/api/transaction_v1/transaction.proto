@@ -37,25 +37,25 @@ service TransactionV1 {
 
   rpc Get(GetRequest) returns (GetResponse) {
     option (google.api.http) = {
-      post: "/api/v1/transaction/get"
+      get: "/api/v1/transaction/get"
     };
   };
 
   rpc List(ListRequest) returns (ListResponse) {
     option (google.api.http) = {
-      post: "/api/v1/transaction/list"
+      get: "/api/v1/transaction/list"
     };
   };
 
   rpc Delete(DeleteRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      post: "/api/v1/transaction/delete"
+      delete: "/api/v1/transaction/delete"
     };
   };
 
   rpc Update(UpdateRequest) returns (UpdateResponse) {
     option (google.api.http) = {
-      post: "/api/v1/transaction/update",
+      put: "/api/v1/transaction/update",
       body: "*"
     };
   };
@@ -70,22 +70,22 @@ service TransactionV1 {
 // -------------------------------------------------------------------------
 
 message TransactionInfo {
-  int64 owner_id = 1 [(validate.rules).int64.gte = 0];
-  int64 from_wallet_id = 2 [(validate.rules).int64.gte = 0];
-  google.protobuf.Int64Value to_wallet_id = 3 [(validate.rules).int64.gte = 0];
-  int64 board_id = 4 [(validate.rules).int64.gte = 0];
+  int64 owner_id = 1 [(validate.rules).int64.gt = 0];
+  int64 from_wallet_id = 2 [(validate.rules).int64.gt = 0];
+  google.protobuf.Int64Value to_wallet_id = 3 [(validate.rules).int64.gt = 0];
+  int64 board_id = 4 [(validate.rules).int64.gt = 0];
   string amount = 5 [(validate.rules).string = {min_len:1}];
   string type = 6 [(validate.rules).string = {min_len:1}];
 }
 
 message TransactionDetails {
-  int64 id = 1 [(validate.rules).int64.gte = 0]; // Возможно эта информация не нужна в коде (только в бд)
+  int64 id = 1 [(validate.rules).int64.gt = 0]; // Возможно эта информация не нужна в коде (только в бд)
   TransactionDetailsInfo info = 2 [(validate.rules).message.required = true];
 }
 
 message TransactionDetailsInfo {
   string name = 1 [(validate.rules).string = {min_len:1}];
-  int64 category = 2 [(validate.rules).int64.gte = 0]; // TODO: Сделать валидацию > чем 0 и < чем максимальный id категории
+  int64 category = 2 [(validate.rules).int64.gt = 0]; // TODO: Сделать валидацию > чем 0 и < чем максимальный id категории
   google.protobuf.Timestamp transaction_date = 3;
 }
 
@@ -96,28 +96,28 @@ message TransactionCategory {
 }
 
 message FilterInfo {
-  google.protobuf.Int64Value category = 1 [(validate.rules).int64.gte=0];
+  google.protobuf.Int64Value category = 1 [(validate.rules).int64.gt=0];
   google.protobuf.Timestamp transaction_date = 2;
-  google.protobuf.Int64Value owner_id = 3 [(validate.rules).int64.gte=0];
-  google.protobuf.Int64Value from_wallet_id = 4 [(validate.rules).int64.gte=0];
-  google.protobuf.Int64Value to_wallet_id = 5 [(validate.rules).int64.gte=0];
+  google.protobuf.Int64Value owner_id = 3 [(validate.rules).int64.gt=0];
+  google.protobuf.Int64Value from_wallet_id = 4 [(validate.rules).int64.gt=0];
+  google.protobuf.Int64Value to_wallet_id = 5 [(validate.rules).int64.gt=0];
 }
 
 message Transaction {
-  int64 id = 1 [(validate.rules).int64.gte = 0];
+  int64 id = 1 [(validate.rules).int64.gt = 0];
   TransactionInfo info = 2 [(validate.rules).message.required = true];
-  int64 details_id = 3 [(validate.rules).int64.gte = 0];
+  int64 details_id = 3 [(validate.rules).int64.gt = 0];
   google.protobuf.Timestamp updated_at = 4;
   google.protobuf.Timestamp created_at = 5;
 }
 
 message UpdateTransactionInfo {
-  google.protobuf.Int64Value from_wallet_id = 1 [(validate.rules).int64.gte = 0];
-  google.protobuf.Int64Value to_wallet_id = 2 [(validate.rules).int64.gte = 0];
+  google.protobuf.Int64Value from_wallet_id = 1 [(validate.rules).int64.gt = 0];
+  google.protobuf.Int64Value to_wallet_id = 2 [(validate.rules).int64.gt = 0];
   google.protobuf.StringValue amount = 3 [(validate.rules).string = {min_len:1}];
   google.protobuf.StringValue type = 4 [(validate.rules).string = {min_len:1}];
   google.protobuf.StringValue name = 5 [(validate.rules).string = {min_len:1}];
-  google.protobuf.Int64Value category = 6 [(validate.rules).int64.gte = 0];
+  google.protobuf.Int64Value category = 6 [(validate.rules).int64.gt = 0];
 }
 
 message CreateRequest {
@@ -151,7 +151,7 @@ message ListResponse {
 }
 
 message UpdateRequest {
-  int64 id = 1 [(validate.rules).int64.gte = 0];
+  int64 id = 1 [(validate.rules).int64.gt = 0];
   UpdateTransactionInfo info = 2 [(validate.rules).message.required = true];
 }
 
@@ -160,7 +160,7 @@ message UpdateResponse {
 }
 
 message DeleteRequest {
-  int64 id = 1 [(validate.rules).int64.gte = 0];
+  int64 id = 1 [(validate.rules).int64.gt = 0];
 }
 
 message CategoriesResponse {

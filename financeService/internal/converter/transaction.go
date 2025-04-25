@@ -149,19 +149,19 @@ func ToTransactionDetailsUpdateFromDesc(req *desc.UpdateRequest) *model.Transact
 
 func Filters(req *desc.FilterInfo) map[string]interface{} {
 	filters := map[string]interface{}{}
-	if req.GetCategory().GetValue() != 0 {
+	if req.GetCategory() != nil {
 		filters[categoryColumn] = req.GetCategory().GetValue()
 	}
 	if req.GetTransactionDate().IsValid() {
 		filters[transactionDateColumn] = req.GetTransactionDate().AsTime()
 	}
-	if req.GetOwnerId().GetValue() != 0 {
+	if req.GetOwnerId() != nil {
 		filters[ownerIdColumn] = req.GetOwnerId().GetValue()
 	}
-	if req.GetFromWalletId().GetValue() != 0 {
+	if req.GetFromWalletId() != nil {
 		filters[fromWalletIdColumn] = req.GetFromWalletId().GetValue()
 	}
-	if req.GetToWalletId().GetValue() != 0 {
+	if req.GetToWalletId() != nil {
 		filters[toWalletIdColumn] = req.GetToWalletId().GetValue()
 	}
 
