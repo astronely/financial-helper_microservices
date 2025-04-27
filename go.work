@@ -6,4 +6,5 @@ use (
 	./apiGateway
 	./financeService
 	./noteService
+	./boardService
 )

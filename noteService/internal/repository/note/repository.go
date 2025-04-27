@@ -124,7 +124,6 @@ func (r *repo) List(ctx context.Context, limit, offset uint64, filters map[strin
 		builder = builder.Where(sq.Eq{statusColumn: val})
 	}
 
-	// TODO: Date filters
 	if val, ok := filters[createdAtStartColumn]; ok {
 		logger.Debug("filters, created_at_start",
 			"value", val,

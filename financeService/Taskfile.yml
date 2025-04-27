@@ -1,0 +1,8 @@
+version: '3'
+
+dotenv: ['local.env']
+
+tasks:
+  greet:
+    cmds:
+      - echo "Using $GRPC_HOST and endpoint $GRPC_PORT"

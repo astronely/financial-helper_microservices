@@ -24,4 +24,7 @@
 /authService/vendor.protogen/
 /apiGateway/vendor.protogen/
 /financeService/vendor.protogen/
+/noteService/vendor.protogen/
+/boardeService/vendor.protogen/
 /coverage.out
+/boardService/vendor.protogen/

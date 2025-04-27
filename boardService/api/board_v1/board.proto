@@ -1,0 +1,168 @@
+syntax = "proto3";
+
+package board_v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "validate/validate.proto";
+
+option go_package = "github.com/astronely/financial-helper_microservices/boardService/pkg/board_v1;board_v1";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  info: {
+    title: "Board API"
+    version: "1.0.0"
+    contact: {
+      name: "astronely"
+    };
+  };
+
+  host: "localhost:8080",
+  schemes: HTTP,
+  schemes: HTTPS,
+  consumes: "application/json",
+  produces: "application/json",
+};
+
+service BoardV1 {
+  rpc Create(CreateRequest) returns (CreateResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/board/create",
+      body: "*"
+    };
+  }
+  rpc Get(GetRequest) returns (GetResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/board/get"
+    };
+  }
+  rpc GetUsers(GetUsersRequest) returns (GetUsersResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/board/get"
+    };
+  }
+  rpc ListByOwnerId(ListRequest) returns (ListResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/board/list"
+    };
+  }
+  rpc ListByUserId(ListByUserIdRequest) returns (ListResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/board/list"
+    };
+  }
+  rpc Update(UpdateRequest) returns (UpdateResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/board/update",
+      body: "*"
+    };
+  }
+  rpc Delete(DeleteRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/api/v1/board/delete",
+    };
+  }
+
+  rpc GenerateInviteURL(GenerateInviteRequest) returns (GenerateInviteResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/board/generateInviteURL",
+    };
+  }
+
+  rpc Join(JoinRequest) returns (JoinResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/board/join",
+    };
+  }
+}
+
+message BoardUser {
+  int64 board_id = 1 [(validate.rules).int64.gt = 0];
+  int64 user_id = 2 [(validate.rules).int64.gt = 0];
+  string role = 3 [(validate.rules).string.min_len = 1];
+}
+
+message GenerateInviteRequest {
+  int64 board_id = 1 [(validate.rules).int64.gt = 0];
+  int64 user_id = 2 [(validate.rules).int64.gt = 0];
+  string role = 3 [(validate.rules).string.min_len = 1];
+}
+
+message GenerateInviteResponse {
+  string url = 1 [(validate.rules).string.min_len = 1];
+}
+
+message JoinRequest {
+  string token = 1 [(validate.rules).string.min_len = 1];
+}
+
+message JoinResponse {
+  int64 id = 1 [(validate.rules).int64.gt = 0];
+}
+
+message BoardInfo {
+  string name = 1 [(validate.rules).string.min_len = 1];
+  string description = 2 [(validate.rules).string.min_len = 1];
+  int64 owner_id = 3 [(validate.rules).int64.gt = 0];
+}
+
+message Board {
+  int64 id = 1 [(validate.rules).int64.gt = 0];
+  BoardInfo info = 2 [(validate.rules).message.required = true];
+  google.protobuf.Timestamp updated_at = 3;
+  google.protobuf.Timestamp created_at = 4;
+}
+
+message CreateRequest {
+  BoardInfo info = 1[(validate.rules).message.required = true];
+}
+
+message CreateResponse {
+  int64 id = 1;
+}
+
+message GetRequest {
+  int64 id = 1 [(validate.rules).int64.gt = 0];
+}
+
+message GetUsersRequest {
+  int64 board_id = 1 [(validate.rules).int64.gt = 0];
+}
+
+message GetUsersResponse {
+  repeated BoardUser users = 1;
+}
+
+message GetResponse {
+  Board board = 1 [(validate.rules).message.required = true];
+}
+
+message ListRequest {
+  int64 limit = 1 [(validate.rules).int64.gte = 0];
+  int64 offset = 2 [(validate.rules).int64.gte = 0];
+}
+
+message ListByUserIdRequest {
+  int64 id = 1 [(validate.rules).int64.gt = 0];
+}
+
+message ListResponse {
+  repeated Board boards = 1;
+}
+
+message UpdateRequest {
+  int64 id = 1 [(validate.rules).int64.gt = 0];
+  string name = 2 [(validate.rules).string.min_len = 1];
+  string description = 3 [(validate.rules).string.min_len = 1];
+}
+
+message UpdateResponse {
+  int64 id = 1;
+}
+
+message DeleteRequest {
+  int64 id = 1;
+}
