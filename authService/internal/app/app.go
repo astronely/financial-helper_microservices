@@ -101,7 +101,7 @@ func (a *App) initServiceProvider(_ context.Context) error {
 }
 
 func (a *App) initGRPCServer(ctx context.Context) error {
-	authInterceptor := interceptor.NewAuthInterceptor(a.serviceProvider.AccessService(ctx))
+	//authInterceptor := interceptor.NewAuthInterceptor(a.serviceProvider.AccessService(ctx))
 
 	a.grpcServer = grpc.NewServer(
 		grpc.Creds(insecure.NewCredentials()),
@@ -109,7 +109,7 @@ func (a *App) initGRPCServer(ctx context.Context) error {
 			grpcMiddleware.ChainUnaryServer(
 				interceptor.LogInterceptor,
 				interceptor.ValidateInterceptor,
-				authInterceptor.AuthInterceptor,
+				//authInterceptor.AuthInterceptor,
 			),
 		),
 	)

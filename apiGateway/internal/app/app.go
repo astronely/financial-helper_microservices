@@ -5,6 +5,7 @@ import (
 	"errors"
 	"flag"
 	"github.com/astronely/financial-helper_microservices/apiGateway/internal/config"
+	"github.com/astronely/financial-helper_microservices/apiGateway/internal/interceptor"
 	descAccess "github.com/astronely/financial-helper_microservices/apiGateway/pkg/access_v1"
 	descAuth "github.com/astronely/financial-helper_microservices/apiGateway/pkg/auth_v1"
 	descBoard "github.com/astronely/financial-helper_microservices/apiGateway/pkg/board_v1"
@@ -15,6 +16,7 @@ import (
 	descUser "github.com/astronely/financial-helper_microservices/apiGateway/pkg/user_v1"
 	descWallet "github.com/astronely/financial-helper_microservices/apiGateway/pkg/wallet_v1"
 	_ "github.com/astronely/financial-helper_microservices/apiGateway/statik"
+	"time"
 
 	//descWallet "github.com/astronely/financial-helper_microservices/financeService/pkg/transaction_v1"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -116,31 +118,53 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	}
 
-	err := descUser.RegisterUserV1HandlerFromEndpoint(ctx, mux, a.serviceProvider.GrpcConfig().UserAddress(), opts)
+	conn, err := grpc.NewClient(a.serviceProvider.GrpcConfig().AuthAddress(), opts...)
 	if err != nil {
 		return err
 	}
-	err = descAuth.RegisterAuthV1HandlerFromEndpoint(ctx, mux, a.serviceProvider.GrpcConfig().AuthAddress(), opts)
+
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, time.Second*10)
+
+	authClient := descAccess.NewAccessV1Client(conn)
+	authMux := interceptor.AuthInterceptor(ctx, authClient)(mux)
+
+	closer.Add(func() error {
+		err := conn.Close()
+		if err != nil {
+			return err
+		}
+		logger.Info("Auth client closed successfully")
+
+		cancel()
+		logger.Info("Context with timeout canceled")
+		return err
+	})
+
+	err = descUser.RegisterUserV1HandlerFromEndpoint(ctxWithTimeout, mux, a.serviceProvider.GrpcConfig().UserAddress(), opts)
 	if err != nil {
 		return err
 	}
-	err = descAccess.RegisterAccessV1HandlerFromEndpoint(ctx, mux, a.serviceProvider.GrpcConfig().AuthAddress(), opts)
+	err = descAuth.RegisterAuthV1HandlerFromEndpoint(ctxWithTimeout, mux, a.serviceProvider.GrpcConfig().AuthAddress(), opts)
 	if err != nil {
 		return err
 	}
-	err = descWallet.RegisterWalletV1HandlerFromEndpoint(ctx, mux, a.serviceProvider.GrpcConfig().FinanceAddress(), opts)
+	err = descAccess.RegisterAccessV1HandlerFromEndpoint(ctxWithTimeout, mux, a.serviceProvider.GrpcConfig().AuthAddress(), opts)
 	if err != nil {
 		return err
 	}
-	err = descTransaction.RegisterTransactionV1HandlerFromEndpoint(ctx, mux, a.serviceProvider.GrpcConfig().FinanceAddress(), opts)
+	err = descWallet.RegisterWalletV1HandlerFromEndpoint(ctxWithTimeout, mux, a.serviceProvider.GrpcConfig().FinanceAddress(), opts)
 	if err != nil {
 		return err
 	}
-	err = descNote.RegisterNoteV1HandlerFromEndpoint(ctx, mux, a.serviceProvider.GrpcConfig().NoteAddress(), opts)
+	err = descTransaction.RegisterTransactionV1HandlerFromEndpoint(ctxWithTimeout, mux, a.serviceProvider.GrpcConfig().FinanceAddress(), opts)
 	if err != nil {
 		return err
 	}
-	err = descBoard.RegisterBoardV1HandlerFromEndpoint(ctx, mux, a.serviceProvider.GrpcConfig().BoardAddress(), opts)
+	err = descNote.RegisterNoteV1HandlerFromEndpoint(ctxWithTimeout, mux, a.serviceProvider.GrpcConfig().NoteAddress(), opts)
+	if err != nil {
+		return err
+	}
+	err = descBoard.RegisterBoardV1HandlerFromEndpoint(ctxWithTimeout, mux, a.serviceProvider.GrpcConfig().BoardAddress(), opts)
 	if err != nil {
 		return err
 	}
@@ -154,7 +178,7 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 
 	a.httpServer = &http.Server{
 		Addr:    a.serviceProvider.HttpConfig().Address(),
-		Handler: corsMiddleware.Handler(mux),
+		Handler: corsMiddleware.Handler(authMux),
 	}
 
 	return nil

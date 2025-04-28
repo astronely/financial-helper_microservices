@@ -7,12 +7,12 @@ tasks:
       - go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1
       - go install github.com/envoyproxy/protoc-gen-validate@v1.2.1
       - go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@v2.26.0
-      - go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2
       - go install github.com/pressly/goose/v3/cmd/goose@v3.24.1
       - go install github.com/rakyll/statik@v0.1.7
 
   get-deps:
     cmds:
+      - go get github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2
       - go get -u google.golang.org/protobuf/cmd/protoc-gen-go
       - go get -u google.golang.org/grpc/cmd/protoc-gen-go-grpc
 
@@ -31,12 +31,12 @@ tasks:
   test:
     cmds:
       - go clean -testcache
-      - go test ./... -v -coverpkg=github.com/astronely/financial-helper_microservices/financeService/internal/api/...,github.com/astronely/financial-helper_microservices/financeService/internal/service/...
+      - go test ./... -v -coverpkg=github.com/astronely/financial-helper_microservices/userService/internal/api/...,github.com/astronely/financial-helper_microservices/userService/internal/service/...
 
   test-coverage:
     cmds:
       - go clean -testcache
-      - go test ./... -coverprofile=coverage.tmp.out -covermode count -coverpkg=github.com/astronely/financial-helper_microservices/financeService/internal/api/...,github.com/astronely/financial-helper_microservices/financeService/internal/service/...
+      - go test ./... -coverprofile=coverage.tmp.out -covermode count -coverpkg=github.com/astronely/financial-helper_microservices/userService/internal/api/...,github.com/astronely/financial-helper_microservices/userService/internal/service/...
       - grep -v 'mocks\|config' coverage.tmp.out > coverage.out
       - rm coverage.tmp.out
       - go tool cover -html=coverage.out;
@@ -45,27 +45,36 @@ tasks:
 
   generate:
     cmds:
-      - task: generate-wallet-api
-      - task: generate-transaction-api
+      - task: generate-auth-api
+      - task: generate-access-api
+      - task: generate-openapi
+      - if not exist pkg\swagger mkdir pkg\swagger
+      - statik -src=pkg\swagger\ -include='*.css,*.html,*.js,*.json,*.png'
 
-  generate-wallet-api:
+  generate-auth-api:
     cmds:
-      - if not exist pkg\wallet_v1 mkdir pkg\wallet_v1
-      - protoc --proto_path api\wallet_v1 --proto_path vendor.protogen \
-        --go_out=pkg\wallet_v1 --go_opt=paths=source_relative \
-        --go-grpc_out=pkg\wallet_v1 --go-grpc_opt=paths=source_relative \
-        --validate_out lang=go:pkg\wallet_v1 --validate_opt=paths=source_relative \
-        api\wallet_v1\wallet.proto
+      - if not exist pkg\auth_v1 mkdir pkg\auth_v1
+      - protoc --proto_path api\auth_v1 --proto_path vendor.protogen \
+        --go_out=pkg\auth_v1 --go_opt=paths=source_relative \
+        --go-grpc_out=pkg\auth_v1 --go-grpc_opt=paths=source_relative \
+        --grpc-gateway_out=pkg\auth_v1 --grpc-gateway_opt=paths=source_relative \
+        api\auth_v1\auth.proto
 
-  generate-transaction-api:
+  generate-access-api:
     cmds:
-      - if not exist pkg\transaction_v1 mkdir pkg\transaction_v1
-      - protoc --proto_path api\transaction_v1 --proto_path vendor.protogen \
-        --go_out=pkg\transaction_v1 --go_opt=paths=source_relative \
-        --go-grpc_out=pkg\transaction_v1 --go-grpc_opt=paths=source_relative \
-        --validate_out lang=go:pkg\transaction_v1 --validate_opt=paths=source_relative \
-        --grpc-gateway_out=pkg\transaction_v1 --grpc-gateway_opt=paths=source_relative \
-        api\transaction_v1\transaction.proto
+      - if not exist pkg\access_v1 mkdir pkg\access_v1
+      - protoc --proto_path api\access_v1 --proto_path vendor.protogen \
+        --go_out=pkg\access_v1 --go_opt=paths=source_relative \
+        --go-grpc_out=pkg\access_v1 --go-grpc_opt=paths=source_relative \
+        --grpc-gateway_out=pkg\access_v1 --grpc-gateway_opt=paths=source_relative \
+        api\access_v1\access.proto
+
+  generate-openapi:
+    cmds:
+      - if not exist pkg\swagger mkdir pkg\swagger
+      - protoc --proto_path=api --proto_path=vendor.protogen \
+        --openapiv2_out=allow_merge=true,merge_file_name=api:pkg\swagger \
+        api\auth_v1\auth.proto api\access_v1\access.proto
 
   vendor-proto:
     cmds:

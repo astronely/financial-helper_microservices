@@ -1,27 +1,157 @@
 version: '3'
 
 vars:
-  entities: [access, auth, board, note, transaction, user, wallet]
-  service: "apiGateway"
-
-dotenv: ['local.env']
+  proto_path: api
+  vendor_proto_path: vendor.protogen
+  output_dir: pkg
 
 tasks:
-  generate:
-    desc: Генерация API
+  install-deps:
     cmds:
-      - cmd: mkdir -p pkg/swagger
-      - for:
-          var: entities
-        cmd: |
-          mkdir -p pkg/{{.ITEM}}_v1
-          protoc --proto_path api/{{.ITEM}}_v1 --proto_path vendor.protogen \
-            --go_out=pkg/{{.ITEM}}_v1 --go_opt=paths=source_relative \
-            --go-grpc_out=pkg/{{.ITEM}}_v1 --go-grpc_opt=paths=source_relative \
-            --grpc-gateway_out=pkg/{{.ITEM}}_v1 --grpc-gateway_opt=paths=source_relative \
-            api/{{.ITEM}}_v1/{{.ITEM}}.proto
-          
-          protoc --proto_path=api --proto_path=vendor.protogen \
-            --openapiv2_out=allow_merge=true,merge_file_name={{.ITEM}}Api:pkg/swagger \
-            api/{{.ITEM}}_v1/{{.ITEM}}.proto
-      - cmd: statik -src=pkg/swagger/ -include='*.css,*.html,*.js,*.json,*.png'
+      - go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.36.3
+      - go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1
+      - go install github.com/envoyproxy/protoc-gen-validate@v1.2.1
+      - go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@v2.26.0
+      - go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2
+      - go install github.com/pressly/goose/v3/cmd/goose@v3.24.1
+      - go install github.com/rakyll/statik@v0.1.7
+
+  get-deps:
+    cmds:
+      - go get -u google.golang.org/protobuf/cmd/protoc-gen-go
+      - go get -u google.golang.org/grpc/cmd/protoc-gen-go-grpc
+
+  generate:
+    cmds:
+      - task: generate-user-api
+      - task: generate-auth-api
+      - task: generate-access-api
+      - task: generate-wallet-api
+      - task: generate-transaction-api
+      # TODO: other APIs
+      - task: generate-openapi
+      - mkdir {{.output_dir}}\swagger
+      - statik -src={{.output_dir}}\swagger\ -include="*.css,*.html,*.js,*.json,*.png"
+
+  generate-user-api:
+    cmds:
+      - mkdir {{.output_dir}}\user_v1
+      - protoc --proto_path={{.proto_path}}\user_v1 --proto_path={{.vendor_proto_path}} \
+        --go_out={{.output_dir}}\user_v1 --go_opt=paths=source_relative \
+        --go-grpc_out={{.output_dir}}\user_v1 --go-grpc_opt=paths=source_relative \
+        --validate_out lang=go:{{.output_dir}}\user_v1 --validate_opt=paths=source_relative \
+        --grpc-gateway_out={{.output_dir}}\user_v1 --grpc-gateway_opt=paths=source_relative \
+        {{.proto_path}}\user_v1\user.proto
+
+  generate-auth-api:
+    cmds:
+      - mkdir {{.output_dir}}\auth_v1
+      - protoc --proto_path={{.proto_path}}\auth_v1 --proto_path={{.vendor_proto_path}} \
+        --go_out={{.output_dir}}\auth_v1 --go_opt=paths=source_relative \
+        --go-grpc_out={{.output_dir}}\auth_v1 --go-grpc_opt=paths=source_relative \
+        --grpc-gateway_out={{.output_dir}}\auth_v1 --grpc-gateway_opt=paths=source_relative \
+        {{.proto_path}}\auth_v1\auth.proto
+
+  generate-access-api:
+    cmds:
+      - mkdir {{.output_dir}}\access_v1
+      - protoc --proto_path={{.proto_path}}\access_v1 --proto_path={{.vendor_proto_path}} \
+        --go_out={{.output_dir}}\access_v1 --go_opt=paths=source_relative \
+        --go-grpc_out={{.output_dir}}\access_v1 --go-grpc_opt=paths=source_relative \
+        --grpc-gateway_out={{.output_dir}}\access_v1 --grpc-gateway_opt=paths=source_relative \
+        {{.proto_path}}\access_v1\access.proto
+
+  generate-wallet-api:
+    cmds:
+      - mkdir {{.output_dir}}\wallet_v1
+      - protoc --proto_path={{.proto_path}}\wallet_v1 --proto_path={{.vendor_proto_path}} \
+        --go_out={{.output_dir}}\wallet_v1 --go_opt=paths=source_relative \
+        --go-grpc_out={{.output_dir}}\wallet_v1 --go-grpc_opt=paths=source_relative \
+        --grpc-gateway_out={{.output_dir}}\wallet_v1 --grpc-gateway_opt=paths=source_relative \
+        {{.proto_path}}\wallet_v1\wallet.proto
+
+  generate-transaction-api:
+    cmds:
+      - mkdir {{.output_dir}}\transaction_v1
+      - protoc --proto_path={{.proto_path}}\transaction_v1 --proto_path={{.vendor_proto_path}} \
+        --go_out={{.output_dir}}\transaction_v1 --go_opt=paths=source_relative \
+        --go-grpc_out={{.output_dir}}\transaction_v1 --go-grpc_opt=paths=source_relative \
+        --grpc-gateway_out={{.output_dir}}\transaction_v1 --grpc-gateway_opt=paths=source_relative \
+        {{.proto_path}}\transaction_v1\transaction.proto
+
+  generate-openapi:
+    cmds:
+      - mkdir {{.output_dir}}\swagger
+      - protoc --proto_path={{.proto_path}} --proto_path={{.vendor_proto_path}} \
+        --openapiv2_out=allow_merge=true,merge_file_name=userApi:{{.output_dir}}\swagger \
+        {{.proto_path}}\user_v1\user.proto
+
+      - protoc --proto_path={{.proto_path}} --proto_path={{.vendor_proto_path}} \
+        --openapiv2_out=allow_merge=true,merge_file_name=authApi:{{.output_dir}}\swagger \
+        {{.proto_path}}\auth_v1\auth.proto {{.proto_path}}\access_v1\access.proto
+
+      - protoc --proto_path={{.proto_path}} --proto_path={{.vendor_proto_path}} \
+        --openapiv2_out=allow_merge=true,merge_file_name=financeApi:{{.output_dir}}\swagger \
+        {{.proto_path}}\wallet_v1\wallet.proto {{.proto_path}}\transaction_v1\transaction.proto
+
+      - protoc --proto_path={{.proto_path}} --proto_path={{.vendor_proto_path}} \
+        --openapiv2_out=allow_merge=true,merge_file_name=boardApi:{{.output_dir}}\swagger \
+        {{.proto_path}}\board_v1\board.proto
+
+      - protoc --proto_path={{.proto_path}} --proto_path={{.vendor_proto_path}} \
+        --openapiv2_out=allow_merge=true,merge_file_name=noteApi:{{.output_dir}}\swagger \
+        {{.proto_path}}\note_v1\note.proto
+
+  vendor-proto:
+    cmds:
+      - |
+        if not exist {{.vendor_proto_path}}\validate (
+          mkdir {{.vendor_proto_path}}\validate
+          git clone https://github.com/envoyproxy/protoc-gen-validate {{.vendor_proto_path}}\protoc-gen-validate
+          move {{.vendor_proto_path}}\protoc-gen-validate\validate\*.proto {{.vendor_proto_path}}\validate
+          rmdir /S /Q {{.vendor_proto_path}}\protoc-gen-validate
+        )
+
+      - |
+        if not exist {{.vendor_proto_path}}\google (
+          git clone https://github.com/googleapis/googleapis {{.vendor_proto_path}}\googleapis
+          mkdir {{.vendor_proto_path}}\google
+          move {{.vendor_proto_path}}\googleapis\google\api {{.vendor_proto_path}}\google
+          rmdir /S /Q {{.vendor_proto_path}}\googleapis
+        )
+
+      - |
+        if not exist {{.vendor_proto_path}}\protoc-gen-openapiv2 (
+          mkdir {{.vendor_proto_path}}\protoc-gen-openapiv2\options
+          git clone https://github.com/grpc-ecosystem/grpc-gateway {{.vendor_proto_path}}\openapiv2
+          move {{.vendor_proto_path}}\openapiv2\protoc-gen-openapiv2\options\*.proto {{.vendor_proto_path}}\protoc-gen-openapiv2\options
+          rmdir /S /Q {{.vendor_proto_path}}\openapiv2
+        )
+
+#version: '3'
+#
+#vars:
+#  entities: [access, auth, board, note, transaction, user, wallet]
+#  service: "apiGateway"
+#
+#dotenv: ['local.env']
+#
+#tasks:
+#  generate:
+#    desc: Генерация API
+#    cmds:
+#      - cmd: mkdir -p pkg/swagger
+#      - for:
+#          var: entities
+#        cmd: |
+#          mkdir -p pkg/{{.ITEM}}_v1
+#          protoc --proto_path api/{{.ITEM}}_v1 --proto_path vendor.protogen \
+#            --go_out=pkg/{{.ITEM}}_v1 --go_opt=paths=source_relative \
+#            --go-grpc_out=pkg/{{.ITEM}}_v1 --go-grpc_opt=paths=source_relative \
+#            --grpc-gateway_out=pkg/{{.ITEM}}_v1 --grpc-gateway_opt=paths=source_relative \
+#            api/{{.ITEM}}_v1/{{.ITEM}}.proto
+#
+#          protoc --proto_path=api --proto_path=vendor.protogen \
+#            --openapiv2_out=allow_merge=true,merge_file_name={{.ITEM}}Api:pkg/swagger \
+#            api/{{.ITEM}}_v1/{{.ITEM}}.proto
+#      - cmd: statik -src=pkg/swagger/ -include='*.css,*.html,*.js,*.json,*.png'

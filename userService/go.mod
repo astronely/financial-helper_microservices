@@ -1,12 +1,12 @@
 module github.com/astronely/financial-helper_microservices/userService
 
-go 1.23.1
+go 1.24.0
 
 require (
 	github.com/Masterminds/squirrel v1.5.4
+	github.com/astronely/financial-helper_microservices/apiGateway v0.0.0-20250428145705-b64bf30c3719
 	github.com/brianvoe/gofakeit/v7 v7.1.2
 	github.com/envoyproxy/protoc-gen-validate v1.1.0
-	github.com/fatih/color v1.18.0
 	github.com/georgysavva/scany v1.2.2
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
@@ -15,8 +15,6 @@ require (
 	github.com/jackc/pgx/v4 v4.18.3
 	github.com/joho/godotenv v1.5.1
 	github.com/pkg/errors v0.9.1
-	github.com/rakyll/statik v0.1.7
-	github.com/rs/cors v1.11.1
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/crypto v0.36.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20250227231956-55c901821b1e
@@ -26,6 +24,7 @@ require (
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/fatih/color v1.18.0 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
@@ -43,7 +42,6 @@ require (
 	golang.org/x/net v0.37.0 // indirect
 	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
-	google.golang.org/genproto v0.0.0-20250324211829-b45e905df463 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250227231956-55c901821b1e // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

@@ -27,20 +27,20 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
 service AuthV1 {
   rpc Login (LoginRequest) returns (LoginResponse) {
     option (google.api.http) = {
-      post: "/api/v1/user/v1/login"
+      post: "/api/v1/user/login"
       body: "*"
     };
   };
 
   rpc GetRefreshToken (GetRefreshTokenRequest) returns (GetRefreshTokenResponse) {
     option (google.api.http) = {
-      post: "/api/v1/user/v1/refresh_token"
+      post: "/api/v1/user/refresh_token"
       body: "*"
     };
   };
   rpc GetAccessToken (GetAccessTokenRequest) returns (GetAccessTokenResponse) {
     option (google.api.http) = {
-      post: "/api/v1/user/v1/access_token"
+      post: "/api/v1/user/access_token"
       body: "*"
     };
   };

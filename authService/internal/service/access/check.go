@@ -16,7 +16,10 @@ const authPrefix = "Bearer "
 //const accessTokenKey = "access_token_key"
 
 func (s *serv) Check(ctx context.Context, endpointAddress string) (bool, error) {
-	if !strings.HasSuffix(endpointAddress, "/Check") {
+	if strings.HasSuffix(endpointAddress, "login") {
+		return true, nil
+	}
+	if strings.HasSuffix(endpointAddress, "create") {
 		return true, nil
 	}
 
@@ -29,6 +32,10 @@ func (s *serv) Check(ctx context.Context, endpointAddress string) (bool, error) 
 	if !ok || len(authHeader) == 0 {
 		return false, status.Errorf(codes.Unauthenticated, "authorization token is not provided")
 	}
+
+	logger.Debug("Authorization token",
+		"token", authHeader[0],
+	)
 
 	if !strings.HasPrefix(authHeader[0], authPrefix) {
 		return false, status.Errorf(codes.Unauthenticated, "authorization token is not provided")

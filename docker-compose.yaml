@@ -5,6 +5,9 @@ volumes:
   postgres_volume_prod:
   redis-data:
 
+networks:
+  backend:
+
 services:
   postgres-local:
     image: postgres:17.2-alpine3.21
@@ -14,6 +17,8 @@ services:
       - "54321:5432"
     volumes:
       - postgres_volume_local:/var/lib/postgresql/data
+    networks:
+      - backend
 
   redis:
     image: redis:7.4.2-alpine3.21
@@ -26,27 +31,83 @@ services:
       - "6379:6379"
     volumes:
       - redis-data:/data
-#  postgres-prod:
-#    image: postgres:17.2-alpine3.21
-#    env_file:
-#      - "prod.env"
-#    ports:
-#      - "54322:5432"
-#    volumes:
-#      - postgres_volume_prod:/var/lib/postgresql/data
-#
-#  migrator-local:
-#    build:
-#      context: .
-#      dockerfile: migration_local.Dockerfile
-#    restart: on-failure
-#    environment:
-#      DB_HOST: postgres-local
-#
-#  migrator-prod:
-#    build:
-#      context: .
-#      dockerfile: migration_prod.Dockerfile
-#    restart: on-failure
-#    environment:
-#      DB_HOST: postgres-prod
+    networks:
+      - backend
+
+  api-gateway:
+    build:
+      context: ./apiGateway
+    env_file:
+      - "./apiGateway/prod.env"
+    depends_on:
+      - user-service
+      - auth-service
+      - finance-service
+      - note-service
+      - board-service
+    ports:
+      - "8080:8080"
+      - "9090:9090"
+    networks:
+      - backend
+
+  user-service:
+    build:
+      context: ./userService
+    env_file:
+      - "./userService/prod.env"
+    depends_on:
+      - postgres-local
+    ports:
+      - "50051:50051"
+    networks:
+      - backend
+
+  auth-service:
+    build:
+      context: ./authService
+    env_file:
+      - "./authService/prod.env"
+    depends_on:
+      - postgres-local
+    ports:
+      - "50052:50052"
+    networks:
+      - backend
+
+  finance-service:
+    build:
+      context: ./noteService
+    env_file:
+      - "./financeService/prod.env"
+    depends_on:
+      - postgres-local
+    ports:
+      - "50053:50053"
+    networks:
+      - backend
+
+  note-service:
+    build:
+      context: ./noteService
+    env_file:
+      - "./noteService/prod.env"
+    depends_on:
+      - postgres-local
+    ports:
+      - "50054:50054"
+    networks:
+      - backend
+
+  board-service:
+    build:
+      context: ./boardService
+    env_file:
+      - "./boardService/prod.env"
+    depends_on:
+      - postgres-local
+      - redis
+    ports:
+      - "50055:50055"
+    networks:
+      - backend

@@ -80,6 +80,14 @@ generate-openapi:
 		--openapiv2_out=allow_merge=true,merge_file_name=financeApi:pkg/swagger \
 		api/wallet_v1/wallet.proto api/transaction_v1/transaction.proto
 
+	protoc --proto_path=api --proto_path=vendor.protogen \
+        		--openapiv2_out=allow_merge=true,merge_file_name=boardApi:pkg/swagger \
+        		api/board_v1/board.proto
+
+	protoc --proto_path=api --proto_path=vendor.protogen \
+    		--openapiv2_out=allow_merge=true,merge_file_name=noteApi:pkg/swagger \
+    		api/note_v1/note.proto
+
 vendor-proto:
 		@if [ ! -d vendor.protogen/validate ]; then \
 			mkdir -p vendor.protogen/validate &&\
