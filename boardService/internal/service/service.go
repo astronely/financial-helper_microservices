@@ -7,7 +7,7 @@ import (
 
 type BoardService interface {
 	Create(ctx context.Context, info *model.BoardInfo) (int64, error)
-	CreateUser(ctx context.Context, info *model.BoardUser) (int64, error)
+	CreateUser(ctx context.Context, info *model.BoardUserCreate) (int64, error)
 	Get(ctx context.Context, id int64) (*model.Board, error)
 	GetUsers(ctx context.Context, boardId int64) ([]*model.BoardUser, error)
 	ListByUserId(ctx context.Context, userId int64) ([]*model.Board, error)

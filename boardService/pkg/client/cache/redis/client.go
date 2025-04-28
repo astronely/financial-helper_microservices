@@ -88,7 +88,7 @@ func (r *redisClient) HGetAll(ctx context.Context, key string) (map[string]strin
 }
 
 func (r *redisClient) Get(ctx context.Context, key string) (interface{}, error) {
-	result, err := r.rdb.Get(ctx, key).Bytes()
+	result, err := r.rdb.Get(ctx, key).Result()
 	if err != nil {
 		logger.Error("redis get failed",
 			"error", err,

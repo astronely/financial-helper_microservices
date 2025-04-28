@@ -25,6 +25,12 @@ type BoardUser struct {
 	CreatedAt time.Time
 }
 
+type BoardUserCreate struct {
+	BoardID int64
+	UserID  int64
+	Role    string
+}
+
 type BoardUpdate struct {
 	ID          int64
 	Name        sql.NullString
@@ -33,10 +39,11 @@ type BoardUpdate struct {
 
 type JoinInfo struct {
 	Token string
+	ID    int64
 }
 
 type GenerateInviteInfo struct {
-	BoarID int64
-	UserID int64
-	Role   string
+	BoardID int64
+	//UserID  int64
+	Role string
 }

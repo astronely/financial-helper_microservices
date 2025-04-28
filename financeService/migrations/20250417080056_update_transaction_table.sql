@@ -50,7 +50,6 @@ ALTER TABLE "transaction_details"
 
 ALTER TABLE "wallets"
     ADD CONSTRAINT balance_positive CHECK ("balance" > 0);
-
 -- +goose StatementEnd
 
 -- +goose Down

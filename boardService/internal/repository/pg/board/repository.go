@@ -2,6 +2,7 @@ package board
 
 import (
 	"context"
+	"errors"
 	sq "github.com/Masterminds/squirrel"
 	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/logger"
 	"github.com/astronely/financial-helper_microservices/boardService/internal/model"
@@ -24,9 +25,9 @@ const (
 	idColumn          = "id"
 	nameColumn        = "name"
 	descriptionColumn = "description"
-	ownerIdColumn     = "owner"
-	updatedAtColumn   = "updatedAt"
-	createdAtColumn   = "createdAt"
+	ownerIdColumn     = "owner_id"
+	updatedAtColumn   = "updated_at"
+	createdAtColumn   = "created_at"
 
 	boardIdColumn = "board_id"
 	userIdColumn  = "user_id"
@@ -85,12 +86,12 @@ func (r *repo) Create(ctx context.Context, info *model.BoardInfo) (int64, error)
 	return id, nil
 }
 
-func (r *repo) CreateUser(ctx context.Context, info *model.BoardUser) (int64, error) {
+func (r *repo) CreateUser(ctx context.Context, info *model.BoardUserCreate) (int64, error) {
 	builder := sq.Insert(boardUserTableName).
 		Columns(boardIdColumn, userIdColumn, roleColumn).
 		Values(info.BoardID, info.UserID, info.Role).
 		PlaceholderFormat(sq.Dollar).
-		Suffix("RETURNING id")
+		Suffix("RETURNING board_id")
 
 	query, args, err := builder.ToSql()
 	if err != nil {
@@ -211,7 +212,7 @@ func (r *repo) ListByUserId(ctx context.Context, userId int64) ([]*model.Board, 
 	boardsBuilder := sq.Select(idColumn, nameColumn, descriptionColumn, ownerIdColumn, updatedAtColumn, createdAtColumn).
 		From(boardTableName).
 		PlaceholderFormat(sq.Dollar).
-		Where(sq.Expr("id IN (?)", ids))
+		Where(sq.Eq{idColumn: ids})
 
 	query, args, err = boardsBuilder.ToSql()
 	if err != nil {
@@ -221,8 +222,13 @@ func (r *repo) ListByUserId(ctx context.Context, userId int64) ([]*model.Board, 
 		return nil, err
 	}
 
+	logger.Debug("SQL",
+		"query", query,
+	)
+
 	q = db.Query{
-		Name: "board_repository.Boards.ListByUserId",
+		Name:     "board_repository.Boards.ListByUserId",
+		QueryRaw: query,
 	}
 
 	var boards []*modelRepo.Board
@@ -328,45 +334,19 @@ func (r *repo) Delete(ctx context.Context, id int64) error {
 		QueryRaw: query,
 	}
 
-	_, err = r.db.DB().ExecContext(ctx, q, args...)
+	result, err := r.db.DB().ExecContext(ctx, q, args...)
 	if err != nil {
 		logger.Error("error delete board | ExecContext",
 			"error", err.Error(),
 		)
 		return err
 	}
+	if result.RowsAffected() == 0 {
+		logger.Error("no board to delete | ExecContext",
+			"error", errors.New("no board to delete"),
+		)
+		return errors.New("no board to delete")
+	}
 
 	return nil
 }
-
-//func (r *repo) JoinBoard(ctx context.Context, info *model.JoinInfo) (*model.JoinInfo, error) {
-//	builder := sq.Insert(boardTableName).
-//		PlaceholderFormat(sq.Dollar).
-//		Columns(boardIdColumn, userIdColumn, roleColumn).
-//		Values(info.BoarID, info.UserID, info.Role).
-//		Suffix("RETURNING id")
-//
-//	query, args, err := builder.ToSql()
-//	if err != nil {
-//		logger.Error("error join board | BuildToSql",
-//			"error", err.Error(),
-//		)
-//		return nil, err
-//	}
-//
-//	q := db.Query{
-//		Name:     "board_repository.Join",
-//		QueryRaw: query,
-//	}
-//
-//	var id int64
-//	err = r.db.DB().QueryRawContext(ctx, q, args...).Scan(&id)
-//	if err != nil {
-//		logger.Error("error join board | QueryRawContext",
-//			"error", err.Error(),
-//		)
-//		return nil, err
-//	}
-//
-//	return info, nil
-//}

@@ -16,6 +16,7 @@ import (
 	cacheClient "github.com/astronely/financial-helper_microservices/boardService/pkg/client/cache/redis"
 	"github.com/astronely/financial-helper_microservices/userService/pkg/client/db"
 	"github.com/astronely/financial-helper_microservices/userService/pkg/client/db/pg"
+	"github.com/astronely/financial-helper_microservices/userService/pkg/client/db/transaction"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -27,6 +28,7 @@ type serviceProvider struct {
 	rdb         *redis.Client
 	redisClient cache.RedisClient
 	dbClient    db.Client
+	txManager   db.TxManager
 
 	boardService service.BoardService
 
@@ -100,6 +102,13 @@ func (s *serviceProvider) DBClient(ctx context.Context) db.Client {
 	return s.dbClient
 }
 
+func (s *serviceProvider) TxManager(ctx context.Context) db.TxManager {
+	if s.txManager == nil {
+		s.txManager = transaction.NewTransactionManager(s.DBClient(ctx).DB())
+	}
+	return s.txManager
+}
+
 func (s *serviceProvider) Rdb(ctx context.Context) *redis.Client {
 	if s.rdb == nil {
 		rdb := redis.NewClient(&redis.Options{
@@ -125,7 +134,7 @@ func (s *serviceProvider) RedisClient(ctx context.Context) cache.RedisClient {
 
 func (s *serviceProvider) BoardService(ctx context.Context) service.BoardService {
 	if s.boardService == nil {
-		s.boardService = boardService.NewService(s.BoardRepository(ctx), s.BoardRedisRepository(ctx))
+		s.boardService = boardService.NewService(s.BoardRepository(ctx), s.BoardRedisRepository(ctx), s.TxManager(ctx))
 	}
 	return s.boardService
 }

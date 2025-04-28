@@ -18,6 +18,7 @@ func (i *Implementation) Join(ctx context.Context, req *desc.JoinRequest) (*desc
 		"token", req.GetToken())
 
 	return &desc.JoinResponse{
-		Id: info.BoarID,
+		BoardId: info.BoardID,
+		Role:    info.Role,
 	}, nil
 }

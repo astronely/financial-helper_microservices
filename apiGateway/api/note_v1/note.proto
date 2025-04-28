@@ -1,0 +1,145 @@
+syntax = "proto3";
+
+package note_v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "validate/validate.proto";
+
+option go_package = "github.com/astronely/financial-helper_microservices/noteService/pkg/note_v1;note_v1";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  info: {
+    title: "Note API"
+    version: "1.0.0"
+    contact: {
+      name: "astronely"
+    };
+  };
+
+  host: "localhost:8080",
+  schemes: HTTP,
+  schemes: HTTPS,
+  consumes: "application/json",
+  produces: "application/json",
+};
+
+service NoteV1 {
+  rpc Create(CreateRequest) returns (CreateResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/note/create",
+      body: "*"
+    };
+  }
+  rpc Get(GetRequest) returns (GetResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/note/get"
+    };
+  }
+  rpc List(ListRequest) returns (ListResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/note/list"
+    };
+  }
+  rpc Update(UpdateRequest) returns (UpdateResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/note/update",
+      body: "*"
+    };
+  }
+  rpc Complete(CompleteRequest) returns (CompleteResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/note/complete",
+      body: "*"
+    };
+  }
+  rpc Delete(DeleteRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/api/v1/note/delete",
+    };
+  }
+}
+
+message NoteInfo {
+  int64 board_id = 1 [(validate.rules).int64.gt = 0];
+  int64 owner_id = 2 [(validate.rules).int64.gt = 0];
+  google.protobuf.Int64Value performer_id = 3 [(validate.rules).int64.gt = 0];
+  string content = 4 [(validate.rules).string.min_len = 1];
+  bool status = 5 [(validate.rules).bool.const = true]; // Посмотреть что значит const
+  google.protobuf.Timestamp completion_date = 6;
+}
+
+message Note {
+  int64 id = 1 [(validate.rules).int64.gt = 0];
+  NoteInfo info = 2 [(validate.rules).message.required = true];
+  google.protobuf.Timestamp update_at = 3;
+  google.protobuf.Timestamp created_at = 4;
+}
+
+message NoteCreate {
+  int64 board_id = 1 [(validate.rules).int64.gt = 0];
+  int64 owner_id = 2 [(validate.rules).int64.gt = 0];
+  string content = 3 [(validate.rules).string.min_len = 1];
+}
+
+message FilterInfo {
+  google.protobuf.Int64Value board_id = 1 [(validate.rules).int64.gt = 0];
+  google.protobuf.Int64Value owner_id = 2 [(validate.rules).int64.gt = 0];
+  google.protobuf.Int64Value performer_id = 3 [(validate.rules).int64.gt = 0];
+  google.protobuf.BoolValue status = 4;
+  google.protobuf.Timestamp completion_date_start = 5;
+  google.protobuf.Timestamp completion_date_end = 6;
+  google.protobuf.Timestamp updated_at = 7;
+  google.protobuf.Timestamp created_at_start = 8;
+  google.protobuf.Timestamp created_at_end = 9;
+}
+
+message CreateRequest {
+  NoteCreate info = 1[(validate.rules).message.required = true];
+}
+
+message CreateResponse {
+  int64 id = 1;
+}
+
+message GetRequest {
+  int64 id = 1 [(validate.rules).int64.gt = 0];
+}
+
+message GetResponse {
+  Note note = 1;
+}
+message ListRequest {
+  int64 limit = 1 [(validate.rules).int64.gte = 0];
+  int64 offset = 2 [(validate.rules).int64.gte = 0];
+  FilterInfo filterInfo = 3;
+}
+
+message ListResponse {
+  repeated Note notes = 1;
+}
+
+message UpdateRequest {
+  int64 id = 1;
+  string content = 2;
+}
+
+message UpdateResponse {
+  int64 id = 1;
+}
+
+message CompleteRequest {
+  int64 id = 1;
+  bool status = 2; // Возможно можно не передавать, просто инвертировать False -> True, True -> False
+}
+
+message CompleteResponse {
+  int64 id = 1;
+}
+
+message DeleteRequest {
+  int64 id = 1;
+}

@@ -458,7 +458,7 @@ func (r *repo) Delete(ctx context.Context, id int64) error {
 
 	query, args, err := builder.ToSql()
 	if err != nil {
-		logger.Error("SQL Error message from delete",
+		logger.Error("error delete transaction | Builder",
 			"Error", err.Error(),
 		)
 		return err
@@ -469,12 +469,19 @@ func (r *repo) Delete(ctx context.Context, id int64) error {
 		QueryRaw: query,
 	}
 
-	_, err = r.db.DB().ExecContext(ctx, q, args...)
+	result, err := r.db.DB().ExecContext(ctx, q, args...)
 	if err != nil {
-		logger.Error("SQL Error message from delete",
+		logger.Error("error delete transaction | ExecContext",
 			"Error", err.Error(),
 		)
 		return err
+	}
+
+	if result.RowsAffected() == 0 {
+		logger.Error("error delete transaction | RowsAffected == 0",
+			"error", errors.New("no transaction to delete"),
+		)
+		return errors.New("no transaction to delete")
 	}
 	return nil
 }

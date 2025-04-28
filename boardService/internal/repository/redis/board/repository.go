@@ -7,7 +7,6 @@ import (
 	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/logger"
 	"github.com/astronely/financial-helper_microservices/boardService/internal/model"
 	"github.com/astronely/financial-helper_microservices/boardService/internal/repository"
-	modelRepo "github.com/astronely/financial-helper_microservices/boardService/internal/repository/redis/board/model"
 	"github.com/astronely/financial-helper_microservices/boardService/pkg/client/cache"
 	"github.com/google/uuid"
 	"time"
@@ -62,13 +61,8 @@ func NewRepository(client cache.RedisClient) repository.BoardRedisRepository {
 func (r *repo) GenerateInvite(ctx context.Context, info *model.GenerateInviteInfo) (string, error) {
 	token := uuid.New().String()
 	key := inviteKey + token
-	converted := modelRepo.InvitationData{
-		BoardID: info.BoarID,
-		UserID:  info.UserID,
-		Role:    info.Role,
-	}
 
-	bytesData, err := json.Marshal(converted)
+	bytesData, err := json.Marshal(info)
 	if err != nil {
 		return "", err
 	}
@@ -100,19 +94,13 @@ func (r *repo) JoinBoard(ctx context.Context, info *model.JoinInfo) (*model.Gene
 		logger.Error("error join board | Redis",
 			"error", err.Error(),
 		)
-		return nil, err
+		return nil, errors.New("invite link expired")
 	}
 
 	var convertedInfo *model.GenerateInviteInfo
-	err = json.Unmarshal(inviteInfo.([]byte), &convertedInfo)
+	err = json.Unmarshal([]byte(inviteInfo.(string)), &convertedInfo)
 	if err != nil {
 		return nil, errors.New("invalid invite info")
 	}
 	return convertedInfo, nil
-	//switch convertedInfo.(type) {
-	//case model.GenerateInviteInfo:
-	//	return inviteInfo.(*model.GenerateInviteInfo), nil
-	//default:
-	//	return nil, errors.New("invalid invite info")
-	//}
 }

@@ -14,6 +14,6 @@ func (s *serv) GenerateInvite(ctx context.Context, info *model.GenerateInviteInf
 		)
 		return "", err
 	}
-	url := "invite?token=" + token
-	return url, nil
+	//url := "invite?token=" + token
+	return token, nil
 }

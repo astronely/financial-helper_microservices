@@ -15,8 +15,6 @@ CREATE INDEX ON "wallets" ("board_id");
 CREATE UNIQUE INDEX ON "wallets" ("owner_id", "board_id", "name");
 
 ALTER TABLE "wallets" ADD FOREIGN KEY ("owner_id") REFERENCES "users" ("id");
-
--- ALTER TABLE "wallets" ADD FOREIGN KEY ("board_id") REFERENCES "boards" ("id"); // TODO: Когда добавлю таблицу Boards
 -- +goose StatementEnd
 
 -- +goose Down

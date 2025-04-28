@@ -2,6 +2,7 @@ package note
 
 import (
 	"context"
+	"errors"
 	sq "github.com/Masterminds/squirrel"
 	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/logger"
 	"github.com/astronely/financial-helper_microservices/noteService/internal/model"
@@ -216,12 +217,19 @@ func (r *repo) Delete(ctx context.Context, id int64) error {
 		QueryRaw: query,
 	}
 
-	_, err = r.db.DB().ExecContext(ctx, q, args...)
+	result, err := r.db.DB().ExecContext(ctx, q, args...)
 	if err != nil {
 		logger.Error("error delete note | ExecContext",
 			"error", err.Error(),
 		)
 		return err
+	}
+
+	if result.RowsAffected() == 0 {
+		logger.Error("error delete note | RowsAffected = 0",
+			"error", errors.New("no note to delete"),
+		)
+		return errors.New("no note to delete")
 	}
 
 	return nil

@@ -34,20 +34,16 @@ CREATE INDEX ON "board_users" ("user_id");
 
 CREATE UNIQUE INDEX ON "board_users" ("board_id", "user_id");
 
--- ALTER TABLE "boards" ADD FOREIGN KEY ("owner_id") REFERENCES "users" ("id");
+ALTER TABLE "boards" ADD FOREIGN KEY ("owner_id") REFERENCES "users" ("id") ON DELETE CASCADE;
 
--- ALTER TABLE "board_users" ADD FOREIGN KEY ("board_id") REFERENCES "boards" ("id");
+ALTER TABLE "board_users" ADD FOREIGN KEY ("board_id") REFERENCES "boards" ("id") ON DELETE CASCADE;
 
--- ALTER TABLE "board_users" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
-
--- ALTER TABLE "wallets" ADD FOREIGN KEY ("board_id") REFERENCES "boards" ("id");
-
--- ALTER TABLE "transactions" ADD FOREIGN KEY ("board_id") REFERENCES "boards" ("id");
-
--- ALTER TABLE "notes" ADD FOREIGN KEY ("board_id") REFERENCES "boards" ("id");
+ALTER TABLE "board_users" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE CASCADE;
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
-SELECT 'down SQL query';
+DROP TABLE IF EXISTS "board_users";
+DROP TABLE IF EXISTS "boards";
+DROP TYPE IF EXISTS "roles";
 -- +goose StatementEnd

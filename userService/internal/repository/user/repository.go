@@ -2,7 +2,9 @@ package user
 
 import (
 	"context"
+	"errors"
 	sq "github.com/Masterminds/squirrel"
+	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/logger"
 	"github.com/astronely/financial-helper_microservices/userService/internal/model"
 	"github.com/astronely/financial-helper_microservices/userService/internal/repository"
 	"github.com/astronely/financial-helper_microservices/userService/internal/repository/user/converter"
@@ -49,6 +51,9 @@ func (r *repo) Create(ctx context.Context, info *model.UserInfo, password string
 
 	query, args, err := builder.ToSql()
 	if err != nil {
+		logger.Error("error create user | Builder",
+			"error", err.Error(),
+		)
 		return 0, err
 	}
 
@@ -60,6 +65,9 @@ func (r *repo) Create(ctx context.Context, info *model.UserInfo, password string
 	var id int64
 	err = r.db.DB().QueryRawContext(ctx, q, args...).Scan(&id)
 	if err != nil {
+		logger.Error("error create user | QueryRawContext",
+			"error", err.Error(),
+		)
 		return 0, err
 	}
 
@@ -75,6 +83,9 @@ func (r *repo) Get(ctx context.Context, id int64) (*model.User, error) {
 
 	query, args, err := builder.ToSql()
 	if err != nil {
+		logger.Error("error get user | Builder",
+			"error", err.Error(),
+		)
 		return nil, err
 	}
 
@@ -86,6 +97,9 @@ func (r *repo) Get(ctx context.Context, id int64) (*model.User, error) {
 	var user modelRepo.User
 	err = r.db.DB().ScanOneContext(ctx, &user, q, args...)
 	if err != nil {
+		logger.Error("error get user | ScanOneContext",
+			"error", err.Error(),
+		)
 		return nil, err
 	}
 
@@ -101,6 +115,9 @@ func (r *repo) List(ctx context.Context, limit uint64, offset uint64) ([]*model.
 
 	query, args, err := builder.ToSql()
 	if err != nil {
+		logger.Error("error list users | Builder",
+			"error", err.Error(),
+		)
 		return nil, err
 	}
 
@@ -112,6 +129,9 @@ func (r *repo) List(ctx context.Context, limit uint64, offset uint64) ([]*model.
 	var users []*modelRepo.User
 	err = r.db.DB().ScanAllContext(ctx, &users, q, args...)
 	if err != nil {
+		logger.Error("error list users | ScanAllContext",
+			"error", err.Error(),
+		)
 		return nil, err
 	}
 
@@ -133,8 +153,20 @@ func (r *repo) Delete(ctx context.Context, id int64) error {
 		QueryRaw: query,
 	}
 
-	_, err = r.db.DB().ExecContext(ctx, q, args...)
+	result, err := r.db.DB().ExecContext(ctx, q, args...)
 
+	if err != nil {
+		logger.Error("error delete user | ExecContext",
+			"error", err.Error(),
+		)
+		return err
+	}
+	if result.RowsAffected() == 0 {
+		logger.Error("error delete user | RowsAffected = 0",
+			"error", errors.New("no user to delete"),
+		)
+		return errors.New("no user to delete")
+	}
 	return err
 }
 
@@ -164,6 +196,9 @@ func (r *repo) Update(ctx context.Context, info *model.UpdateUserInfo) (int64, e
 	query, args, err := builder.ToSql()
 
 	if err != nil {
+		logger.Error("error update user | Builder",
+			"error", err.Error(),
+		)
 		return 0, err
 	}
 
@@ -175,6 +210,9 @@ func (r *repo) Update(ctx context.Context, info *model.UpdateUserInfo) (int64, e
 	var id int64
 	err = r.db.DB().QueryRawContext(ctx, q, args...).Scan(&id)
 	if err != nil {
+		logger.Error("error update user | QueryRawContext",
+			"error", err.Error(),
+		)
 		return 0, err
 	}
 

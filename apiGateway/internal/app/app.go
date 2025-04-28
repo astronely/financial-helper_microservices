@@ -7,8 +7,10 @@ import (
 	"github.com/astronely/financial-helper_microservices/apiGateway/internal/config"
 	descAccess "github.com/astronely/financial-helper_microservices/apiGateway/pkg/access_v1"
 	descAuth "github.com/astronely/financial-helper_microservices/apiGateway/pkg/auth_v1"
+	descBoard "github.com/astronely/financial-helper_microservices/apiGateway/pkg/board_v1"
 	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/closer"
 	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/logger"
+	descNote "github.com/astronely/financial-helper_microservices/apiGateway/pkg/note_v1"
 	descTransaction "github.com/astronely/financial-helper_microservices/apiGateway/pkg/transaction_v1"
 	descUser "github.com/astronely/financial-helper_microservices/apiGateway/pkg/user_v1"
 	descWallet "github.com/astronely/financial-helper_microservices/apiGateway/pkg/wallet_v1"
@@ -134,6 +136,14 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	err = descNote.RegisterNoteV1HandlerFromEndpoint(ctx, mux, a.serviceProvider.GrpcConfig().NoteAddress(), opts)
+	if err != nil {
+		return err
+	}
+	err = descBoard.RegisterBoardV1HandlerFromEndpoint(ctx, mux, a.serviceProvider.GrpcConfig().BoardAddress(), opts)
+	if err != nil {
+		return err
+	}
 
 	corsMiddleware := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:9090"}, // TODO: Дописать IP клиента
@@ -201,6 +211,8 @@ func (a *App) initSwaggerServer(_ context.Context) error {
 	mux.HandleFunc("/userApi.swagger.json", serveSwaggerFile("/userApi.swagger.json"))
 	mux.HandleFunc("/authApi.swagger.json", serveSwaggerFile("/authApi.swagger.json"))
 	mux.HandleFunc("/financeApi.swagger.json", serveSwaggerFile("/financeApi.swagger.json"))
+	mux.HandleFunc("/boardApi.swagger.json", serveSwaggerFile("/boardApi.swagger.json"))
+	mux.HandleFunc("/noteApi.swagger.json", serveSwaggerFile("/noteApi.swagger.json"))
 
 	a.swaggerServer = &http.Server{
 		Addr:    a.serviceProvider.SwaggerConfig().Address(),

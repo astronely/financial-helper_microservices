@@ -1,0 +1,27 @@
+version: '3'
+
+vars:
+  entities: [access, auth, board, note, transaction, user, wallet]
+  service: "apiGateway"
+
+dotenv: ['local.env']
+
+tasks:
+  generate:
+    desc: Генерация API
+    cmds:
+      - cmd: mkdir -p pkg/swagger
+      - for:
+          var: entities
+        cmd: |
+          mkdir -p pkg/{{.ITEM}}_v1
+          protoc --proto_path api/{{.ITEM}}_v1 --proto_path vendor.protogen \
+            --go_out=pkg/{{.ITEM}}_v1 --go_opt=paths=source_relative \
+            --go-grpc_out=pkg/{{.ITEM}}_v1 --go-grpc_opt=paths=source_relative \
+            --grpc-gateway_out=pkg/{{.ITEM}}_v1 --grpc-gateway_opt=paths=source_relative \
+            api/{{.ITEM}}_v1/{{.ITEM}}.proto
+          
+          protoc --proto_path=api --proto_path=vendor.protogen \
+            --openapiv2_out=allow_merge=true,merge_file_name={{.ITEM}}Api:pkg/swagger \
+            api/{{.ITEM}}_v1/{{.ITEM}}.proto
+      - cmd: statik -src=pkg/swagger/ -include='*.css,*.html,*.js,*.json,*.png'
