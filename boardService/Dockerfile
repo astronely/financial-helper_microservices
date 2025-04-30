@@ -7,6 +7,9 @@ RUN go mod tidy
 RUN go mod download
 COPY . .
 
+ENV GOOS=linux
+ENV GOARCH=amd64
+
 RUN go build -o main cmd/main.go
 
 # Expose the port the service will run on

@@ -16,6 +16,7 @@ import (
 	descUser "github.com/astronely/financial-helper_microservices/apiGateway/pkg/user_v1"
 	descWallet "github.com/astronely/financial-helper_microservices/apiGateway/pkg/wallet_v1"
 	_ "github.com/astronely/financial-helper_microservices/apiGateway/statik"
+	"google.golang.org/protobuf/proto"
 	"time"
 
 	//descWallet "github.com/astronely/financial-helper_microservices/financeService/pkg/transaction_v1"
@@ -42,6 +43,7 @@ type App struct {
 	serviceProvider *serviceProvider
 	httpServer      *http.Server
 	swaggerServer   *http.Server
+	authConn        *grpc.ClientConn
 }
 
 func NewApp(ctx context.Context) (*App, error) {
@@ -112,7 +114,20 @@ func (a *App) initServiceProvider(_ context.Context) error {
 }
 
 func (a *App) initHTTPServer(ctx context.Context) error {
-	mux := runtime.NewServeMux()
+	mux := runtime.NewServeMux(
+		runtime.WithForwardResponseOption(func(ctx context.Context, w http.ResponseWriter, _ proto.Message) error {
+			md, ok := runtime.ServerMetadataFromContext(ctx)
+			logger.Debug("Server metadata",
+				"md", md)
+			if !ok {
+				return nil
+			}
+			for _, v := range md.HeaderMD["set-cookie"] {
+				w.Header().Add("Set-Cookie", v)
+			}
+			return nil
+		}),
+	)
 
 	opts := []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -123,54 +138,47 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 		return err
 	}
 
-	ctxWithTimeout, cancel := context.WithTimeout(ctx, time.Second*10)
+	a.authConn = conn
 
-	authClient := descAccess.NewAccessV1Client(conn)
-	authMux := interceptor.AuthInterceptor(ctx, authClient)(mux)
+	//authClient := descAccess.NewAccessV1Client(conn)
+	interceptorsChain := interceptor.Chain(
+		interceptor.Logger(ctx),
+		//interceptor.CookieInterceptor,
+		interceptor.Timeout(time.Second*10),
+		//interceptor.AuthInterceptor(ctx, authClient),
+	)
 
-	closer.Add(func() error {
-		err := conn.Close()
-		if err != nil {
-			return err
-		}
-		logger.Info("Auth client closed successfully")
-
-		cancel()
-		logger.Info("Context with timeout canceled")
-		return err
-	})
-
-	err = descUser.RegisterUserV1HandlerFromEndpoint(ctxWithTimeout, mux, a.serviceProvider.GrpcConfig().UserAddress(), opts)
+	err = descUser.RegisterUserV1HandlerFromEndpoint(ctx, mux, a.serviceProvider.GrpcConfig().UserAddress(), opts)
 	if err != nil {
 		return err
 	}
-	err = descAuth.RegisterAuthV1HandlerFromEndpoint(ctxWithTimeout, mux, a.serviceProvider.GrpcConfig().AuthAddress(), opts)
+	err = descAuth.RegisterAuthV1HandlerFromEndpoint(ctx, mux, a.serviceProvider.GrpcConfig().AuthAddress(), opts)
 	if err != nil {
 		return err
 	}
-	err = descAccess.RegisterAccessV1HandlerFromEndpoint(ctxWithTimeout, mux, a.serviceProvider.GrpcConfig().AuthAddress(), opts)
+	err = descAccess.RegisterAccessV1HandlerFromEndpoint(ctx, mux, a.serviceProvider.GrpcConfig().AuthAddress(), opts)
 	if err != nil {
 		return err
 	}
-	err = descWallet.RegisterWalletV1HandlerFromEndpoint(ctxWithTimeout, mux, a.serviceProvider.GrpcConfig().FinanceAddress(), opts)
+	err = descWallet.RegisterWalletV1HandlerFromEndpoint(ctx, mux, a.serviceProvider.GrpcConfig().FinanceAddress(), opts)
 	if err != nil {
 		return err
 	}
-	err = descTransaction.RegisterTransactionV1HandlerFromEndpoint(ctxWithTimeout, mux, a.serviceProvider.GrpcConfig().FinanceAddress(), opts)
+	err = descTransaction.RegisterTransactionV1HandlerFromEndpoint(ctx, mux, a.serviceProvider.GrpcConfig().FinanceAddress(), opts)
 	if err != nil {
 		return err
 	}
-	err = descNote.RegisterNoteV1HandlerFromEndpoint(ctxWithTimeout, mux, a.serviceProvider.GrpcConfig().NoteAddress(), opts)
+	err = descNote.RegisterNoteV1HandlerFromEndpoint(ctx, mux, a.serviceProvider.GrpcConfig().NoteAddress(), opts)
 	if err != nil {
 		return err
 	}
-	err = descBoard.RegisterBoardV1HandlerFromEndpoint(ctxWithTimeout, mux, a.serviceProvider.GrpcConfig().BoardAddress(), opts)
+	err = descBoard.RegisterBoardV1HandlerFromEndpoint(ctx, mux, a.serviceProvider.GrpcConfig().BoardAddress(), opts)
 	if err != nil {
 		return err
 	}
 
 	corsMiddleware := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:9090"}, // TODO: Дописать IP клиента
+		AllowedOrigins:   []string{"http://localhost:9090", "http://localhost:5173", "http://localhost:5174"}, // TODO: Дописать IP клиента
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Authorization", "Content-Type", "Accept", "Content-Length"},
 		AllowCredentials: true,
@@ -178,7 +186,7 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 
 	a.httpServer = &http.Server{
 		Addr:    a.serviceProvider.HttpConfig().Address(),
-		Handler: corsMiddleware.Handler(authMux),
+		Handler: corsMiddleware.Handler(interceptorsChain(mux)),
 	}
 
 	return nil
@@ -193,6 +201,10 @@ func (a *App) runHttpServer(ctx context.Context) error {
 		if err := a.httpServer.Shutdown(context.Background()); err == nil {
 			logger.Info("HTTP server shutdown gracefully")
 		}
+		if err := a.authConn.Close(); err == nil {
+			logger.Info("Auth client shutdown gracefully")
+		}
+		logger.Info("In closer")
 		return nil
 	})
 

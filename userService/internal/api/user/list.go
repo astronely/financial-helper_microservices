@@ -17,6 +17,8 @@ func (i *Implementation) List(ctx context.Context, req *desc.ListRequest) (*desc
 	}
 	logger.Debug("Get List of Users",
 		"users number", len(usersObj),
+		"limit", req.GetLimit(),
+		"offset", req.GetOffset(),
 	)
 
 	return &desc.ListResponse{

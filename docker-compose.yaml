@@ -51,6 +51,7 @@ services:
       - "9090:9090"
     networks:
       - backend
+    platform: linux/amd64
 
   user-service:
     build:
@@ -64,6 +65,7 @@ services:
       - "50051:50051"
     networks:
       - backend
+    platform: linux/amd64
 
   auth-service:
     build:
@@ -77,6 +79,7 @@ services:
       - "50052:50052"
     networks:
       - backend
+    platform: linux/amd64
 
   finance-service:
     build:
@@ -90,6 +93,7 @@ services:
       - "50053:50053"
     networks:
       - backend
+    platform: linux/amd64
 
   note-service:
     build:
@@ -103,6 +107,7 @@ services:
       - "50054:50054"
     networks:
       - backend
+    platform: linux/amd64
 
   board-service:
     build:
@@ -117,3 +122,4 @@ services:
       - "50055:50055"
     networks:
       - backend
+    platform: linux/amd64

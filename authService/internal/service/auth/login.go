@@ -47,7 +47,7 @@ func (s *serv) Login(ctx context.Context, email string, password string) (string
 		return "", err
 	}
 
-	md := metadata.Pairs("set-cookie", "token="+refreshToken+"; HttpOnly; Path=/; Secure; SameSite=Strict")
+	md := metadata.Pairs("set-cookie", "token="+refreshToken+"; HttpOnly; Path=/; Secure=false; SameSite=None")
 
 	err = grpc.SendHeader(ctx, md)
 	if err != nil {
