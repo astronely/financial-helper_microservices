@@ -42,14 +42,12 @@ CREATE INDEX ON "transaction_details" ("transaction_date");
 CREATE UNIQUE INDEX ON "transaction_categories" ("name");
 
 ALTER TABLE "transactions"
-    ADD FOREIGN KEY ("owner_id") REFERENCES "users" ("id")
-    ON DELETE CASCADE;
+    ADD FOREIGN KEY ("owner_id") REFERENCES "users" ("id");
+--     ON DELETE CASCADE;
 
 ALTER TABLE "transactions"
     ADD FOREIGN KEY ("wallet_id") REFERENCES "wallets" ("id")
     ON DELETE CASCADE;
-
--- ALTER TABLE "transactions" ADD FOREIGN KEY ("board_id") REFERENCES "boards" ("id"); // TODO: После добавления boards
 
 ALTER TABLE "transactions"
     ADD FOREIGN KEY ("details_id") REFERENCES "transaction_details" ("id")
