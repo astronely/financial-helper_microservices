@@ -24,3 +24,10 @@ type RedisConfig interface {
 	MaxIdle() int
 	IdleTimeout() time.Duration
 }
+
+type TokenConfig interface {
+	AccessTokenKey() string
+	RefreshTokenKey() string
+	AccessTokenExpirationTime() time.Duration
+	RefreshTokenExpirationTime() time.Duration
+}

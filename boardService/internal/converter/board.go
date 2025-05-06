@@ -21,6 +21,13 @@ func ToBoardFromService(info *model.Board) *desc.Board {
 	}
 }
 
+func ToBoardCreateFromDesc(req *desc.CreateRequest) *model.BoardCreate {
+	return &model.BoardCreate{
+		Name:        req.GetName(),
+		Description: req.GetDescription(),
+	}
+}
+
 func ToBoardInfoFromDesc(req *desc.BoardInfo) *model.BoardInfo {
 	return &model.BoardInfo{
 		Name:        req.GetName(),
@@ -95,7 +102,7 @@ func ToBoardUpdateFromDesc(req *desc.UpdateRequest) *model.BoardUpdate {
 func ToJoinInfoFromDesc(req *desc.JoinRequest) *model.JoinInfo {
 	return &model.JoinInfo{
 		Token: req.GetToken(),
-		ID:    req.GetId(),
+		//ID:    req.GetId(),
 	}
 }
 

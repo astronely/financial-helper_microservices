@@ -4,9 +4,18 @@ import (
 	"context"
 	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/logger"
 	"github.com/astronely/financial-helper_microservices/boardService/internal/model"
+	"github.com/astronely/financial-helper_microservices/boardService/internal/utils"
 )
 
 func (s *serv) JoinBoard(ctx context.Context, info *model.JoinInfo) (*model.GenerateInviteInfo, error) {
+	userID, err := utils.GetUserIdFromContext(ctx, s.tokenConfig.AccessTokenKey())
+	if err != nil {
+		logger.Error("error getting user id from context",
+			"error", err.Error(),
+		)
+		return nil, err
+	}
+
 	boardInviteInfo, err := s.boardRedisRepository.JoinBoard(ctx, info)
 	if err != nil {
 		logger.Error("join board error | Redis",
@@ -17,7 +26,7 @@ func (s *serv) JoinBoard(ctx context.Context, info *model.JoinInfo) (*model.Gene
 
 	_, err = s.boardRepository.CreateUser(ctx, &model.BoardUserCreate{
 		BoardID: boardInviteInfo.BoardID,
-		UserID:  info.ID,
+		UserID:  userID,
 		Role:    boardInviteInfo.Role,
 	})
 

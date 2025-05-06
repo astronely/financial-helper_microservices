@@ -7,7 +7,7 @@ import (
 )
 
 func (i *Implementation) Create(ctx context.Context, req *desc.CreateRequest) (*desc.CreateResponse, error) {
-	boarId, err := i.service.Create(ctx, converter.ToBoardInfoFromDesc(req.GetInfo()))
+	boarId, err := i.service.Create(ctx, converter.ToBoardCreateFromDesc(req))
 	if err != nil {
 		return nil, err
 	}

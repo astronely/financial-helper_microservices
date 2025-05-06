@@ -30,18 +30,18 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
 service BoardV1 {
   rpc Create(CreateRequest) returns (CreateResponse) {
     option (google.api.http) = {
-      post: "/api/v1/board/create",
+      post: "/api/v1/board",
       body: "*"
     };
   }
   rpc Get(GetRequest) returns (GetResponse) {
     option (google.api.http) = {
-      get: "/api/v1/board/get"
+      get: "/api/v1/board"
     };
   }
   rpc GetUsers(GetUsersRequest) returns (GetUsersResponse) {
     option (google.api.http) = {
-      get: "/api/v1/board/users"
+      get: "/api/v1/board/users",
     };
   }
   rpc ListByOwnerId(ListRequest) returns (ListResponse) {
@@ -51,18 +51,18 @@ service BoardV1 {
   }
   rpc ListByUserId(ListByUserIdRequest) returns (ListResponse) {
     option (google.api.http) = {
-      get: "/api/v1/board/listByUserId"
+      get: "/api/v1/user/boards"
     };
   }
   rpc Update(UpdateRequest) returns (UpdateResponse) {
     option (google.api.http) = {
-      put: "/api/v1/board/update",
+      put: "/api/v1/board",
       body: "*"
     };
   }
   rpc Delete(DeleteRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      delete: "/api/v1/board/delete",
+      delete: "/api/v1/board",
     };
   }
 
@@ -77,6 +77,20 @@ service BoardV1 {
       get: "/api/v1/board/join",
     };
   }
+
+  rpc CompareUserAndBoard(CompareRequest) returns (CompareResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/board/compare"
+    };
+  }
+}
+
+message CompareRequest {
+
+}
+
+message CompareResponse {
+  bool result = 1;
 }
 
 message BoardUser {
@@ -97,7 +111,7 @@ message GenerateInviteResponse {
 
 message JoinRequest {
   string token = 1 [(validate.rules).string.min_len = 1];
-  int64 id = 2 [(validate.rules).int64.gt = 0];
+  //  int64 id = 2 [(validate.rules).int64.gt = 0];
 }
 
 message JoinResponse {
@@ -119,7 +133,9 @@ message Board {
 }
 
 message CreateRequest {
-  BoardInfo info = 1[(validate.rules).message.required = true];
+  //  BoardInfo info = 1[(validate.rules).message.required = true];
+  string name = 1 [(validate.rules).string.min_len = 1];
+  string description = 2 [(validate.rules).string.min_len = 1];
 }
 
 message CreateResponse {
@@ -149,7 +165,7 @@ message ListRequest {
 }
 
 message ListByUserIdRequest {
-  int64 id = 1 [(validate.rules).int64.gt = 0];
+//  int64 id = 1 [(validate.rules).int64.gt = 0];
 }
 
 message ListResponse {

@@ -12,6 +12,11 @@ type Board struct {
 	CreatedAt time.Time
 }
 
+type BoardCreate struct {
+	Name        string
+	Description string
+}
+
 type BoardInfo struct {
 	Name        string
 	Description string
@@ -39,7 +44,7 @@ type BoardUpdate struct {
 
 type JoinInfo struct {
 	Token string
-	ID    int64
+	//ID    int64
 }
 
 type GenerateInviteInfo struct {

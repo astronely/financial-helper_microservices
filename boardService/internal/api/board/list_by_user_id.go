@@ -7,7 +7,7 @@ import (
 )
 
 func (i *Implementation) ListByUserId(ctx context.Context, req *desc.ListByUserIdRequest) (*desc.ListResponse, error) {
-	boards, err := i.service.ListByUserId(ctx, req.GetId())
+	boards, err := i.service.ListByUserId(ctx)
 	if err != nil {
 		return nil, err
 	}

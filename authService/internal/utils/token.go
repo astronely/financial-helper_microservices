@@ -40,6 +40,13 @@ func VerifyToken(tokenStr string, secretKey []byte) (*model.UserClaims, error) {
 	}
 
 	claims, ok := token.Claims.(*model.UserClaims)
+
+	//logger.Debug("VerifyToken",
+	//	"secretKey", secretKey,
+	//	"claims", claims,
+	//	"token", token,
+	//)
+
 	if !ok {
 		return nil, fmt.Errorf("invalid token")
 	}

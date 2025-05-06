@@ -36,15 +36,15 @@ test-coverage:
 	grep -sqFx "/coverage.out" .gitignore || echo "/coverage.out" >> .gitignore
 
 generate:
-	make generate-note-api
+	make generate-board-api
 
-generate-note-api:
-	mkdir -p pkg/note_v1
-	protoc --proto_path api/note_v1 --proto_path vendor.protogen \
-	--go_out=pkg/note_v1 --go_opt=paths=source_relative \
- 	--go-grpc_out=pkg/note_v1 --go-grpc_opt=paths=source_relative \
- 	--validate_out lang=go:pkg/note_v1 --validate_opt=paths=source_relative \
- 	  api/note_v1/note.proto
+generate-board-api:
+	mkdir -p pkg/board_v1
+	protoc --proto_path api/board_v1 --proto_path vendor.protogen \
+	--go_out=pkg/board_v1 --go_opt=paths=source_relative \
+ 	--go-grpc_out=pkg/board_v1 --go-grpc_opt=paths=source_relative \
+ 	--validate_out lang=go:pkg/board_v1 --validate_opt=paths=source_relative \
+ 	  api/board_v1/board.proto
 
 vendor-proto:
 		@if [ ! -d vendor.protogen/validate ]; then \

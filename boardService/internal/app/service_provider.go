@@ -24,6 +24,7 @@ type serviceProvider struct {
 	grpcConfig  config.GRPCConfig
 	pgConfig    config.PGConfig
 	redisConfig config.RedisConfig
+	tokenConfig config.TokenConfig
 
 	rdb         *redis.Client
 	redisClient cache.RedisClient
@@ -75,6 +76,18 @@ func (s *serviceProvider) RedisConfig() config.RedisConfig {
 	}
 
 	return s.redisConfig
+}
+
+func (s *serviceProvider) TokenConfig() config.TokenConfig {
+	if s.tokenConfig == nil {
+		cfg, err := env.NewTokenConfig()
+		if err != nil {
+			panic("Cannot load Token Config" + err.Error())
+		}
+		s.tokenConfig = cfg
+	}
+
+	return s.tokenConfig
 }
 
 func (s *serviceProvider) DBClient(ctx context.Context) db.Client {
@@ -134,7 +147,7 @@ func (s *serviceProvider) RedisClient(ctx context.Context) cache.RedisClient {
 
 func (s *serviceProvider) BoardService(ctx context.Context) service.BoardService {
 	if s.boardService == nil {
-		s.boardService = boardService.NewService(s.BoardRepository(ctx), s.BoardRedisRepository(ctx), s.TxManager(ctx))
+		s.boardService = boardService.NewService(s.BoardRepository(ctx), s.BoardRedisRepository(ctx), s.TxManager(ctx), s.TokenConfig())
 	}
 	return s.boardService
 }
