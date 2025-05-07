@@ -83,6 +83,20 @@ service BoardV1 {
       get: "/api/v1/board/compare"
     };
   }
+
+  rpc SetBoard(SetBoardRequest) returns (SetBoardResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/board/set"
+    };
+  }
+}
+
+message SetBoardRequest {
+  int64 board_id = 1 [(validate.rules).int64.gt = 0];
+}
+
+message SetBoardResponse {
+  bool result = 1;
 }
 
 message CompareRequest {

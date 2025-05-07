@@ -8,7 +8,8 @@ import (
 )
 
 func (i *Implementation) List(ctx context.Context, req *desc.ListRequest) (*desc.ListResponse, error) {
-	wallets, err := i.service.List(ctx, uint64(req.GetLimit()), uint64(req.GetOffset()))
+	//wallets, err := i.service.List(ctx, uint64(req.GetLimit()), uint64(req.GetOffset()))
+	wallets, err := i.service.List(ctx, req.GetBoardId())
 	if err != nil {
 		logger.Error("Error getting wallet",
 			"err", err.Error(),

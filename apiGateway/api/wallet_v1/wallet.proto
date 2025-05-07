@@ -30,31 +30,32 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
 service WalletV1 {
   rpc Create(CreateRequest) returns (CreateResponse) {
     option (google.api.http) = {
-      post: "/api/v1/wallet/create",
+      post: "/api/v1/wallet",
+      body: "*"
     };
   };
 
   rpc Get(GetRequest) returns (GetResponse) {
     option (google.api.http) = {
-      get: "/api/v1/wallet/get",
+      get: "/api/v1/wallet",
     };
   };
 
   rpc List(ListRequest) returns (ListResponse) {
     option (google.api.http) = {
-      get: "/api/v1/wallet/list",
+      get: "/api/v1/wallets",
     };
   };
 
   rpc Delete(DeleteRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      delete: "/api/v1/wallet/delete",
+      delete: "/api/v1/wallet",
     };
   };
 
   rpc Update(UpdateRequest) returns (UpdateResponse) {
     option (google.api.http) = {
-      put: "/api/v1/wallet/update",
+      put: "/api/v1/wallet",
       body: "*"
     };
   };
@@ -89,7 +90,7 @@ message CreateResponse {
 }
 
 message GetRequest {
-  int64 id = 1 [(validate.rules).int64.gte = 0];
+  int64 id = 1 [(validate.rules).int64.gt = 0];
 }
 
 message GetResponse {
@@ -99,6 +100,7 @@ message GetResponse {
 message ListRequest {
   int64 limit = 1 [(validate.rules).int64.gte = 0];
   int64 offset = 2 [(validate.rules).int64.gte = 0];
+  int64 board_id = 3 [(validate.rules).int64.gt = 0];
 }
 
 message ListResponse {
@@ -106,7 +108,7 @@ message ListResponse {
 }
 
 message UpdateRequest {
-  int64 id = 1 [(validate.rules).int64.gte = 0];
+  int64 id = 1 [(validate.rules).int64.gt = 0];
   UpdatedWalletInfo info = 2 [(validate.rules).message.required = true];
 }
 
@@ -115,5 +117,5 @@ message UpdateResponse {
 }
 
 message DeleteRequest {
-  int64 id = 1 [(validate.rules).int64.gte = 0];
+  int64 id = 1 [(validate.rules).int64.gt = 0];
 }

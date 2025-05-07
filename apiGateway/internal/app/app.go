@@ -117,14 +117,20 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 	mux := runtime.NewServeMux(
 		runtime.WithForwardResponseOption(func(ctx context.Context, w http.ResponseWriter, _ proto.Message) error {
 			md, ok := runtime.ServerMetadataFromContext(ctx)
-			logger.Debug("Server metadata",
-				"md", md)
+			//logger.Debug("Server metadata",
+			//	"md", md)
 			if !ok {
 				return nil
 			}
-			for _, v := range md.HeaderMD["set-cookie"] {
+			for _, v := range md.HeaderMD.Get("set-cookie") {
+				//logger.Debug("cookie set",
+				//	"v", v,
+				//)
 				w.Header().Add("Set-Cookie", v)
 			}
+			//for _, v := range md.HeaderMD.Get("authorization") {
+			//	w.Header().Add("Authorization", v)
+			//}
 			return nil
 		}),
 	)
@@ -140,12 +146,13 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 
 	a.authConn = conn
 
-	//authClient := descAccess.NewAccessV1Client(conn)
+	authClient := descAccess.NewAccessV1Client(conn)
 	interceptorsChain := interceptor.Chain(
 		interceptor.Logger(ctx),
+		interceptor.SetCookiesInterceptor(ctx),
 		//interceptor.CookieInterceptor,
 		interceptor.Timeout(time.Second*10),
-		//interceptor.AuthInterceptor(ctx, authClient),
+		interceptor.AuthInterceptor(ctx, authClient),
 	)
 
 	err = descUser.RegisterUserV1HandlerFromEndpoint(ctx, mux, a.serviceProvider.GrpcConfig().UserAddress(), opts)

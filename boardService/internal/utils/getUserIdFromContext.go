@@ -10,6 +10,7 @@ import (
 
 const (
 	userTokenName = "token"
+	cookieName    = "grpcgateway-cookie"
 )
 
 func GetUserIdFromContext(ctx context.Context, key string) (int64, error) {
@@ -17,11 +18,15 @@ func GetUserIdFromContext(ctx context.Context, key string) (int64, error) {
 	if !exists {
 		return -1, errors.New("context doesn't contain metadata")
 	}
-
-	cookies := md.Get("cookie")
+	logger.Debug("md",
+		"metadata", md,
+	)
+	cookies := md.Get(cookieName)
 	if len(cookies) == 0 {
 		return -1, errors.New("context doesn't contain cookie")
 	}
+	logger.Debug("cookies",
+		"cookies", cookies)
 
 	var tokenString string
 	for _, header := range cookies {

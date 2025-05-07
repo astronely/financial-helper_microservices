@@ -17,6 +17,7 @@ type BoardService interface {
 	CompareUserAndBoard(ctx context.Context) (bool, error)
 	CompareUserAndBoardRaw(ctx context.Context, userId int64, boardId int64) (bool, error)
 	CheckUserInBoardWithContext(ctx context.Context, boardID int64) error
+	SetBoard(ctx context.Context, boardID int64) error
 
 	JoinBoard(ctx context.Context, info *model.JoinInfo) (*model.GenerateInviteInfo, error)
 	GenerateInvite(ctx context.Context, info *model.GenerateInviteInfo) (string, error)

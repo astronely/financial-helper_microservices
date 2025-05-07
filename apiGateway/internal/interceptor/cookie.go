@@ -12,7 +12,6 @@ func CookieInterceptor(next http.Handler) http.Handler {
 		if !ok {
 			panic("invalid ResponseWriter type: expected responseWrapper")
 		}
-
 		//logger.Debug("first in cookie")
 		next.ServeHTTP(w, r)
 		//logger.Debug("second in cookie")

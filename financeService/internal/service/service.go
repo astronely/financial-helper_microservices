@@ -8,7 +8,8 @@ import (
 type WalletService interface {
 	Create(ctx context.Context, walletInfo *model.WalletInfo) (int64, error)
 	Get(ctx context.Context, id int64) (*model.Wallet, error)
-	List(ctx context.Context, limit, offset uint64) ([]*model.Wallet, error)
+	// List(ctx context.Context, limit, offset uint64) ([]*model.Wallet, error)
+	List(ctx context.Context, boardID int64) ([]*model.Wallet, error)
 	Update(ctx context.Context, walletInfo *model.WalletUpdateInfo) (int64, error)
 	Delete(ctx context.Context, id int64) error
 }

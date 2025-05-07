@@ -85,12 +85,11 @@ func (r *repo) Get(ctx context.Context, id int64) (*model.Wallet, error) {
 	return converter.ToWalletFromRepo(&wallet), nil
 }
 
-func (r *repo) List(ctx context.Context, limit, offset uint64) ([]*model.Wallet, error) {
+func (r *repo) List(ctx context.Context, boardID int64) ([]*model.Wallet, error) {
 	builder := sq.Select(idColumn, ownerIdColumn, boardIdColumn, nameColumn, balanceColumn, createdAtColumn, updatedAtColumn).
 		From(tableName).
 		PlaceholderFormat(sq.Dollar).
-		Limit(limit).
-		Offset(offset)
+		Where(sq.Eq{boardIdColumn: boardID})
 
 	query, args, err := builder.ToSql()
 	if err != nil {

@@ -4,7 +4,6 @@ import (
 	"context"
 	accessService "github.com/astronely/financial-helper_microservices/apiGateway/pkg/access_v1"
 	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/logger"
-	"google.golang.org/grpc/metadata"
 	"net/http"
 	"time"
 )
@@ -21,15 +20,15 @@ func AuthInterceptor(ctx context.Context, accessClient accessService.AccessV1Cli
 				panic("invalid ResponseWriter type: expected responseWrapper")
 			}
 
-			authHeader := r.Header.Get("Authorization")
+			//authHeader := r.Header.Get("Authorization")
 
 			ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
 			defer cancel()
 
-			if authHeader != "" {
-				md := metadata.Pairs("authorization", authHeader)
-				ctx = metadata.NewOutgoingContext(ctx, md)
-			}
+			//if authHeader != "" {
+			//	md := metadata.Pairs("authorization", authHeader)
+			//	ctx = metadata.NewOutgoingContext(ctx, md)
+			//}
 
 			req := &accessService.CheckRequest{
 				EndpointAddress: r.URL.Path,

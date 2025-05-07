@@ -19,6 +19,8 @@ generate:
 	make generate-access-api
 	make generate-wallet-api
 	make generate-transaction-api
+	make generate-board-api
+	make generate-note-api
 	# TODO: other APIs
 	make generate-openapi
 	mkdir -p pkg/swagger
@@ -65,6 +67,22 @@ generate-transaction-api:
  	--go-grpc_out=pkg/transaction_v1 --go-grpc_opt=paths=source_relative \
  	--grpc-gateway_out=pkg/transaction_v1 --grpc-gateway_opt=paths=source_relative \
  	api/transaction_v1/transaction.proto
+
+generate-board-api:
+	mkdir -p pkg/board_v1
+	protoc --proto_path api/board_v1 --proto_path vendor.protogen \
+	--go_out=pkg/board_v1 --go_opt=paths=source_relative \
+ 	--go-grpc_out=pkg/board_v1 --go-grpc_opt=paths=source_relative \
+ 	--grpc-gateway_out=pkg/board_v1 --grpc-gateway_opt=paths=source_relative \
+ 	api/board_v1/board.proto
+
+generate-note-api:
+	mkdir -p pkg/note_v1
+	protoc --proto_path api/note_v1 --proto_path vendor.protogen \
+	--go_out=pkg/note_v1 --go_opt=paths=source_relative \
+ 	--go-grpc_out=pkg/note_v1 --go-grpc_opt=paths=source_relative \
+ 	--grpc-gateway_out=pkg/note_v1 --grpc-gateway_opt=paths=source_relative \
+ 	api/note_v1/note.proto
 
 generate-openapi:
 	mkdir -p pkg/swagger

@@ -41,15 +41,17 @@ func (s *serv) Login(ctx context.Context, email string, password string) (string
 		[]byte(s.tokenConfig.AccessTokenKey()), s.tokenConfig.AccessTokenExpirationTime(),
 	)
 
-	err = grpc.SetHeader(ctx, metadata.Pairs("Authorization", "Bearer "+accessToken))
+	//err = grpc.SetHeader(ctx, metadata.Pairs("Authorization", "Bearer "+accessToken))
 
 	if err != nil {
 		return "", err
 	}
 
-	md := metadata.Pairs("set-cookie", "token="+refreshToken+"; HttpOnly; Path=/; Secure=false; SameSite=None")
+	mdRefreshToken := metadata.Pairs("set-cookie", "refreshToken="+refreshToken+"; HttpOnly; Path=/; Secure=false; SameSite=None;")
+	mdAccessToken := metadata.Pairs("set-cookie", "token="+accessToken+"; HttpOnly; Path=/; Secure=false; SameSite=None")
 
-	err = grpc.SendHeader(ctx, md)
+	err = grpc.SetHeader(ctx, mdRefreshToken)
+	err = grpc.SetHeader(ctx, mdAccessToken)
 	if err != nil {
 		return "", err
 	}
