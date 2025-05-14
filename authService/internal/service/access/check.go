@@ -37,7 +37,30 @@ func (s *serv) Check(ctx context.Context, endpointAddress string) (bool, error) 
 	logger.Debug("metadata in check",
 		"md", md,
 	)
-	accessToken := md.Get(accessTokenName)
+	var accessToken, refreshToken string
+
+	cookies := md.Get("grpcgateway-cookie")
+
+	for _, header := range cookies {
+		for _, kv := range strings.Split(header, "; ") {
+			parts := strings.SplitN(kv, "=", 2)
+			if len(parts) != 2 {
+				continue
+			}
+			name, value := parts[0], parts[1]
+			if name == accessTokenName {
+				accessToken = value
+			}
+			if name == refreshTokenName {
+				refreshToken = value
+			}
+		}
+	}
+
+	if len(accessToken) == 0 || len(refreshToken) == 0 {
+		accessToken = md.Get(accessTokenName)[0]
+		refreshToken = md.Get(refreshTokenName)[0]
+	}
 
 	//if len(accessToken) == 0 {
 	//	return false, status.Errorf(codes.Unauthenticated, "cookie is not provided")
@@ -73,14 +96,14 @@ func (s *serv) Check(ctx context.Context, endpointAddress string) (bool, error) 
 	//accessToken := strings.TrimPrefix(authHeader[0], authPrefix)
 
 	//claims :=
-	_, err := utils.VerifyToken(accessToken[0], []byte(s.tokenConfig.AccessTokenKey()))
+	_, err := utils.VerifyToken(accessToken, []byte(s.tokenConfig.AccessTokenKey()))
 
 	if err != nil {
 		logger.Error("Verify access token error",
 			"token", accessToken,
 			"err", err.Error(),
 		)
-		refreshToken := md.Get(refreshTokenName)
+		//refreshToken := md.Get(refreshTokenName)
 		if len(refreshToken) == 0 {
 			logger.Error("Refresh token is not provided")
 			return false, status.Errorf(codes.Unauthenticated, "refresh token is not provided")
@@ -97,7 +120,7 @@ func (s *serv) Check(ctx context.Context, endpointAddress string) (bool, error) 
 
 		//refreshToken := strings.TrimPrefix(cookie[0], "token=")
 
-		newAccessToken, err := s.authService.GetAccessToken(ctx, refreshToken[0])
+		newAccessToken, err := s.authService.GetAccessToken(ctx, refreshToken)
 		if err != nil {
 			logger.Error("Error getting access token",
 				"err", err.Error(),
