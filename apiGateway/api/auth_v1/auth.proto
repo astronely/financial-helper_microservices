@@ -32,6 +32,12 @@ service AuthV1 {
     };
   };
 
+  rpc Logout (LogoutRequest) returns (LogoutResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/user/logout"
+    };
+  };
+
   rpc GetRefreshToken (GetRefreshTokenRequest) returns (GetRefreshTokenResponse) {
     option (google.api.http) = {
       post: "/api/v1/user/refresh_token"
@@ -44,6 +50,14 @@ service AuthV1 {
       body: "*"
     };
   };
+}
+
+message LogoutRequest {
+
+}
+
+message LogoutResponse {
+
 }
 
 message LoginRequest {

@@ -30,23 +30,23 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
 service NoteV1 {
   rpc Create(CreateRequest) returns (CreateResponse) {
     option (google.api.http) = {
-      post: "/api/v1/note/create",
+      post: "/api/v1/note",
       body: "*"
     };
   }
   rpc Get(GetRequest) returns (GetResponse) {
     option (google.api.http) = {
-      get: "/api/v1/note/get"
+      get: "/api/v1/note"
     };
   }
   rpc List(ListRequest) returns (ListResponse) {
     option (google.api.http) = {
-      get: "/api/v1/note/list"
+      get: "/api/v1/notes"
     };
   }
   rpc Update(UpdateRequest) returns (UpdateResponse) {
     option (google.api.http) = {
-      put: "/api/v1/note/update",
+      put: "/api/v1/note",
       body: "*"
     };
   }
@@ -58,7 +58,7 @@ service NoteV1 {
   }
   rpc Delete(DeleteRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      delete: "/api/v1/note/delete",
+      delete: "/api/v1/note",
     };
   }
 }

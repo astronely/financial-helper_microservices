@@ -199,7 +199,7 @@ func (r *repo) Get(ctx context.Context, id int64, filters map[string]interface{}
 	return converter.ToTransactionFromRepo(&transaction), nil
 }
 
-func (r *repo) List(ctx context.Context, limit, offset uint64, filters map[string]interface{}) ([]*model.Transaction, error) {
+func (r *repo) List(ctx context.Context, boardID int64, limit, offset uint64, filters map[string]interface{}) ([]*model.Transaction, error) {
 	builder := sq.Select(
 		idColumnWithAlias, ownerIdColumnWithAlias, fromWalletIdColumnWithAlias,
 		toWalletIdColumnWithAlias, boardIdColumnWithAlias, amountColumnWithAlias, typeColumnWithAlias,
@@ -211,8 +211,16 @@ func (r *repo) List(ctx context.Context, limit, offset uint64, filters map[strin
 		From(transactionTableNameWithAlias).
 		LeftJoin(transactionDetailsTableNameWithAlias + " ON t.details_id = td.id").
 		LeftJoin(transactionCategoriesTableNameWithAlias + " ON td.category = tc.id").
-		Limit(limit).
-		Offset(offset)
+		Where(sq.Eq{transactionPrefix + boardIdColumn: boardID}).
+		OrderBy(transactionDetailsPrefix + transactionDateColumn + " DESC")
+
+	if limit > 0 {
+		builder = builder.Limit(limit)
+	}
+
+	if offset > 0 {
+		builder = builder.Offset(offset)
+	}
 
 	if val, ok := filters[categoryColumn]; ok {
 		builder = builder.Where(sq.Eq{transactionDetailsPrefix + categoryColumn: val})

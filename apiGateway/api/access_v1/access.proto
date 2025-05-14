@@ -26,7 +26,7 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
 service AccessV1 {
   rpc Check(CheckRequest) returns (CheckResponse) {
     option (google.api.http) = {
-      get: "/api/v1/user/v1/check"
+      get: "/api/v1/user/check"
     };
   };
 }

@@ -9,6 +9,10 @@ import (
 
 func (s *serv) Create(ctx context.Context, transactionInfo *model.TransactionInfo, transactionDetailsInfo *model.TransactionDetailsInfo) (int64, error) {
 	var id int64
+	//logger.Debug("Create transaction info",
+	//	"transaction info", transactionInfo,
+	//	"transaction details info", transactionDetailsInfo,
+	//)
 	err := s.txManager.ReadCommitted(ctx, func(ctx context.Context) error {
 		detailsId, errTx := s.transactionRepository.CreateTransactionDetails(ctx, transactionDetailsInfo)
 		if errTx != nil {

@@ -2,6 +2,7 @@ package interceptor
 
 import (
 	"context"
+	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/logger"
 	"google.golang.org/grpc/metadata"
 	"net/http"
 )
@@ -9,6 +10,7 @@ import (
 const (
 	accessTokenName  = "token"
 	refreshTokenName = "refreshToken"
+	boardTokenName   = "boardToken"
 )
 
 func SetCookiesInterceptor(ctx context.Context) Middleware {
@@ -21,7 +23,7 @@ func SetCookiesInterceptor(ctx context.Context) Middleware {
 
 			cookies := r.Cookies()
 
-			var token, refreshToken string
+			var token, refreshToken, boardToken string
 			for _, cookie := range cookies {
 				if cookie.Name == accessTokenName {
 					token = cookie.Value
@@ -29,17 +31,19 @@ func SetCookiesInterceptor(ctx context.Context) Middleware {
 				if cookie.Name == refreshTokenName {
 					refreshToken = cookie.Value
 				}
+				if cookie.Name == boardTokenName {
+					boardToken = cookie.Value
+				}
 			}
-
-			//logger.Debug("Cookies",
-			//	"cookies", cookies,
-			//	"token", token,
-			//)
 
 			ctxWithMetadata := metadata.AppendToOutgoingContext(r.Context(), accessTokenName, token)
 			ctxWithMetadata = metadata.AppendToOutgoingContext(ctxWithMetadata, refreshTokenName, refreshToken)
+			ctxWithMetadata = metadata.AppendToOutgoingContext(ctxWithMetadata, boardTokenName, boardToken)
 			r = r.WithContext(ctxWithMetadata)
-			//logger.Debug("first in logger")
+			md, _ := metadata.FromOutgoingContext(r.Context())
+
+			logger.Debug("ctx metadata in set_cookies",
+				"metadata", md)
 
 			next.ServeHTTP(rw, r)
 

@@ -30,32 +30,32 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
 service TransactionV1 {
   rpc Create(CreateRequest) returns (CreateResponse) {
     option (google.api.http) = {
-      post: "/api/v1/transaction/create",
+      post: "/api/v1/transaction",
       body: "*"
     };
   };
 
   rpc Get(GetRequest) returns (GetResponse) {
     option (google.api.http) = {
-      get: "/api/v1/transaction/get"
+      get: "/api/v1/transaction"
     };
   };
 
   rpc List(ListRequest) returns (ListResponse) {
     option (google.api.http) = {
-      get: "/api/v1/transaction/list"
+      get: "/api/v1/transactions"
     };
   };
 
   rpc Delete(DeleteRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      delete: "/api/v1/transaction/delete"
+      delete: "/api/v1/transaction"
     };
   };
 
   rpc Update(UpdateRequest) returns (UpdateResponse) {
     option (google.api.http) = {
-      put: "/api/v1/transaction/update",
+      put: "/api/v1/transaction",
       body: "*"
     };
   };
@@ -143,7 +143,8 @@ message GetResponse {
 message ListRequest {
   int64 limit = 1 [(validate.rules).int64.gte = 0];
   int64 offset = 2 [(validate.rules).int64.gte = 0];
-  FilterInfo filterInfo = 3;
+  int64 board_id = 3 [(validate.rules).int64.gt = 0];
+  FilterInfo filterInfo = 4;
 }
 
 message ListResponse {

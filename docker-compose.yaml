@@ -83,7 +83,7 @@ services:
 
   finance-service:
     build:
-      context: ./noteService
+      context: ./financeService
     image: astrow/finance-service:latest
     env_file:
       - "./financeService/prod.env"

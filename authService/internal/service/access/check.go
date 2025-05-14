@@ -28,17 +28,20 @@ func (s *serv) Check(ctx context.Context, endpointAddress string) (bool, error) 
 	}
 
 	md, ok := metadata.FromIncomingContext(ctx)
+	//logger.Debug("metadata in check",
+	//	"metadata", md,
+	//)
 	if !ok {
 		return false, status.Errorf(codes.Unauthenticated, "metadata is not provided")
 	}
-	logger.Debug("metadata",
+	logger.Debug("metadata in check",
 		"md", md,
 	)
-	accessToken := md.Get(accessTokenName)[0]
+	accessToken := md.Get(accessTokenName)
 
-	if len(accessToken) == 0 {
-		return false, status.Errorf(codes.Unauthenticated, "cookie is not provided")
-	}
+	//if len(accessToken) == 0 {
+	//	return false, status.Errorf(codes.Unauthenticated, "cookie is not provided")
+	//}
 
 	//var accessToken, refreshToken string
 	//for _, c := range cookie {
@@ -70,14 +73,14 @@ func (s *serv) Check(ctx context.Context, endpointAddress string) (bool, error) 
 	//accessToken := strings.TrimPrefix(authHeader[0], authPrefix)
 
 	//claims :=
-	_, err := utils.VerifyToken(accessToken, []byte(s.tokenConfig.AccessTokenKey()))
+	_, err := utils.VerifyToken(accessToken[0], []byte(s.tokenConfig.AccessTokenKey()))
 
 	if err != nil {
 		logger.Error("Verify access token error",
 			"token", accessToken,
 			"err", err.Error(),
 		)
-		refreshToken := md.Get(refreshTokenName)[0]
+		refreshToken := md.Get(refreshTokenName)
 		if len(refreshToken) == 0 {
 			logger.Error("Refresh token is not provided")
 			return false, status.Errorf(codes.Unauthenticated, "refresh token is not provided")
@@ -94,7 +97,7 @@ func (s *serv) Check(ctx context.Context, endpointAddress string) (bool, error) 
 
 		//refreshToken := strings.TrimPrefix(cookie[0], "token=")
 
-		newAccessToken, err := s.authService.GetAccessToken(ctx, refreshToken)
+		newAccessToken, err := s.authService.GetAccessToken(ctx, refreshToken[0])
 		if err != nil {
 			logger.Error("Error getting access token",
 				"err", err.Error(),

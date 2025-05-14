@@ -17,7 +17,7 @@ type WalletService interface {
 type TransactionService interface {
 	Create(ctx context.Context, transactionInfo *model.TransactionInfo, transactionDetailsInfo *model.TransactionDetailsInfo) (int64, error)
 	Get(ctx context.Context, id int64, filters map[string]interface{}) (*model.Transaction, error)
-	List(ctx context.Context, limit, offset uint64, filters map[string]interface{}) ([]*model.Transaction, error)
+	List(ctx context.Context, boardID int64, limit, offset uint64, filters map[string]interface{}) ([]*model.Transaction, error)
 	Update(ctx context.Context,
 		updateInfo *model.TransactionInfoUpdate,
 		updateDetails *model.TransactionDetailsUpdate) (int64, error)

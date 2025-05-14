@@ -7,6 +7,10 @@ import (
 )
 
 func (i *Implementation) Create(ctx context.Context, req *desc.CreateRequest) (*desc.CreateResponse, error) {
+	//logger.Debug("Create impl",
+	//	"get date", req.DetailsInfo.GetTransactionDate(),
+	//	"req details date as time", req.DetailsInfo.GetTransactionDate().AsTime(),
+	//)
 	id, err := i.service.Create(ctx, converter.ToTransactionInfoFromDesc(req.GetInfo()),
 		converter.ToTransactionDetailsInfoFromDesc(req.GetDetailsInfo()))
 	if err != nil {
