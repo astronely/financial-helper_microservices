@@ -350,3 +350,37 @@ func (r *repo) Delete(ctx context.Context, id int64) error {
 
 	return nil
 }
+
+func (r *repo) DeleteUser(ctx context.Context, boardID, userID int64) error {
+	builder := sq.Delete(boardUserTableName).
+		PlaceholderFormat(sq.Dollar).
+		Where(sq.Eq{userIdColumn: userID, boardIdColumn: boardID})
+
+	query, args, err := builder.ToSql()
+	if err != nil {
+		logger.Error("error delete board | BuildToSql",
+			"error", err.Error(),
+		)
+		return err
+	}
+
+	q := db.Query{
+		Name:     "board_repository.DeleteUser",
+		QueryRaw: query,
+	}
+
+	result, err := r.db.DB().ExecContext(ctx, q, args...)
+	if result.RowsAffected() == 0 {
+		logger.Error("no user:board pair to delete | ExecContext")
+		return errors.New("no user:board pair to delete")
+	}
+
+	if err != nil {
+		logger.Error("error delete board | ExecContext",
+			"error", err.Error(),
+		)
+		return err
+	}
+
+	return nil
+}

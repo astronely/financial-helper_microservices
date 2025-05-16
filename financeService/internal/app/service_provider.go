@@ -20,13 +20,13 @@ import (
 )
 
 type serviceProvider struct {
-	grpcConfig config.GRPCConfig
-	pgConfig   config.PGConfig
+	grpcConfig  config.GRPCConfig
+	pgConfig    config.PGConfig
+	tokenConfig config.TokenConfig
 
 	dbClient  db.Client
 	txManager db.TxManager
 
-	// TODO: Services, Repositories and Implementations
 	walletService      service.WalletService
 	transactionService service.TransactionService
 
@@ -64,6 +64,17 @@ func (s *serviceProvider) PGConfig() config.PGConfig {
 	return s.pgConfig
 }
 
+func (s *serviceProvider) TokenConfig() config.TokenConfig {
+	if s.tokenConfig == nil {
+		cfg, err := env.NewTokenConfig()
+		if err != nil {
+			panic("Cannot load Token Config" + err.Error())
+		}
+		s.tokenConfig = cfg
+	}
+	return s.tokenConfig
+}
+
 func (s *serviceProvider) DBClient(ctx context.Context) db.Client {
 	if s.dbClient == nil {
 		cl, err := pg.New(ctx, s.PGConfig().DSN())
@@ -98,7 +109,7 @@ func (s *serviceProvider) TxManager(ctx context.Context) db.TxManager {
 
 func (s *serviceProvider) WalletService(ctx context.Context) service.WalletService {
 	if s.walletService == nil {
-		s.walletService = walletService.NewService(s.WalletRepository(ctx))
+		s.walletService = walletService.NewService(s.WalletRepository(ctx), s.TokenConfig())
 	}
 	return s.walletService
 }
@@ -109,6 +120,7 @@ func (s *serviceProvider) TransactionService(ctx context.Context) service.Transa
 			s.TransactionRepository(ctx),
 			s.WalletRepository(ctx),
 			s.TxManager(ctx),
+			s.TokenConfig(),
 		)
 	}
 	return s.transactionService

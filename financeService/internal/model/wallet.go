@@ -13,6 +13,12 @@ type Wallet struct {
 	UpdatedAt sql.NullTime // В БД надо добавить это поле, его нет
 }
 
+type CreateWalletInfo struct {
+	OwnerID int64
+	BoardID int64
+	Name    string
+}
+
 type WalletInfo struct {
 	OwnerID int64
 	BoardID int64

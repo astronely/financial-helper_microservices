@@ -6,8 +6,9 @@ import (
 	"github.com/astronely/financial-helper_microservices/noteService/internal/model"
 )
 
-func (s *serv) List(ctx context.Context, offset, limit uint64, filters map[string]interface{}) ([]*model.Note, error) {
-	notes, err := s.noteRepository.List(ctx, offset, limit, filters)
+func (s *serv) List(ctx context.Context, boardID int64, offset, limit uint64, filters map[string]interface{}) ([]*model.Note, error) {
+
+	notes, err := s.noteRepository.List(ctx, boardID, offset, limit, filters)
 	if err != nil {
 		logger.Error("failed to list note",
 			"error", err.Error(),

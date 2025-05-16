@@ -19,7 +19,7 @@ const (
 	toWalletIdColumn   = "to_wallet_id"
 )
 
-func ToTransactionInfoFromDesc(req *desc.TransactionInfo) *model.TransactionInfo {
+func ToTransactionInfoFromDesc(req *desc.CreateTransactionInfo) *model.TransactionInfo {
 	amount, err := decimal.NewFromString(req.GetAmount())
 	if err != nil {
 		logger.Error("Error converting from balance to decimal",
@@ -35,15 +35,15 @@ func ToTransactionInfoFromDesc(req *desc.TransactionInfo) *model.TransactionInfo
 	}
 
 	return &model.TransactionInfo{
-		OwnerID:      req.GetOwnerId(),
+		//OwnerID:      req.GetOwnerId(),
 		FromWalletID: req.GetFromWalletId(),
 		ToWalletID: sql.NullInt64{
 			Valid: isValidToWalletId,
 			Int64: req.GetToWalletId().GetValue(),
 		},
-		BoardID: req.GetBoardId(),
-		Amount:  amount,
-		Type:    req.GetType(),
+		//BoardID: req.GetBoardId(),
+		Amount: amount,
+		Type:   req.GetType(),
 	}
 }
 
@@ -84,6 +84,20 @@ func ToTransactionInfoFromService(info model.TransactionInfo) *desc.TransactionI
 	}
 
 	return returningDesc
+}
+
+func AddOwnerAndBoardIdToTransactionInfo(transactionInfo *model.TransactionInfo, ownerID, boardID int64) *model.TransactionInfo {
+	return &model.TransactionInfo{
+		OwnerID:      ownerID,
+		FromWalletID: transactionInfo.FromWalletID,
+		ToWalletID: sql.NullInt64{
+			Int64: boardID,
+			Valid: true,
+		},
+		BoardID: boardID,
+		Amount:  transactionInfo.Amount,
+		Type:    transactionInfo.Type,
+	}
 }
 
 func ToTransactionDetailsFromService(details model.TransactionDetails) *desc.TransactionDetails {

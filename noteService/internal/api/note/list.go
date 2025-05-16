@@ -7,7 +7,7 @@ import (
 )
 
 func (i *Implementation) List(ctx context.Context, req *desc.ListRequest) (*desc.ListResponse, error) {
-	notes, err := i.service.List(ctx, uint64(req.GetLimit()), uint64(req.GetOffset()), converter.ToFilters(req.GetFilterInfo()))
+	notes, err := i.service.List(ctx, req.GetBoardId(), uint64(req.GetLimit()), uint64(req.GetOffset()), converter.ToFilters(req.GetFilterInfo()))
 	if err != nil {
 		return nil, err
 	}

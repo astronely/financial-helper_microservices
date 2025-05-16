@@ -68,7 +68,7 @@ message NoteInfo {
   int64 owner_id = 2 [(validate.rules).int64.gt = 0];
   google.protobuf.Int64Value performer_id = 3 [(validate.rules).int64.gt = 0];
   string content = 4 [(validate.rules).string.min_len = 1];
-  bool status = 5 [(validate.rules).bool.const = true]; // Посмотреть что значит const
+  bool status = 5;
   google.protobuf.Timestamp completion_date = 6;
 }
 
@@ -80,21 +80,21 @@ message Note {
 }
 
 message NoteCreate {
-  int64 board_id = 1 [(validate.rules).int64.gt = 0];
-  int64 owner_id = 2 [(validate.rules).int64.gt = 0];
-  string content = 3 [(validate.rules).string.min_len = 1];
+  //  int64 board_id = 1 [(validate.rules).int64.gt = 0];
+  //  int64 owner_id = 2 [(validate.rules).int64.gt = 0];
+  string content = 1 [(validate.rules).string.min_len = 1];
 }
 
 message FilterInfo {
-  google.protobuf.Int64Value board_id = 1 [(validate.rules).int64.gt = 0];
-  google.protobuf.Int64Value owner_id = 2 [(validate.rules).int64.gt = 0];
-  google.protobuf.Int64Value performer_id = 3 [(validate.rules).int64.gt = 0];
-  google.protobuf.BoolValue status = 4;
-  google.protobuf.Timestamp completion_date_start = 5;
-  google.protobuf.Timestamp completion_date_end = 6;
-  google.protobuf.Timestamp updated_at = 7;
-  google.protobuf.Timestamp created_at_start = 8;
-  google.protobuf.Timestamp created_at_end = 9;
+  //  google.protobuf.Int64Value board_id = 1 [(validate.rules).int64.gt = 0];
+  google.protobuf.Int64Value owner_id = 1 [(validate.rules).int64.gt = 0];
+  google.protobuf.Int64Value performer_id = 2 [(validate.rules).int64.gt = 0];
+  google.protobuf.BoolValue status = 3;
+  google.protobuf.Timestamp completion_date_start = 4;
+  google.protobuf.Timestamp completion_date_end = 5;
+  google.protobuf.Timestamp updated_at = 6;
+  google.protobuf.Timestamp created_at_start = 7;
+  google.protobuf.Timestamp created_at_end = 8;
 }
 
 message CreateRequest {
@@ -115,7 +115,8 @@ message GetResponse {
 message ListRequest {
   int64 limit = 1 [(validate.rules).int64.gte = 0];
   int64 offset = 2 [(validate.rules).int64.gte = 0];
-  FilterInfo filterInfo = 3;
+  int64 board_id = 3 [(validate.rules).int64.gt = 0];
+  FilterInfo filterInfo = 4;
 }
 
 message ListResponse {
@@ -133,7 +134,7 @@ message UpdateResponse {
 
 message CompleteRequest {
   int64 id = 1;
-  bool status = 2; // Возможно можно не передавать, просто инвертировать False -> True, True -> False
+  bool status = 2;
 }
 
 message CompleteResponse {

@@ -16,8 +16,9 @@ import (
 )
 
 type serviceProvider struct {
-	grpcConfig config.GRPCConfig
-	pgConfig   config.PGConfig
+	grpcConfig  config.GRPCConfig
+	pgConfig    config.PGConfig
+	tokenConfig config.TokenConfig
 
 	dbClient db.Client
 
@@ -55,6 +56,17 @@ func (s *serviceProvider) PGConfig() config.PGConfig {
 	return s.pgConfig
 }
 
+func (s *serviceProvider) TokenConfig() config.TokenConfig {
+	if s.tokenConfig == nil {
+		cfg, err := env.NewTokenConfig()
+		if err != nil {
+			panic("Cannot load Token Config" + err.Error())
+		}
+		s.tokenConfig = cfg
+	}
+	return s.tokenConfig
+}
+
 func (s *serviceProvider) DBClient(ctx context.Context) db.Client {
 	if s.dbClient == nil {
 		cl, err := pg.New(ctx, s.PGConfig().DSN())
@@ -82,7 +94,7 @@ func (s *serviceProvider) DBClient(ctx context.Context) db.Client {
 
 func (s *serviceProvider) NoteService(ctx context.Context) service.NoteService {
 	if s.noteService == nil {
-		s.noteService = noteService.NewService(s.NoteRepository(ctx))
+		s.noteService = noteService.NewService(s.NoteRepository(ctx), s.TokenConfig())
 	}
 	return s.noteService
 }

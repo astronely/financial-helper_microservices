@@ -105,16 +105,20 @@ func (r *repo) Get(ctx context.Context, id int64) (*model.Note, error) {
 
 	return converter.ToNoteFromRepo(&note), nil
 }
-func (r *repo) List(ctx context.Context, limit, offset uint64, filters map[string]interface{}) ([]*model.Note, error) {
+func (r *repo) List(ctx context.Context, boardID int64, limit, offset uint64, filters map[string]interface{}) ([]*model.Note, error) {
 	builder := sq.Select(idColumn, ownerIdColumn, performerIdColumn, contentColumn, statusColumn, completionDateColumn, updatedAtColumn, createdAtColumn).
 		From(tableName).
 		PlaceholderFormat(sq.Dollar).
-		Limit(limit).
-		Offset(offset)
+		Where(sq.Eq{boardIdColumn: boardID})
 
-	if val, ok := filters[boardIdColumn]; ok {
-		builder = builder.Where(sq.Eq{boardIdColumn: val})
+	if limit > 0 {
+		builder = builder.Limit(limit)
 	}
+
+	if offset > 0 {
+		builder = builder.Offset(offset)
+	}
+
 	if val, ok := filters[ownerIdColumn]; ok {
 		builder = builder.Where(sq.Eq{ownerIdColumn: val})
 	}

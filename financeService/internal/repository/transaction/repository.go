@@ -112,10 +112,21 @@ func (r *repo) CreateTransactionDetails(ctx context.Context, transactionDetails 
 }
 
 func (r *repo) CreateTransaction(ctx context.Context, transactionInfo *model.TransactionInfo, transactionDetailsId int64) (int64, error) {
+	var toWalletId sql.NullInt64
+
+	if transactionInfo.Type != "transfer" {
+		toWalletId.Valid = false
+	} else if transactionInfo.Type == "transfer" {
+		if !transactionInfo.ToWalletID.Valid {
+			return 0, errors.New("to wallet id required")
+		}
+		toWalletId = transactionInfo.ToWalletID
+	}
+
 	builder := sq.Insert(transactionTableName).
 		PlaceholderFormat(sq.Dollar).
 		Columns(ownerIdColumn, fromWalletIdColumn, toWalletIdColumn, boardIdColumn, amountColumn, typeColumn, detailsIdColumn).
-		Values(transactionInfo.OwnerID, transactionInfo.FromWalletID, transactionInfo.ToWalletID, transactionInfo.BoardID, transactionInfo.Amount, transactionInfo.Type, transactionDetailsId).
+		Values(transactionInfo.OwnerID, transactionInfo.FromWalletID, toWalletId, transactionInfo.BoardID, transactionInfo.Amount, transactionInfo.Type, transactionDetailsId).
 		Suffix("RETURNING id")
 
 	query, args, err := builder.ToSql()

@@ -49,7 +49,7 @@ ALTER TABLE "transaction_details"
     ADD FOREIGN KEY ("category") REFERENCES "transaction_categories" ("id");
 
 ALTER TABLE "wallets"
-    ADD CONSTRAINT balance_positive CHECK ("balance" > 0);
+    ADD CONSTRAINT balance_positive CHECK ("balance" >= 0);
 -- +goose StatementEnd
 
 -- +goose Down

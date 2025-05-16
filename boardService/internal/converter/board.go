@@ -68,13 +68,13 @@ func ToBoardListFromService(boards []*model.Board) []*desc.Board {
 	return boardList
 }
 
-func ToGenerateInviteFromDesc(req *desc.GenerateInviteRequest) *model.GenerateInviteInfo {
-	return &model.GenerateInviteInfo{
-		BoardID: req.GetBoardId(),
-		//UserID:  req.GetUserId(),
-		Role: req.GetRole(),
-	}
-}
+//func ToGenerateInviteFromDesc(req *desc.GenerateInviteRequest) *model.GenerateInviteInfo {
+//	return &model.GenerateInviteInfo{
+//		BoardID: req.GetBoardId(),
+//		//UserID:  req.GetUserId(),
+//		Role: req.GetRole(),
+//	}
+//}
 
 func ToBoardUpdateFromDesc(req *desc.UpdateRequest) *model.BoardUpdate {
 	var name, description sql.NullString
@@ -106,10 +106,9 @@ func ToJoinInfoFromDesc(req *desc.JoinRequest) *model.JoinInfo {
 	}
 }
 
-func ToGenerateInvite(info *model.GenerateInviteInfo) model.GenerateInviteInfo {
-	return model.GenerateInviteInfo{
-		BoardID: info.BoardID,
-		//UserID:  info.UserID,
-		Role: info.Role,
+func ToGenerateInviteInfo(boardID int64, role string) *model.GenerateInviteInfo {
+	return &model.GenerateInviteInfo{
+		BoardID: boardID,
+		Role:    role,
 	}
 }

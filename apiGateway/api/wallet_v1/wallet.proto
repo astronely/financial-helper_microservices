@@ -67,7 +67,11 @@ message WalletInfo {
   int64 owner_id = 1;
   int64 board_id = 2;
   string name = 3;
-  string balance = 4; // Возможно убрать и сделать default = 0
+  string balance = 4;
+}
+
+message CreateWalletInfo {
+  string name = 1 [(validate.rules).string.min_len = 1];
 }
 
 message Wallet {
@@ -77,12 +81,12 @@ message Wallet {
 }
 
 message UpdatedWalletInfo {
-  google.protobuf.StringValue name = 1 [(validate.rules).string.email = true];
+  google.protobuf.StringValue name = 1 [(validate.rules).string = {min_len:1}];
   google.protobuf.StringValue balance = 2 [(validate.rules).string = {min_len:1}];
 }
 
 message CreateRequest {
-  WalletInfo info = 1 [(validate.rules).message.required = true];
+  CreateWalletInfo info = 1 [(validate.rules).message.required = true];
 }
 
 message CreateResponse {

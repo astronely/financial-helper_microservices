@@ -8,7 +8,7 @@ import (
 )
 
 func (i *Implementation) Create(ctx context.Context, req *desc.CreateRequest) (*desc.CreateResponse, error) {
-	id, err := i.service.Create(ctx, converter.ToWalletInfoFromDesc(req.GetInfo()))
+	id, err := i.service.Create(ctx, converter.ToCreateWalletInfoFromDesc(req.GetInfo()))
 	if err != nil {
 		logger.Error("Error creating wallet",
 			"err", err.Error(),

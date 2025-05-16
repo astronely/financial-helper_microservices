@@ -14,6 +14,7 @@ type BoardRepository interface {
 	ListByOwnerId(ctx context.Context, ownerId int64) ([]*model.Board, error)
 	Update(ctx context.Context, info *model.BoardUpdate) (int64, error)
 	Delete(ctx context.Context, id int64) error
+	DeleteUser(ctx context.Context, boardID, userID int64) error
 }
 
 type BoardRedisRepository interface {

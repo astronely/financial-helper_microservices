@@ -67,10 +67,25 @@ func ToWalletInfoFromDesc(walletInfo *desc.WalletInfo) *model.WalletInfo {
 	}
 
 	return &model.WalletInfo{
-		OwnerID: walletInfo.GetOwnerId(),
-		BoardID: walletInfo.GetBoardId(),
+		//OwnerID: walletInfo.GetOwnerId(),
+		//BoardID: walletInfo.GetBoardId(),
 		Name:    walletInfo.GetName(),
 		Balance: balance,
+	}
+}
+
+func ToCreateWalletInfoFromDesc(info *desc.CreateWalletInfo) *model.CreateWalletInfo {
+	return &model.CreateWalletInfo{
+		Name: info.GetName(),
+	}
+}
+
+func AddOwnerAndBoardIdToWalletInfo(walletInfo *model.CreateWalletInfo, ownerID, boardID int64) *model.WalletInfo {
+	return &model.WalletInfo{
+		OwnerID: ownerID,
+		BoardID: boardID,
+		Name:    walletInfo.Name,
+		Balance: decimal.NewFromInt(0),
 	}
 }
 

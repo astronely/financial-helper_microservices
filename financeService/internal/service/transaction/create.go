@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/logger"
+	"github.com/astronely/financial-helper_microservices/financeService/internal/converter"
 	"github.com/astronely/financial-helper_microservices/financeService/internal/model"
+	"github.com/astronely/financial-helper_microservices/financeService/internal/utils"
 )
 
 func (s *serv) Create(ctx context.Context, transactionInfo *model.TransactionInfo, transactionDetailsInfo *model.TransactionDetailsInfo) (int64, error) {
@@ -14,6 +16,22 @@ func (s *serv) Create(ctx context.Context, transactionInfo *model.TransactionInf
 	//	"transaction details info", transactionDetailsInfo,
 	//)
 	err := s.txManager.ReadCommitted(ctx, func(ctx context.Context) error {
+		boardID, err := utils.GetBoardIdFromContext(ctx, s.tokenConfig.AccessTokenKey())
+		if err != nil {
+			logger.Error("error getting board id from context",
+				"error", err.Error(),
+			)
+			return err
+		}
+
+		ownerID, err := utils.GetUserIdFromContext(ctx, s.tokenConfig.AccessTokenKey())
+		if err != nil {
+			logger.Error("error getting user id from context",
+				"error", err.Error(),
+			)
+			return err
+		}
+
 		detailsId, errTx := s.transactionRepository.CreateTransactionDetails(ctx, transactionDetailsInfo)
 		if errTx != nil {
 			logger.Error("Failed to create transaction details",
@@ -22,8 +40,9 @@ func (s *serv) Create(ctx context.Context, transactionInfo *model.TransactionInf
 			return errTx
 		}
 
+		transactionInfoFull := converter.AddOwnerAndBoardIdToTransactionInfo(transactionInfo, ownerID, boardID)
 		// Create transaction in database
-		id, errTx = s.transactionRepository.CreateTransaction(ctx, transactionInfo, detailsId)
+		id, errTx = s.transactionRepository.CreateTransaction(ctx, transactionInfoFull, detailsId)
 		if errTx != nil {
 			logger.Error("Failed to create transaction",
 				"error", errTx.Error(),

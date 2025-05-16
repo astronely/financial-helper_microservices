@@ -57,9 +57,17 @@ func ToNoteInfoFromDesc(note *desc.NoteInfo) model.NoteInfo {
 
 func ToNoteCreateFromDesc(info *desc.NoteCreate) *model.NoteCreate {
 	return &model.NoteCreate{
-		BoardID: info.BoardId,
-		OwnerID: info.OwnerId,
+		//BoardID: info.BoardId,
+		//OwnerID: info.OwnerId,
 		Content: info.Content,
+	}
+}
+
+func AddOwnerAndBoardIdToNoteCreate(info *model.NoteCreate, ownerID, boardID int64) *model.NoteCreate {
+	return &model.NoteCreate{
+		Content: info.Content,
+		OwnerID: ownerID,
+		BoardID: boardID,
 	}
 }
 
@@ -119,9 +127,9 @@ func ToNoteListFromService(notes []*model.Note) []*desc.Note {
 
 func ToFilters(filters *desc.FilterInfo) map[string]interface{} {
 	convertedFilters := make(map[string]interface{})
-	if filters.GetBoardId() != nil {
-		convertedFilters[boardIdColumn] = filters.GetBoardId()
-	}
+	//if filters.GetBoardId() != nil {
+	//	convertedFilters[boardIdColumn] = filters.GetBoardId()
+	//}
 	if filters.GetOwnerId() != nil {
 		convertedFilters[ownerIdColumn] = filters.GetOwnerId()
 	}
