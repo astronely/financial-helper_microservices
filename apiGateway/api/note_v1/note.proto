@@ -36,12 +36,12 @@ service NoteV1 {
   }
   rpc Get(GetRequest) returns (GetResponse) {
     option (google.api.http) = {
-      get: "/api/v1/note"
+      get: "/api/v1/note/{id}"
     };
   }
   rpc List(ListRequest) returns (ListResponse) {
     option (google.api.http) = {
-      get: "/api/v1/notes"
+      get: "/api/v1/notes/{board_id}"
     };
   }
   rpc Update(UpdateRequest) returns (UpdateResponse) {
@@ -58,7 +58,7 @@ service NoteV1 {
   }
   rpc Delete(DeleteRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      delete: "/api/v1/note",
+      delete: "/api/v1/note/{id}",
     };
   }
 }

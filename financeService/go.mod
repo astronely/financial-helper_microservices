@@ -7,6 +7,7 @@ require (
 	github.com/astronely/financial-helper_microservices/apiGateway v0.0.0-20250428145705-b64bf30c3719
 	github.com/astronely/financial-helper_microservices/userService v0.0.0-20250428145705-b64bf30c3719
 	github.com/envoyproxy/protoc-gen-validate v1.2.1
+	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.26.3
 	github.com/joho/godotenv v1.5.1

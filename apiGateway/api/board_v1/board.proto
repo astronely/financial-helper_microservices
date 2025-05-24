@@ -37,25 +37,25 @@ service BoardV1 {
 
   rpc Get(GetRequest) returns (GetResponse) {
     option (google.api.http) = {
-      get: "/api/v1/board"
+      get: "/api/v1/board/{id}"
     };
   }
 
   rpc GetUsers(GetUsersRequest) returns (GetUsersResponse) {
     option (google.api.http) = {
-      get: "/api/v1/board/users",
+      get: "/api/v1/board/users/{board_id}",
     };
   }
 
   rpc ListByOwnerId(ListRequest) returns (ListResponse) {
     option (google.api.http) = {
-      get: "/api/v1/board/listByOwnerId"
+      get: "/api/v1/board/listByOwnerId/{owner_id}"
     };
   }
 
   rpc ListByUserId(ListByUserIdRequest) returns (ListResponse) {
     option (google.api.http) = {
-      get: "/api/v1/user/boards"
+      get: "/api/v1/boards"
     };
   }
 
@@ -68,13 +68,13 @@ service BoardV1 {
 
   rpc Delete(DeleteRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      delete: "/api/v1/board",
+      delete: "/api/v1/board/{id}",
     };
   }
 
   rpc DeleteUser(DeleteUserRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      delete: "/api/v1/board/delete/user",
+      delete: "/api/v1/board/delete/user/{user_id}",
     };
   }
 
@@ -86,7 +86,7 @@ service BoardV1 {
 
   rpc Join(JoinRequest) returns (JoinResponse) {
     option (google.api.http) = {
-      get: "/api/v1/board/join",
+      get: "/api/v1/board/join/{token}",
     };
   }
 
@@ -98,7 +98,7 @@ service BoardV1 {
 
   rpc SetBoard(SetBoardRequest) returns (SetBoardResponse) {
     option (google.api.http) = {
-      get: "/api/v1/board/set"
+      get: "/api/v1/board/set/{board_id}"
     };
   }
 }

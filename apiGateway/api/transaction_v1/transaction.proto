@@ -37,19 +37,19 @@ service TransactionV1 {
 
   rpc Get(GetRequest) returns (GetResponse) {
     option (google.api.http) = {
-      get: "/api/v1/transaction"
+      get: "/api/v1/transaction/{id}"
     };
   };
 
   rpc List(ListRequest) returns (ListResponse) {
     option (google.api.http) = {
-      get: "/api/v1/transactions"
+      get: "/api/v1/transactions/{board_id}"
     };
   };
 
   rpc Delete(DeleteRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      delete: "/api/v1/transaction"
+      delete: "/api/v1/transaction/{id}"
     };
   };
 

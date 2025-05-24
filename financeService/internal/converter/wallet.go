@@ -75,8 +75,18 @@ func ToWalletInfoFromDesc(walletInfo *desc.WalletInfo) *model.WalletInfo {
 }
 
 func ToCreateWalletInfoFromDesc(info *desc.CreateWalletInfo) *model.CreateWalletInfo {
+	balance, err := decimal.NewFromString(info.GetBalance())
+	if err != nil {
+		logger.Error("Error converting from balance to decimal",
+			"error", err,
+			"balance", info.GetBalance(),
+		)
+		balance = decimal.NewFromInt(-1)
+	}
+
 	return &model.CreateWalletInfo{
-		Name: info.GetName(),
+		Name:    info.GetName(),
+		Balance: balance,
 	}
 }
 
@@ -85,7 +95,7 @@ func AddOwnerAndBoardIdToWalletInfo(walletInfo *model.CreateWalletInfo, ownerID,
 		OwnerID: ownerID,
 		BoardID: boardID,
 		Name:    walletInfo.Name,
-		Balance: decimal.NewFromInt(0),
+		Balance: walletInfo.Balance,
 	}
 }
 

@@ -31,7 +31,8 @@ func (s *serv) GetAccessToken(ctx context.Context, refreshToken string) (string,
 		return "", status.Errorf(codes.Aborted, "invalid refresh token")
 	}
 
-	err = grpc.SetHeader(ctx, metadata.Pairs("Authorization", "Bearer "+token))
+	md := metadata.Pairs("set-cookie", "token="+token+"; HttpOnly; Path=/; Secure; SameSite=Strict")
+	err = grpc.SetHeader(ctx, md)
 	if err != nil {
 		return "", err
 	}

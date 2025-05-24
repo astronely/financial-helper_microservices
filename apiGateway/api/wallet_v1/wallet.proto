@@ -37,19 +37,19 @@ service WalletV1 {
 
   rpc Get(GetRequest) returns (GetResponse) {
     option (google.api.http) = {
-      get: "/api/v1/wallet",
+      get: "/api/v1/wallet/{id}",
     };
   };
 
   rpc List(ListRequest) returns (ListResponse) {
     option (google.api.http) = {
-      get: "/api/v1/wallets",
+      get: "/api/v1/wallets/{board_id}",
     };
   };
 
   rpc Delete(DeleteRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      delete: "/api/v1/wallet",
+      delete: "/api/v1/wallet/{id}",
     };
   };
 
@@ -72,6 +72,7 @@ message WalletInfo {
 
 message CreateWalletInfo {
   string name = 1 [(validate.rules).string.min_len = 1];
+  string balance = 2 [(validate.rules).string.min_len = 1];
 }
 
 message Wallet {

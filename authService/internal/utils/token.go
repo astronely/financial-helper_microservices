@@ -51,6 +51,10 @@ func VerifyToken(tokenStr string, secretKey []byte) (*model.UserClaims, error) {
 		return nil, fmt.Errorf("invalid token")
 	}
 
+	if claims.ExpiresAt == nil || claims.ExpiresAt.Before(time.Now()) {
+		return nil, fmt.Errorf("token has expired")
+	}
+
 	return claims, nil
 }
 

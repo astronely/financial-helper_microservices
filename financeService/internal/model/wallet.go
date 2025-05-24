@@ -17,6 +17,7 @@ type CreateWalletInfo struct {
 	OwnerID int64
 	BoardID int64
 	Name    string
+	Balance decimal.Decimal
 }
 
 type WalletInfo struct {

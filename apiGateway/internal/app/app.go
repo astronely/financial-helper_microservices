@@ -117,8 +117,8 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 	mux := runtime.NewServeMux(
 		runtime.WithForwardResponseOption(func(ctx context.Context, w http.ResponseWriter, _ proto.Message) error {
 			md, ok := runtime.ServerMetadataFromContext(ctx)
-			//logger.Debug("Server metadata",
-			//	"md", md)
+			logger.Debug("Server metadata",
+				"md", md)
 			if !ok {
 				return nil
 			}
@@ -128,9 +128,6 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 				//)
 				w.Header().Add("Set-Cookie", v)
 			}
-			//for _, v := range md.HeaderMD.Get("authorization") {
-			//	w.Header().Add("Authorization", v)
-			//}
 			return nil
 		}),
 	)
