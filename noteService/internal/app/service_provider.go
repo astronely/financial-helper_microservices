@@ -108,7 +108,7 @@ func (s *serviceProvider) NoteRepository(ctx context.Context) repository.NoteRep
 
 func (s *serviceProvider) NoteImpl(ctx context.Context) *note.Implementation {
 	if s.noteImpl == nil {
-		s.noteImpl = note.NewImplementation(s.NoteRepository(ctx))
+		s.noteImpl = note.NewImplementation(s.NoteService(ctx))
 	}
 	return s.noteImpl
 }

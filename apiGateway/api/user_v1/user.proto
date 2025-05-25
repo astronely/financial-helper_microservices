@@ -30,7 +30,7 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
 service UserV1 {
   rpc Create(CreateRequest) returns (CreateResponse){
     option (google.api.http) = {
-      post: "/api/v1/user"
+      post: "/api/v1/user/create"
       body: "*"
     };
   };

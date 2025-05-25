@@ -2,7 +2,6 @@ package utils
 
 import (
 	"fmt"
-	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/logger"
 	"github.com/astronely/financial-helper_microservices/noteService/internal/model"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -57,8 +56,8 @@ func ExtractUserClaims(tokenStr string, secretKey []byte) (*model.UserClaims, er
 		return nil, err
 	}
 
-	logger.Debug("key",
-		"secret", secretKey)
+	//logger.Debug("key",
+	//	"secret", secretKey)
 
 	claims, ok := token.Claims.(*model.UserClaims)
 	if !ok || !token.Valid {
@@ -86,8 +85,8 @@ func ExtractBoardClaims(tokenStr string, secretKey []byte) (*model.BoardClaims, 
 		return nil, err
 	}
 
-	logger.Debug("key",
-		"secret", secretKey)
+	//logger.Debug("key",
+	//	"secret", secretKey)
 
 	claims, ok := token.Claims.(*model.BoardClaims)
 	if !ok || !token.Valid {

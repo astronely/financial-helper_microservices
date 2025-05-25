@@ -2,6 +2,7 @@ package note
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	sq "github.com/Masterminds/squirrel"
 	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/logger"
@@ -42,6 +43,8 @@ func NewRepository(db db.Client) repository.NoteRepository {
 }
 
 func (r *repo) Create(ctx context.Context, info *model.NoteCreate) (int64, error) {
+	logger.Debug("Info in repo create",
+		"info", info)
 	builder := sq.Insert(tableName).
 		PlaceholderFormat(sq.Dollar).
 		Columns(boardIdColumn, ownerIdColumn, contentColumn).
@@ -109,7 +112,8 @@ func (r *repo) List(ctx context.Context, boardID int64, limit, offset uint64, fi
 	builder := sq.Select(idColumn, ownerIdColumn, performerIdColumn, contentColumn, statusColumn, completionDateColumn, updatedAtColumn, createdAtColumn).
 		From(tableName).
 		PlaceholderFormat(sq.Dollar).
-		Where(sq.Eq{boardIdColumn: boardID})
+		Where(sq.Eq{boardIdColumn: boardID}).
+		OrderBy(createdAtColumn + " DESC")
 
 	if limit > 0 {
 		builder = builder.Limit(limit)
@@ -238,11 +242,16 @@ func (r *repo) Delete(ctx context.Context, id int64) error {
 
 	return nil
 }
-func (r *repo) Complete(ctx context.Context, info *model.NoteComplete) (int64, error) {
+func (r *repo) Complete(ctx context.Context, info *model.NoteComplete, performerID int64) (int64, error) {
 	updateDate := time.Now()
 	var completionDate time.Time
+	var performerIdToSet sql.NullInt64
 	if info.Status {
 		completionDate = time.Now()
+		performerIdToSet = sql.NullInt64{
+			Int64: performerID,
+			Valid: true,
+		}
 	}
 
 	builder := sq.Update(tableName).
@@ -250,6 +259,7 @@ func (r *repo) Complete(ctx context.Context, info *model.NoteComplete) (int64, e
 		Set(statusColumn, info.Status).
 		Set(completionDateColumn, completionDate).
 		Set(updatedAtColumn, updateDate).
+		Set(performerIdColumn, performerIdToSet).
 		Where(sq.Eq{idColumn: info.ID}).
 		Suffix("RETURNING " + idColumn)
 

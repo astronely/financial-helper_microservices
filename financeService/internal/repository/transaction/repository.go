@@ -123,6 +123,11 @@ func (r *repo) CreateTransaction(ctx context.Context, transactionInfo *model.Tra
 		toWalletId = transactionInfo.ToWalletID
 	}
 
+	logger.Debug("transaction info",
+		"info", transactionInfo,
+		"toWalletId", toWalletId,
+	)
+
 	builder := sq.Insert(transactionTableName).
 		PlaceholderFormat(sq.Dollar).
 		Columns(ownerIdColumn, fromWalletIdColumn, toWalletIdColumn, boardIdColumn, amountColumn, typeColumn, detailsIdColumn).

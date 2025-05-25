@@ -17,8 +17,6 @@ const (
 	refreshTokenName = "refreshToken"
 )
 
-//const accessTokenKey = "access_token_key"
-
 func (s *serv) Check(ctx context.Context, endpointAddress string) (bool, error) {
 	if strings.HasSuffix(endpointAddress, "login") {
 		return true, nil

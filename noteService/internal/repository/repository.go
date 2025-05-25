@@ -11,5 +11,5 @@ type NoteRepository interface {
 	List(ctx context.Context, boardID int64, offset, limit uint64, filters map[string]interface{}) ([]*model.Note, error)
 	Update(ctx context.Context, info *model.NoteUpdate) (int64, error)
 	Delete(ctx context.Context, id int64) error
-	Complete(ctx context.Context, info *model.NoteComplete) (int64, error)
+	Complete(ctx context.Context, info *model.NoteComplete, performerID int64) (int64, error)
 }

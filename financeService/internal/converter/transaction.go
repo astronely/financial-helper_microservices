@@ -90,13 +90,10 @@ func AddOwnerAndBoardIdToTransactionInfo(transactionInfo *model.TransactionInfo,
 	return &model.TransactionInfo{
 		OwnerID:      ownerID,
 		FromWalletID: transactionInfo.FromWalletID,
-		ToWalletID: sql.NullInt64{
-			Int64: boardID,
-			Valid: true,
-		},
-		BoardID: boardID,
-		Amount:  transactionInfo.Amount,
-		Type:    transactionInfo.Type,
+		ToWalletID:   transactionInfo.ToWalletID,
+		BoardID:      boardID,
+		Amount:       transactionInfo.Amount,
+		Type:         transactionInfo.Type,
 	}
 }
 
