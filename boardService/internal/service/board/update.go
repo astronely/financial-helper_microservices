@@ -2,10 +2,11 @@ package board
 
 import (
 	"context"
-	"errors"
 	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/logger"
 	"github.com/astronely/financial-helper_microservices/boardService/internal/model"
 	"github.com/astronely/financial-helper_microservices/boardService/internal/utils"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func (s *serv) Update(ctx context.Context, info *model.BoardUpdate) (int64, error) {
@@ -38,7 +39,7 @@ func (s *serv) Update(ctx context.Context, info *model.BoardUpdate) (int64, erro
 			"userId", userId,
 			"ownerId", board.Info.OwnerID,
 		)
-		return 0, errors.New("not allowed")
+		return 0, status.Error(codes.Unauthenticated, "not allowed")
 	}
 
 	boardId, err := s.boardRepository.Update(ctx, info)

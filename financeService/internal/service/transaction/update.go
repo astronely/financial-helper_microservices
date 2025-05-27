@@ -7,6 +7,8 @@ import (
 	"github.com/astronely/financial-helper_microservices/financeService/internal/model"
 	"github.com/astronely/financial-helper_microservices/financeService/internal/utils"
 	"github.com/shopspring/decimal"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func (s *serv) Update(ctx context.Context,
@@ -38,7 +40,7 @@ func (s *serv) Update(ctx context.Context,
 	}
 
 	if userId != board.OwnerID && userId != transaction.Info.OwnerID {
-		return 0, errors.New("not allowed")
+		return 0, status.Error(codes.Unauthenticated, "not allowed")
 	}
 
 	err = s.txManager.ReadCommitted(ctx, func(ctx context.Context) error {

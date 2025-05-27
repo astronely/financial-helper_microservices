@@ -2,9 +2,10 @@ package note
 
 import (
 	"context"
-	"errors"
 	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/logger"
 	"github.com/astronely/financial-helper_microservices/noteService/internal/utils"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func (s *serv) Delete(ctx context.Context, id int64) error {
@@ -26,7 +27,7 @@ func (s *serv) Delete(ctx context.Context, id int64) error {
 
 	if !utils.CheckNoteOwner(ctx, userID, id, s.noteRepository) &&
 		!(userID == board.OwnerID) {
-		return errors.New("not authorized to complete note")
+		return status.Error(codes.Unauthenticated, "not allowed")
 	}
 
 	err = s.noteRepository.Delete(ctx, id)

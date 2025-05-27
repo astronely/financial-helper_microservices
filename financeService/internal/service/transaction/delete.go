@@ -2,10 +2,11 @@ package transaction
 
 import (
 	"context"
-	"errors"
 	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/logger"
 	"github.com/astronely/financial-helper_microservices/financeService/internal/model"
 	"github.com/astronely/financial-helper_microservices/financeService/internal/utils"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func (s *serv) Delete(ctx context.Context, transactionId int64) error {
@@ -34,7 +35,7 @@ func (s *serv) Delete(ctx context.Context, transactionId int64) error {
 	}
 
 	if userId != board.OwnerID && userId != transaction.Info.OwnerID {
-		return errors.New("not allowed")
+		return status.Error(codes.Unauthenticated, "not allowed")
 	}
 
 	err = s.txManager.ReadCommitted(ctx, func(ctx context.Context) error {

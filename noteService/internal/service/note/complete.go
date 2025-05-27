@@ -2,10 +2,11 @@ package note
 
 import (
 	"context"
-	"errors"
 	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/logger"
 	"github.com/astronely/financial-helper_microservices/noteService/internal/model"
 	"github.com/astronely/financial-helper_microservices/noteService/internal/utils"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func (s *serv) Complete(ctx context.Context, info *model.NoteComplete) (int64, error) {
@@ -25,10 +26,10 @@ func (s *serv) Complete(ctx context.Context, info *model.NoteComplete) (int64, e
 		return 0, err
 	}
 
-	if info.Status && !utils.CheckNoteOwner(ctx, userID, info.ID, s.noteRepository) &&
+	if !info.Status && !utils.CheckNoteOwner(ctx, userID, info.ID, s.noteRepository) &&
 		!utils.CheckNotePerformer(ctx, userID, info.ID, s.noteRepository) &&
 		!(userID == board.OwnerID) {
-		return 0, errors.New("not authorized to complete note")
+		return 0, status.Error(codes.Unauthenticated, "not authorized to complete note")
 	}
 
 	id, err := s.noteRepository.Complete(ctx, info, userID)

@@ -2,9 +2,10 @@ package board
 
 import (
 	"context"
-	"errors"
 	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/logger"
 	"github.com/astronely/financial-helper_microservices/boardService/internal/utils"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func (s *serv) DeleteUser(ctx context.Context, userID int64) error {
@@ -38,7 +39,7 @@ func (s *serv) DeleteUser(ctx context.Context, userID int64) error {
 	}
 
 	if userId != board.OwnerID || userID == board.OwnerID {
-		return errors.New("not allowed")
+		return status.Error(codes.Unauthenticated, "not allowed")
 	}
 
 	err = s.boardRepository.DeleteUser(ctx, boardID, userID)

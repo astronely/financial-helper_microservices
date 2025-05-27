@@ -2,10 +2,11 @@ package note
 
 import (
 	"context"
-	"errors"
 	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/logger"
 	"github.com/astronely/financial-helper_microservices/noteService/internal/model"
 	"github.com/astronely/financial-helper_microservices/noteService/internal/utils"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func (s *serv) Update(ctx context.Context, info *model.NoteUpdate) (int64, error) {
@@ -27,7 +28,7 @@ func (s *serv) Update(ctx context.Context, info *model.NoteUpdate) (int64, error
 
 	if !utils.CheckNoteOwner(ctx, userID, info.ID, s.noteRepository) &&
 		!(userID == board.OwnerID) {
-		return 0, errors.New("not authorized to complete note")
+		return 0, status.Error(codes.Unauthenticated, "not allowed")
 	}
 
 	id, err := s.noteRepository.Update(ctx, info)

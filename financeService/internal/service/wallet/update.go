@@ -2,10 +2,11 @@ package wallet
 
 import (
 	"context"
-	"errors"
 	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/logger"
 	"github.com/astronely/financial-helper_microservices/financeService/internal/model"
 	"github.com/astronely/financial-helper_microservices/financeService/internal/utils"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func (s *serv) Update(ctx context.Context, walletInfo *model.WalletUpdateInfo) (int64, error) {
@@ -34,7 +35,8 @@ func (s *serv) Update(ctx context.Context, walletInfo *model.WalletUpdateInfo) (
 	}
 
 	if userId != board.OwnerID && userId != wallet.Info.OwnerID {
-		return 0, errors.New("not allowed")
+		return 0, status.Error(codes.Unauthenticated, "not allowed")
+
 	}
 
 	id, err := s.walletRepository.Update(ctx, walletInfo)

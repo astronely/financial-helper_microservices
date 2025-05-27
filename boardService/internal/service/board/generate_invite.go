@@ -2,10 +2,11 @@ package board
 
 import (
 	"context"
-	"errors"
 	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/logger"
 	"github.com/astronely/financial-helper_microservices/boardService/internal/converter"
 	"github.com/astronely/financial-helper_microservices/boardService/internal/utils"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func (s *serv) GenerateInvite(ctx context.Context) (string, error) {
@@ -26,7 +27,7 @@ func (s *serv) GenerateInvite(ctx context.Context) (string, error) {
 	}
 
 	if userId != board.OwnerID {
-		return "", errors.New("not allowed")
+		return "", status.Error(codes.Unauthenticated, "not allowed")
 	}
 
 	err = s.CheckUserInBoardWithContext(ctx, board.ID)
