@@ -44,6 +44,7 @@ type App struct {
 	httpServer      *http.Server
 	swaggerServer   *http.Server
 	authConn        *grpc.ClientConn
+	boardConn       *grpc.ClientConn
 }
 
 func NewApp(ctx context.Context) (*App, error) {
@@ -140,16 +141,20 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-
 	a.authConn = conn
 
-	authClient := descAccess.NewAccessV1Client(conn)
+	conn, err = grpc.NewClient(a.serviceProvider.GrpcConfig().BoardAddress(), opts...)
+	a.boardConn = conn
+
+	authClient := descAccess.NewAccessV1Client(a.authConn)
+	boardClient := descBoard.NewBoardV1Client(a.boardConn)
+
 	interceptorsChain := interceptor.Chain(
 		interceptor.Logger(ctx),
 		interceptor.SetCookiesInterceptor(ctx),
 		//interceptor.CookieInterceptor,
 		interceptor.Timeout(time.Second*10),
-		interceptor.AuthInterceptor(ctx, authClient),
+		interceptor.AuthInterceptor(ctx, authClient, boardClient),
 	)
 
 	err = descUser.RegisterUserV1HandlerFromEndpoint(ctx, mux, a.serviceProvider.GrpcConfig().UserAddress(), opts)

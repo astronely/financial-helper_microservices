@@ -17,7 +17,7 @@ func (s *serv) SetBoard(ctx context.Context, boardID int64) error {
 		return err
 	}
 
-	_, err = s.boardRepository.Get(ctx, boardID)
+	board, err := s.boardRepository.Get(ctx, boardID)
 	if err != nil {
 		logger.Error("error setting board id to cookie",
 			"error", err.Error(),
@@ -26,7 +26,8 @@ func (s *serv) SetBoard(ctx context.Context, boardID int64) error {
 	}
 
 	accessToken, err := utils.GenerateToken(
-		boardID,
+		board.ID,
+		board.Info.OwnerID,
 		[]byte(s.tokenConfig.AccessTokenKey()), s.tokenConfig.AccessTokenExpirationTime(),
 	)
 

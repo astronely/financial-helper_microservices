@@ -3,15 +3,17 @@ package interceptor
 import (
 	"context"
 	accessService "github.com/astronely/financial-helper_microservices/apiGateway/pkg/access_v1"
+	boardService "github.com/astronely/financial-helper_microservices/apiGateway/pkg/board_v1"
 	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/logger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 )
 
-func AuthInterceptor(ctx context.Context, accessClient accessService.AccessV1Client) func(next http.Handler) http.Handler {
+func AuthInterceptor(ctx context.Context, accessClient accessService.AccessV1Client, boardClient boardService.BoardV1Client) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			//logger.Debug("Inside AuthInterceptor",
@@ -68,21 +70,12 @@ func AuthInterceptor(ctx context.Context, accessClient accessService.AccessV1Cli
 				newRefreshToken = strings.Split(newRefreshToken, ";")[0]
 				newRefreshToken = strings.Split(newRefreshToken, "=")[1]
 
-				//logger.Debug("New Tokens",
-				//	"newAccessToken", newAccessToken,
-				//	"newRefreshToken", newRefreshToken,
-				//)
-
 				newMD := existingMD.Copy()
 				newMD.Set(accessTokenName, newAccessToken)
 				newMD.Set(refreshTokenName, newRefreshToken)
 				newContext = metadata.NewOutgoingContext(r.Context(), newMD)
 
 				r = r.WithContext(newContext)
-
-				//newC, _ := metadata.FromOutgoingContext(r.Context())
-				//logger.Debug("New md",
-				//	"md", newC)
 			}
 
 			//logger.Debug("AuthService",
@@ -93,11 +86,29 @@ func AuthInterceptor(ctx context.Context, accessClient accessService.AccessV1Cli
 
 			if !res.IsAllowed {
 				http.Error(rw, "Unauthorized", http.StatusUnauthorized)
-				//rw.WriteHeader(http.StatusUnauthorized)
 				logger.Error("Unauthorized check",
 					"error", err.Error(),
 				)
 				return
+			}
+
+			var re = regexp.MustCompile(`(?:^|/)(wallets?|transactions?|notes?)(?:/|$)`)
+
+			if re.Match([]byte(r.URL.Path)) {
+				resp, err := boardClient.CompareUserAndBoard(r.Context(), &boardService.CompareRequest{})
+				if err != nil {
+					http.Error(rw, "Unauthorized", http.StatusUnauthorized)
+					rw.headers.Set("X-Error", err.Error())
+					logger.Error("BoardService error",
+						"error", err.Error(),
+					)
+					return
+				}
+				if !resp.GetResult() {
+					http.Error(rw, "Unauthorized", http.StatusUnauthorized)
+					logger.Error("User not in board to do this operation")
+					return
+				}
 			}
 
 			next.ServeHTTP(rw, r)

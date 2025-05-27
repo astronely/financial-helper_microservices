@@ -11,5 +11,6 @@ type UserClaims struct {
 
 type BoardClaims struct {
 	jwt.RegisteredClaims
-	ID int64 `json:"id"`
+	ID      int64 `json:"id"`
+	OwnerID int64 `json:"ownerId"`
 }

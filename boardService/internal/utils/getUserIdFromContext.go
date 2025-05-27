@@ -21,38 +21,43 @@ func GetUserIdFromContext(ctx context.Context, key string) (int64, error) {
 	logger.Debug("md",
 		"metadata", md,
 	)
-	cookies := md.Get(cookieName)
-	if len(cookies) == 0 {
-		return -1, errors.New("context doesn't contain cookie")
-	}
-	logger.Debug("cookies",
-		"cookies", cookies)
 
 	var tokenString string
-	for _, header := range cookies {
-		for _, kv := range strings.Split(header, "; ") {
-			parts := strings.SplitN(kv, "=", 2)
-			if len(parts) != 2 {
-				continue
+
+	cookies := md.Get(cookieName)
+	if len(cookies) != 0 {
+		//logger.Debug("cookies",
+		//	"cookies", cookies)
+		for _, header := range cookies {
+			for _, kv := range strings.Split(header, "; ") {
+				parts := strings.SplitN(kv, "=", 2)
+				if len(parts) != 2 {
+					continue
+				}
+				name, value := parts[0], parts[1]
+				if name == userTokenName {
+					tokenString = value
+					break
+				}
 			}
-			name, value := parts[0], parts[1]
-			if name == userTokenName {
-				tokenString = value
+			if tokenString != "" {
 				break
 			}
 		}
-		if tokenString != "" {
-			break
+		if tokenString == "" {
+			return -1, errors.New("context doesn't contain token")
 		}
+	} else {
+		token := md.Get(userTokenName)
+		if len(token) == 0 {
+			return -1, errors.New("context doesn't contain token")
+		}
+		if len(token[0]) == 0 {
+			return -1, errors.New("context doesn't contain token")
+		}
+		tokenString = token[0]
 	}
 
-	if tokenString == "" {
-		return -1, errors.New("context doesn't contain token")
-	}
-
-	logger.Debug("token info",
-		"token", tokenString,
-		"secret", key)
 	tokenInfo, err := ExtractUserClaims(tokenString, []byte(key))
 	if err != nil {
 		logger.Error("ExtractUserClaims failed",
@@ -60,6 +65,5 @@ func GetUserIdFromContext(ctx context.Context, key string) (int64, error) {
 		)
 		return -1, err
 	}
-
 	return tokenInfo.ID, nil
 }

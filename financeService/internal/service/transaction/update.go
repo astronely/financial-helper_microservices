@@ -5,13 +5,43 @@ import (
 	"errors"
 	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/logger"
 	"github.com/astronely/financial-helper_microservices/financeService/internal/model"
+	"github.com/astronely/financial-helper_microservices/financeService/internal/utils"
 	"github.com/shopspring/decimal"
 )
 
 func (s *serv) Update(ctx context.Context,
 	updateInfo *model.TransactionInfoUpdate,
 	updateDetails *model.TransactionDetailsUpdate) (int64, error) {
-	err := s.txManager.ReadCommitted(ctx, func(ctx context.Context) error {
+
+	userId, err := utils.GetUserIdFromContext(ctx, s.tokenConfig.AccessTokenKey())
+	if err != nil {
+		logger.Error("error getting user id from context | Service | Delete",
+			"error", err.Error(),
+		)
+		return 0, err
+	}
+
+	board, err := utils.GetBoardFromContext(ctx, s.tokenConfig.AccessTokenKey())
+	if err != nil {
+		logger.Error("error getting board from context | Service | Delete",
+			"error", err.Error(),
+		)
+		return 0, err
+	}
+
+	transaction, err := s.transactionRepository.Get(ctx, updateInfo.ID, map[string]interface{}{})
+	if err != nil {
+		logger.Error("error getting wallet | Service | Delete",
+			"error", err.Error(),
+		)
+		return 0, err
+	}
+
+	if userId != board.OwnerID && userId != transaction.Info.OwnerID {
+		return 0, errors.New("not allowed")
+	}
+
+	err = s.txManager.ReadCommitted(ctx, func(ctx context.Context) error {
 		if updateInfo.ToWalletID != 0 && updateInfo.Type != "transfer" {
 			return errors.New("to wallet id must be with type transfer")
 		}

@@ -8,12 +8,13 @@ import (
 	"time"
 )
 
-func GenerateToken(boardID int64, secretKey []byte, duration time.Duration) (string, error) {
+func GenerateToken(boardID, ownerID int64, secretKey []byte, duration time.Duration) (string, error) {
 	claims := model.BoardClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(duration)),
 		},
-		ID: boardID,
+		ID:      boardID,
+		OwnerID: ownerID,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

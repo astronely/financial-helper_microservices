@@ -66,7 +66,7 @@ func ExtractUserClaims(tokenStr string, secretKey []byte) (*model.UserClaims, er
 	}
 
 	claims, ok := token.Claims.(*model.UserClaims)
-	if !ok || token.Valid {
+	if !ok || !token.Valid {
 		return nil, fmt.Errorf("invalid token")
 	}
 

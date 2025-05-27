@@ -2,12 +2,42 @@ package transaction
 
 import (
 	"context"
+	"errors"
 	"github.com/astronely/financial-helper_microservices/apiGateway/pkg/logger"
 	"github.com/astronely/financial-helper_microservices/financeService/internal/model"
+	"github.com/astronely/financial-helper_microservices/financeService/internal/utils"
 )
 
 func (s *serv) Delete(ctx context.Context, transactionId int64) error {
-	err := s.txManager.ReadCommitted(ctx, func(ctx context.Context) error {
+	userId, err := utils.GetUserIdFromContext(ctx, s.tokenConfig.AccessTokenKey())
+	if err != nil {
+		logger.Error("error getting user id from context | Service | Delete",
+			"error", err.Error(),
+		)
+		return err
+	}
+
+	board, err := utils.GetBoardFromContext(ctx, s.tokenConfig.AccessTokenKey())
+	if err != nil {
+		logger.Error("error getting board from context | Service | Delete",
+			"error", err.Error(),
+		)
+		return err
+	}
+
+	transaction, err := s.transactionRepository.Get(ctx, transactionId, map[string]interface{}{})
+	if err != nil {
+		logger.Error("error getting wallet | Service | Delete",
+			"error", err.Error(),
+		)
+		return err
+	}
+
+	if userId != board.OwnerID && userId != transaction.Info.OwnerID {
+		return errors.New("not allowed")
+	}
+
+	err = s.txManager.ReadCommitted(ctx, func(ctx context.Context) error {
 		var errTx error
 		var transactionInfo *model.Transaction
 
