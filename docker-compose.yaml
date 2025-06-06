@@ -38,6 +38,8 @@ services:
     build:
       context: ./apiGateway
     image: astrow/api-gateway:latest
+    environment:
+      - config-path=prod.env
     env_file:
       - "./apiGateway/prod.env"
     depends_on:
@@ -57,6 +59,8 @@ services:
     build:
       context: ./userService
     image: astrow/user-service:latest
+    environment:
+      - config-path=prod.env
     env_file:
       - "./userService/prod.env"
     depends_on:
@@ -71,6 +75,8 @@ services:
     build:
       context: ./authService
     image: astrow/auth-service:latest
+    environment:
+      - config-path=prod.env
     env_file:
       - "./authService/prod.env"
     depends_on:
@@ -85,6 +91,8 @@ services:
     build:
       context: ./financeService
     image: astrow/finance-service:latest
+    environment:
+      - config-path=prod.env
     env_file:
       - "./financeService/prod.env"
     depends_on:
@@ -99,6 +107,8 @@ services:
     build:
       context: ./noteService
     image: astrow/note-service:latest
+    environment:
+      - config-path=prod.env
     env_file:
       - "./noteService/prod.env"
     depends_on:
@@ -113,6 +123,8 @@ services:
     build:
       context: ./boardService
     image: astrow/board-service:latest
+    environment:
+      - config-path=prod.env
     env_file:
       - "./boardService/prod.env"
     depends_on:
