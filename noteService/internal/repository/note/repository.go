@@ -123,13 +123,22 @@ func (r *repo) List(ctx context.Context, boardID int64, limit, offset uint64, fi
 		builder = builder.Offset(offset)
 	}
 
+	logger.Debug("filters",
+		"filters", filters[ownerIdColumn])
+
 	if val, ok := filters[ownerIdColumn]; ok {
+		logger.Debug("filters, ownerId",
+			"value", val)
 		builder = builder.Where(sq.Eq{ownerIdColumn: val})
 	}
 	if val, ok := filters[performerIdColumn]; ok {
+		logger.Debug("filters, performerId",
+			"value", val)
 		builder = builder.Where(sq.Eq{performerIdColumn: val})
 	}
 	if val, ok := filters[statusColumn]; ok {
+		logger.Debug("filters, status",
+			"value", val)
 		builder = builder.Where(sq.Eq{statusColumn: val})
 	}
 

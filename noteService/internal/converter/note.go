@@ -131,13 +131,13 @@ func ToFilters(filters *desc.FilterInfo) map[string]interface{} {
 	//	convertedFilters[boardIdColumn] = filters.GetBoardId()
 	//}
 	if filters.GetOwnerId() != nil {
-		convertedFilters[ownerIdColumn] = filters.GetOwnerId()
+		convertedFilters[ownerIdColumn] = filters.GetOwnerId().GetValue()
 	}
 	if filters.GetPerformerId() != nil {
-		convertedFilters[performerIdColumn] = filters.GetPerformerId()
+		convertedFilters[performerIdColumn] = filters.GetPerformerId().GetValue()
 	}
 	if filters.GetStatus() != nil {
-		convertedFilters[statusColumn] = filters.GetStatus()
+		convertedFilters[statusColumn] = filters.GetStatus().GetValue()
 	}
 	if filters.GetCreatedAtStart().IsValid() {
 		convertedFilters[createdAtStartColumn] = filters.GetCreatedAtStart().AsTime()
