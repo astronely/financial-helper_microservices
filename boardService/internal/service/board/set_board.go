@@ -38,7 +38,7 @@ func (s *serv) SetBoard(ctx context.Context, boardID int64) error {
 		return err
 	}
 
-	md := metadata.Pairs("set-cookie", "boardToken="+accessToken+"; HttpOnly; Path=/; Secure=false; SameSite=None")
+	md := metadata.Pairs("set-cookie", "boardToken="+accessToken+"; HttpOnly; Path=/; SameSite=Lax")
 
 	err = grpc.SendHeader(ctx, md)
 	if err != nil {

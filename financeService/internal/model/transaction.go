@@ -53,7 +53,8 @@ type TransactionInfoUpdate struct {
 }
 
 type TransactionDetailsUpdate struct {
-	ID       int64
-	Name     string
-	Category int64
+	ID              int64
+	Name            string
+	Category        int64
+	TransactionDate time.Time
 }

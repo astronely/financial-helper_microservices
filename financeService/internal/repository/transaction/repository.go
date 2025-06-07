@@ -243,7 +243,11 @@ func (r *repo) List(ctx context.Context, boardID int64, limit, offset uint64, fi
 	}
 
 	if val, ok := filters[transactionDateColumn]; ok {
-		builder = builder.Where(sq.Eq{transactionDetailsPrefix + transactionDateColumn: val})
+		builder = builder.Where(sq.GtOrEq{transactionDetailsPrefix + transactionDateColumn: val})
+	}
+
+	if val, ok := filters[transactionDateColumn+"_end"]; ok {
+		builder = builder.Where(sq.LtOrEq{transactionDetailsPrefix + transactionDateColumn: val})
 	}
 
 	if val, ok := filters[ownerIdColumn]; ok {
@@ -256,6 +260,14 @@ func (r *repo) List(ctx context.Context, boardID int64, limit, offset uint64, fi
 
 	if val, ok := filters[toWalletIdColumn]; ok {
 		builder = builder.Where(sq.Eq{transactionPrefix + toWalletIdColumn: val})
+	}
+
+	if val, ok := filters[typeColumn]; ok {
+		builder = builder.Where(sq.Eq{transactionPrefix + typeColumn: val})
+	}
+
+	if val, ok := filters[detailsNameColumn]; ok {
+		builder = builder.Where(sq.Eq{transactionDetailsPrefix + detailsNameColumn: val})
 	}
 
 	query, args, err := builder.ToSql()
@@ -381,6 +393,9 @@ func (r *repo) UpdateDetails(ctx context.Context, updateInfo *model.TransactionD
 	}
 	if updateInfo.Category != 0 {
 		updateTransactionDetailsMap[categoryColumn] = updateInfo.Category
+	}
+	if !updateInfo.TransactionDate.IsZero() {
+		updateTransactionDetailsMap[transactionDateColumn] = updateInfo.TransactionDate
 	}
 
 	if len(updateTransactionDetailsMap) == 0 {

@@ -142,7 +142,7 @@ func (s *serv) Update(ctx context.Context,
 		}
 
 		// Update details if new details exists
-		if updateDetails.Name != "" || updateDetails.Category != 0 {
+		if updateDetails.Name != "" || updateDetails.Category != 0 || !updateDetails.TransactionDate.IsZero() {
 			_, errTx = s.transactionRepository.UpdateDetails(ctx, updateDetails)
 			if errTx != nil {
 				logger.Error("error updating details",

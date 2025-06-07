@@ -8,15 +8,19 @@ import (
 	"github.com/shopspring/decimal"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
+	"time"
 )
 
 const (
-	categoryColumn        = "category"
-	transactionDateColumn = "transaction_date"
+	categoryColumn           = "category"
+	transactionDateColumn    = "transaction_date"
+	transactionDateColumnEnd = transactionDateColumn + "_end"
 
 	ownerIdColumn      = "owner_id"
 	fromWalletIdColumn = "from_wallet_id"
 	toWalletIdColumn   = "to_wallet_id"
+	typeColumn         = "type"
+	nameColumn         = "name"
 )
 
 func ToTransactionInfoFromDesc(req *desc.CreateTransactionInfo) *model.TransactionInfo {
@@ -151,11 +155,17 @@ func ToTransactionInfoUpdateFromDesc(req *desc.UpdateRequest) *model.Transaction
 }
 
 func ToTransactionDetailsUpdateFromDesc(req *desc.UpdateRequest) *model.TransactionDetailsUpdate {
-	return &model.TransactionDetailsUpdate{
-		ID:       req.GetId(),
-		Name:     req.GetInfo().GetName().GetValue(),
-		Category: req.GetInfo().GetCategory().GetValue(),
+	transactionDetailsUpdate := &model.TransactionDetailsUpdate{
+		ID:              req.GetId(),
+		Name:            req.GetInfo().GetName().GetValue(),
+		Category:        req.GetInfo().GetCategory().GetValue(),
+		TransactionDate: time.Time{},
 	}
+
+	if req.GetInfo().GetTransactionDate().IsValid() {
+		transactionDetailsUpdate.TransactionDate = req.GetInfo().GetTransactionDate().AsTime()
+	}
+	return transactionDetailsUpdate
 }
 
 func Filters(req *desc.FilterInfo) map[string]interface{} {
@@ -166,6 +176,9 @@ func Filters(req *desc.FilterInfo) map[string]interface{} {
 	if req.GetTransactionDate().IsValid() {
 		filters[transactionDateColumn] = req.GetTransactionDate().AsTime()
 	}
+	if req.GetTransactionDateEnd().IsValid() {
+		filters[transactionDateColumnEnd] = req.GetTransactionDateEnd().AsTime()
+	}
 	if req.GetOwnerId() != nil {
 		filters[ownerIdColumn] = req.GetOwnerId().GetValue()
 	}
@@ -174,6 +187,12 @@ func Filters(req *desc.FilterInfo) map[string]interface{} {
 	}
 	if req.GetToWalletId() != nil {
 		filters[toWalletIdColumn] = req.GetToWalletId().GetValue()
+	}
+	if req.GetType() != nil {
+		filters[typeColumn] = req.GetType().GetValue()
+	}
+	if req.GetName() != nil {
+		filters[nameColumn] = req.GetName().GetValue()
 	}
 
 	return filters

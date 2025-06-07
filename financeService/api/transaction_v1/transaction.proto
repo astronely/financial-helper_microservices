@@ -105,9 +105,12 @@ message TransactionCategory {
 message FilterInfo {
   google.protobuf.Int64Value category = 1 [(validate.rules).int64.gt=0];
   google.protobuf.Timestamp transaction_date = 2;
+  google.protobuf.Timestamp transaction_date_end = 6;
   google.protobuf.Int64Value owner_id = 3 [(validate.rules).int64.gt=0];
   google.protobuf.Int64Value from_wallet_id = 4 [(validate.rules).int64.gt=0];
   google.protobuf.Int64Value to_wallet_id = 5 [(validate.rules).int64.gt=0];
+  google.protobuf.StringValue type = 7 [(validate.rules).string.min_len=1];
+  google.protobuf.StringValue name = 8 [(validate.rules).string.min_len=1];
 }
 
 message Transaction {
@@ -125,6 +128,7 @@ message UpdateTransactionInfo {
   google.protobuf.StringValue type = 4 [(validate.rules).string = {min_len:1}];
   google.protobuf.StringValue name = 5 [(validate.rules).string = {min_len:1}];
   google.protobuf.Int64Value category = 6 [(validate.rules).int64.gt = 0];
+  google.protobuf.Timestamp transaction_date = 7;
 }
 
 message CreateRequest {
