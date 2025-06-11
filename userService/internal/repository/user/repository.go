@@ -12,7 +12,10 @@ import (
 	"github.com/astronely/financial-helper_microservices/userService/pkg/client/db"
 	_ "github.com/brianvoe/gofakeit/v7"
 	"golang.org/x/crypto/bcrypt"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	_ "google.golang.org/protobuf/types/known/timestamppb"
+	"strings"
 	"time"
 )
 
@@ -68,6 +71,9 @@ func (r *repo) Create(ctx context.Context, info *model.UserInfo, password string
 		logger.Error("error create user | QueryRawContext",
 			"error", err.Error(),
 		)
+		if strings.Contains(err.Error(), "duplicate key value") {
+			return 0, status.Error(codes.AlreadyExists, "email already exists")
+		}
 		return 0, err
 	}
 
