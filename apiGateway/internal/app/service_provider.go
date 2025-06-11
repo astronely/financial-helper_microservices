@@ -9,6 +9,7 @@ type serviceProvider struct {
 	grpcConfig    config.GRPCConfig
 	httpConfig    config.HTTPConfig
 	swaggerConfig config.SwaggerConfig
+	clientConfig  config.ClientConfig
 }
 
 func newServiceProvider() *serviceProvider {
@@ -46,4 +47,15 @@ func (s *serviceProvider) SwaggerConfig() config.SwaggerConfig {
 		s.swaggerConfig = cfg
 	}
 	return s.swaggerConfig
+}
+
+func (s *serviceProvider) ClientConfig() config.ClientConfig {
+	if s.clientConfig == nil {
+		cfg, err := env.NewClientConfig()
+		if err != nil {
+			panic("Error loading client config")
+		}
+		s.clientConfig = cfg
+	}
+	return s.clientConfig
 }
