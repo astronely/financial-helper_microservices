@@ -11,6 +11,9 @@ import (
 	modelRepo "github.com/astronely/financial-helper_microservices/financeService/internal/repository/wallet/model"
 	"github.com/astronely/financial-helper_microservices/userService/pkg/client/db"
 	"github.com/shopspring/decimal"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"strings"
 	"time"
 )
 
@@ -79,6 +82,9 @@ func (r *repo) Get(ctx context.Context, id int64) (*model.Wallet, error) {
 	var wallet modelRepo.Wallet
 	err = r.db.DB().ScanOneContext(ctx, &wallet, q, args...)
 	if err != nil {
+		if strings.Contains(err.Error(), "no rows in result set") {
+			return nil, status.Error(codes.NotFound, "wallet not found")
+		}
 		return nil, err
 	}
 
@@ -104,6 +110,9 @@ func (r *repo) List(ctx context.Context, boardID int64) ([]*model.Wallet, error)
 	var wallets []*modelRepo.Wallet
 	err = r.db.DB().ScanAllContext(ctx, &wallets, q, args...)
 	if err != nil {
+		if strings.Contains(err.Error(), "no rows in result set") {
+			return nil, status.Error(codes.NotFound, "wallet not found")
+		}
 		return nil, err
 	}
 

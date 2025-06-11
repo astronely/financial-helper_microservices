@@ -13,6 +13,9 @@ import (
 	modelRepo "github.com/astronely/financial-helper_microservices/financeService/internal/repository/transaction/model"
 	"github.com/astronely/financial-helper_microservices/userService/pkg/client/db"
 	"github.com/shopspring/decimal"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"strings"
 	"time"
 )
 
@@ -207,6 +210,9 @@ func (r *repo) Get(ctx context.Context, id int64, filters map[string]interface{}
 	if err != nil {
 		logger.Error("Error getting transaction",
 			"Error", err.Error())
+		if strings.Contains(err.Error(), "no rows in result set") {
+			return nil, status.Error(codes.NotFound, "wallet not found")
+		}
 		return nil, err
 	}
 	//logger.Debug("TransactionRepo",
@@ -291,6 +297,9 @@ func (r *repo) List(ctx context.Context, boardID int64, limit, offset uint64, fi
 	if err != nil {
 		logger.Error("SQL Error message from list",
 			"Error", err.Error())
+		if strings.Contains(err.Error(), "no rows in result set") {
+			return nil, status.Error(codes.NotFound, "wallet not found")
+		}
 		return nil, err
 	}
 	logger.Debug("List transactions",
