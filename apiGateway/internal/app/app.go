@@ -187,7 +187,7 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 	}
 
 	corsMiddleware := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:9090", "http://localhost:5173", "http://localhost:5174"}, // TODO: Дописать IP клиента
+		AllowedOrigins:   []string{"http://localhost:9090", "http://localhost:5173", "http://localhost:5174", "http://95.182.99.17:5173"}, // TODO: Дописать IP клиента
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Authorization", "Content-Type", "Accept", "Content-Length"},
 		AllowCredentials: true,
